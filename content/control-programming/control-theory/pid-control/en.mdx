@@ -1,0 +1,197 @@
+---
+title: Introducing PID Control
+desc: The proportional, integral, derivative loop — tuned live.
+kicker: PID CONTROL
+lead: >-
+  The single most useful feedback algorithm in robotics. Learn how the
+  proportional, integral, and derivative terms combine to drive a system to its
+  setpoint — then tune one yourself, live.
+author: Oliver Chou
+minutes: 25
+level: intermediate
+order: 1
+isNew: true
+updated: Updated Oct 2025
+references:
+  - label: Wikipedia — PID controller
+    href: 'https://en.wikipedia.org/wiki/PID_controller'
+  - label: NI — LabVIEW PID for FRC
+    href: 'https://forums.ni.com/t5/FIRST-Robotics-Competition/PID-Tutorial-LabVIEW-for-FRC/ta-p/3732695'
+  - label: FRC Programming Done Right
+    href: 'https://frcpdr.readthedocs.io/en/latest/control/pid_control.html'
+upNext:
+  label: 'Tuning: manual & Ziegler–Nichols'
+  href: '#'
+---
+
+{/*
+  Introducing PID Control — English.
+  Authors edit prose freely and compose the page from components:
+  generic ones (Section, CodeTabs, Quiz, Callout) plus the PID course's own
+  interactive widgets (BlockDiagram, PlantSchematic, ThreeTerms, PIDSimulator,
+  ZieglerNichols, ArmSimulator). No code required to change the lesson.
+  All course metadata lives in the YAML frontmatter above — not in code.
+*/}
+
+<Section id="loop" n="01" title="Open loop vs. closed loop" chip="Control loop">
+
+In **open-loop** control the command ignores the result — simple and cheap, but
+blind. A **closed loop** feeds the measured output back, comparing it to the
+setpoint and acting on the *error*. PID lives inside the controller block below.
+
+<BlockDiagram />
+
+</Section>
+
+<Section id="plant" n="02" title="The plant — a mechanical system" chip="The plant">
+
+Most robot mechanisms reduce to three elements: a **mass**, a **spring**, and a
+**damper**. Apply a force and the position obeys a second-order differential
+equation. Pluck it to feel its natural, damped response.
+
+<PlantSchematic />
+
+</Section>
+
+<Section id="terms" n="03" title="The three terms" chip="Three terms">
+
+The controller sums three responses to the error `e(t) = setpoint − measured`.
+Each looks at error differently: now, the past, and the future.
+
+<ThreeTerms />
+
+</Section>
+
+<Section id="sim" n="04" title="Live simulator — tune it yourself" chip="Live simulator">
+
+A unit step command at `t = 0` drives the plant. Drag the gains and watch the
+response recompute in real time. Try a preset, then refine.
+
+<PIDSimulator plant="balanced" />
+
+</Section>
+
+<Section id="tune" n="05" title="Tuning — Ziegler–Nichols" chip="Tuning">
+
+Raise Kp (with Ki = Kd = 0) until the loop oscillates steadily — that's the
+**ultimate gain Ku** at period **Tu**. Plug them in and the classic rules give you
+a starting tune.
+
+<ZieglerNichols />
+
+</Section>
+
+<Section id="code" n="06" title="Implementing PID in code" chip="Code">
+
+The discrete form runs every loop iteration (here ~20 ms): compute the error,
+accumulate the integral, take the derivative, and sum the weighted terms into a
+motor command.
+
+<CodeTabs>
+<CodeTab label="Drive.java">
+
+```java
+public class Drive {
+    double P = 0.6, I = 0.02, D = 4.0;
+    double integral, previousError, setpoint = 0;
+    Gyro gyro;
+    DifferentialDrive robotDrive;
+
+    public Drive(Gyro gyro) {
+        this.gyro = gyro;
+    }
+
+    public void setSetpoint(double setpoint) {
+        this.setpoint = setpoint;
+    }
+
+    public void pid() {
+        double error = setpoint - gyro.getAngle();   // error = target - actual
+        this.integral += error * 0.02;               // integral grows by error * dt (20 ms)
+        double derivative = (error - previousError) / 0.02;
+        double rcw = P * error + I * integral + D * derivative;
+        previousError = error;
+        robotDrive.arcadeDrive(0, rcw);
+    }
+}
+```
+
+</CodeTab>
+<CodeTab label="Drive.cpp">
+
+```cpp
+class Drive {
+    double P = 0.6, I = 0.02, D = 4.0;
+    double integral = 0, previousError = 0, setpoint = 0;
+    Gyro& gyro;
+    DifferentialDrive& robotDrive;
+
+public:
+    Drive(Gyro& g, DifferentialDrive& d) : gyro(g), robotDrive(d) {}
+
+    void setSetpoint(double sp) {
+        this->setpoint = sp;
+    }
+
+    void pid() {
+        double error = setpoint - gyro.getAngle();   // error = target - actual
+        this->integral += error * 0.02;              // integral grows by error * dt
+        double derivative = (error - previousError) / 0.02;
+        double rcw = P * error + I * integral + D * derivative;
+        previousError = error;
+        robotDrive.arcadeDrive(0, rcw);
+    }
+};
+```
+
+</CodeTab>
+</CodeTabs>
+
+</Section>
+
+<Section id="arm" n="07" title="Arm simulator — beating gravity" chip="Arm simulator">
+
+A real mechanism rarely behaves like a frictionless plant. Here a **Falcon 500**
+drives a pivoting arm that **gravity constantly pulls down** — the torque needed
+to hold it changes with angle. P alone leaves a droop; switch on a gravity
+**feed-forward** term and PID is freed to correct only what's left.
+
+<ArmSimulator />
+
+</Section>
+
+<Section id="quiz" n="08" title="Knowledge check" chip="Knowledge check">
+
+Three quick questions.
+
+<Quiz>
+  <Q
+    prompt="A pure proportional (P) controller settles with a constant offset from the setpoint. Which term is added to eliminate this steady-state error?"
+    explain="The integral term accumulates past error over time and keeps pushing until the error reaches zero, removing the offset P leaves behind."
+  >
+    <Choice>Derivative (D)</Choice>
+    <Choice correct>Integral (I)</Choice>
+    <Choice>A larger setpoint</Choice>
+    <Choice>More damping</Choice>
+  </Q>
+  <Q
+    prompt="Increasing the derivative (D) gain primarily affects the response by…"
+    explain="D reacts to the rate of change of error, acting like a brake that flattens the trajectory and reduces overshoot. The trade-off is sensitivity to sensor noise."
+  >
+    <Choice>Eliminating steady-state error</Choice>
+    <Choice>Making the loop oscillate faster forever</Choice>
+    <Choice correct>Damping overshoot and smoothing the approach</Choice>
+    <Choice>Increasing the setpoint</Choice>
+  </Q>
+  <Q
+    prompt="In the Ziegler–Nichols method you first raise Kp (with Ki = Kd = 0) until the output…"
+    explain="At the ultimate gain Ku the loop oscillates steadily with period Tu, and those two numbers set all of the PID gains."
+  >
+    <Choice>Reaches the setpoint exactly</Choice>
+    <Choice correct>Oscillates with constant amplitude — the ultimate gain Ku</Choice>
+    <Choice>Stops responding entirely</Choice>
+    <Choice>Overshoots by exactly 2%</Choice>
+  </Q>
+</Quiz>
+
+</Section>

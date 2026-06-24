@@ -1,0 +1,122 @@
+/* Course reader: off-canvas sidebar, sticky topbar + chip nav, responsive grids.
+   Collapse (desktop) and drawer (mobile) are driven by data-collapsed / data-open. */
+
+.course-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 264px;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  z-index: 30;
+  overflow-y: auto;
+  transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.course-main {
+  min-height: 100vh;
+  transition: margin-left 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.course-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  background: rgba(6, 10, 15, 0.5);
+  backdrop-filter: blur(2px);
+  transition: opacity 0.26s ease;
+  display: none;
+}
+
+.course-hamburger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--tx-1);
+  padding: 0;
+}
+
+.course-chipnav .chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--tx-2b);
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  white-space: nowrap;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.course-chipnav .chip:hover {
+  color: var(--tx-strong);
+  border-color: rgba(var(--ac1-rgb), 0.4);
+}
+.course-chipnav .chip[data-active='true'] {
+  color: var(--ac1);
+  border-color: rgba(var(--ac1-rgb), 0.45);
+  background: rgba(var(--ac1-rgb), 0.08);
+}
+
+/* Desktop: sidebar visible, collapses left; main reserves its width. */
+@media (min-width: 821px) {
+  .course-sidebar[data-collapsed='true'] {
+    transform: translateX(-100%);
+  }
+  .course-main {
+    margin-left: 264px;
+  }
+  .course-main[data-collapsed='true'] {
+    margin-left: 0;
+  }
+}
+
+/* Mobile: sidebar becomes an off-canvas drawer with an overlay. */
+@media (max-width: 820px) {
+  .course-sidebar {
+    transform: translateX(-100%);
+    width: 282px;
+    box-shadow: 6px 0 40px rgba(0, 0, 0, 0.28);
+  }
+  .course-sidebar[data-open='true'] {
+    transform: translateX(0);
+  }
+  .course-main {
+    margin-left: 0 !important;
+  }
+  .course-overlay[data-open='true'] {
+    display: block;
+  }
+  .course-breadcrumb {
+    display: none !important;
+  }
+  .course-content {
+    padding: 30px 16px 90px !important;
+  }
+  .course-h1 {
+    font-size: 30px !important;
+    line-height: 1.08 !important;
+  }
+  .course-grid-2,
+  .course-grid-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Generic collapse hooks usable by any course widget. */
+  [data-collapse-grid] {
+    grid-template-columns: 1fr !important;
+  }
+  [data-collapse-metrics] {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "elec",
+  "order": 2,
+  "icon": "Zap",
+  "accent": "--ac6",
+  "title": { "en": "Electrical Engineering", "zh-Hant": "電機工程" },
+  "blurb": {
+    "en": "Power, signal, and safety — wire a robot that turns on every time and survives the match.",
+    "zh-Hant": "電力、訊號與安全——把機器人接好線，讓它每次都能開機並撐完整場比賽。"
+  },
+  "tags": {
+    "en": ["Circuits", "Wiring", "Power"],
+    "zh-Hant": ["電路", "配線", "電力"]
+  }
+}

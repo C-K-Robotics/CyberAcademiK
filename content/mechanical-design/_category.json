@@ -1,0 +1,15 @@
+{
+  "id": "mech",
+  "order": 1,
+  "icon": "Hexagon",
+  "accent": "--ac2",
+  "title": { "en": "Mechanical & Design", "zh-Hant": "機械與設計" },
+  "blurb": {
+    "en": "From a blank Onshape document to a manufactured mechanism — model it, design the motion, and make it real.",
+    "zh-Hant": "從一份空白的 Onshape 文件到實際製造出的機構——建模、設計運動，並把它做出來。"
+  },
+  "tags": {
+    "en": ["CAD", "Mechanisms", "Manufacturing"],
+    "zh-Hant": ["CAD", "機構", "製造"]
+  }
+}

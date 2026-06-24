@@ -1,0 +1,15 @@
+{
+  "id": "ctrl",
+  "order": 3,
+  "icon": "RefreshCw",
+  "accent": "--ac1",
+  "title": { "en": "Control × Programming", "zh-Hant": "控制 × 程式設計" },
+  "blurb": {
+    "en": "Where code meets motion. Write the software and tune the loops that turn motor power into precise, repeatable motion.",
+    "zh-Hant": "程式與運動的交會點。撰寫軟體並調校迴路，把馬達動力轉化為精準且可重複的運動。"
+  },
+  "tags": {
+    "en": ["Java", "Control Theory", "Perception"],
+    "zh-Hant": ["Java", "控制理論", "感知"]
+  }
+}

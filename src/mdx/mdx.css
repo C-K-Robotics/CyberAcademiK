@@ -1,0 +1,22 @@
+/* Overrides for markdown rendered inside special MDX components. */
+
+/* Inside a CodeTabs card the surrounding container provides the chrome, so the
+   markdown <pre> drops its own box. */
+.codetabs-body pre {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  max-height: 460px;
+}
+
+/* Lesson prose links get a subtle underline on hover. */
+.lesson-prose a {
+  color: var(--ac1b);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(var(--ac1-rgb), 0.35);
+  transition: border-color 0.15s ease;
+}
+.lesson-prose a:hover {
+  border-bottom-color: var(--ac1b);
+}

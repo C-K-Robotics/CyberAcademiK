@@ -1,0 +1,219 @@
+/*
+ * CyberAcademiK theme tokens.
+ * Light is the default; dark is opt-in via [data-theme="dark"] on <html>.
+ * Canvas/SVG widgets read matching colours from usePalette() (src/theme/palette.ts).
+ */
+
+:root,
+:root[data-theme='light'] {
+  --bg-deep: #c5d0d9;
+  --bg-sidebar: #bcc8d2;
+  --bg-panel: #d6dee4;
+  --bg-hero: #cfd8df;
+  --bg-input: #cdd7de;
+  --bg-thead: #c7d2da;
+  --bg-inset: #bfccd4;
+  --bg-accent: #d9e7eb;
+  --bg-block: #cdd8de;
+
+  --tx-strong: #15232c;
+  --tx-bright: #1b2832;
+  --tx-1: #27373f;
+  --tx-2: #3b4b56;
+  --tx-2b: #41515d;
+  --tx-2c: #3d4d59;
+  --tx-3: #556470;
+  --tx-4: #64727e;
+  --tx-5: #697783;
+  --tx-6: #5e6c78;
+  --tx-faint: #94a2ae;
+  --tx-faint2: #8997a4;
+
+  --grid: rgba(70, 95, 125, 0.06);
+  --line: rgba(70, 95, 125, 0.22);
+  --scroll: #a6b3bf;
+  --scroll-h: #94a3b0;
+  --track: #aebac4;
+  --bg-topbar: rgba(255, 255, 255, 0.85);
+  --bg-chipnav: rgba(255, 255, 255, 0.9);
+
+  --ac1: #0a7d8f;
+  --ac1b: #2a8a99;
+  --ac2: #6b46c1;
+  --ac3: #c43e74;
+  --ac4: #0e9d63;
+  --ac5: #d23048;
+  --ac6: #b07c08;
+  --on-ac: #eafafc;
+
+  --ac1-rgb: 10, 125, 143;
+  --ac2-rgb: 107, 70, 193;
+  --ac3-rgb: 196, 62, 116;
+  --ac4-rgb: 14, 157, 99;
+  --ac5-rgb: 210, 48, 72;
+  --ac6-rgb: 176, 124, 8;
+
+  --red: #c0182a;
+  --red-rgb: 192, 24, 42;
+
+  /* the home/light variant flattens panel backgrounds to white */
+  --page-bg: #ffffff;
+}
+
+:root[data-theme='dark'] {
+  --bg-deep: #0a0d12;
+  --bg-sidebar: #0b0f15;
+  --bg-panel: #0d121a;
+  --bg-hero: #0c1118;
+  --bg-input: #0e131b;
+  --bg-thead: #10161f;
+  --bg-inset: #0a0e14;
+  --bg-accent: #10202a;
+  --bg-block: #141a23;
+
+  --tx-strong: #e6edf3;
+  --tx-bright: #dfe7ef;
+  --tx-1: #cdd7e1;
+  --tx-2: #aeb9c6;
+  --tx-2b: #9fb0c2;
+  --tx-2c: #aab6c4;
+  --tx-3: #7c8a99;
+  --tx-4: #5f6e7e;
+  --tx-5: #566273;
+  --tx-6: #6f7d8c;
+  --tx-faint: #3a4654;
+  --tx-faint2: #4a5a6b;
+
+  --grid: rgba(86, 130, 170, 0.045);
+  --line: rgba(86, 130, 170, 0.16);
+  --scroll: #222c38;
+  --scroll-h: #2d3a48;
+  --track: #1b2531;
+  --bg-topbar: rgba(10, 13, 18, 0.82);
+  --bg-chipnav: rgba(11, 15, 21, 0.9);
+
+  --ac1: #34d6e8;
+  --ac1b: #7fd3df;
+  --ac2: #a78bfa;
+  --ac3: #fb7bb5;
+  --ac4: #34d399;
+  --ac5: #fb7185;
+  --ac6: #fbbf24;
+  --on-ac: #06222a;
+
+  --ac1-rgb: 52, 214, 232;
+  --ac2-rgb: 167, 139, 250;
+  --ac3-rgb: 251, 123, 181;
+  --ac4-rgb: 52, 211, 153;
+  --ac5-rgb: 251, 113, 133;
+  --ac6-rgb: 251, 191, 36;
+
+  --red: #fb6b78;
+  --red-rgb: 251, 107, 120;
+
+  --page-bg: var(--bg-deep);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--page-bg);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  color: var(--tx-bright);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(var(--ac1-rgb), 0.28);
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scroll);
+  border-radius: 6px;
+  border: 2px solid var(--bg-deep);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-h);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+input[type='range']::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--track);
+}
+input[type='range']::-moz-range-track {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--track);
+}
+input[type='range']::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  box-shadow: 0 0 0 3px currentColor, 0 0 12px currentColor;
+}
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  margin-top: -6px;
+  box-shadow: 0 0 0 3px currentColor, 0 0 12px currentColor;
+}
+
+@keyframes flow {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* The page wrapper carries the subtle blueprint grid. */
+.app-grid {
+  min-height: 100vh;
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 34px 34px;
+}

@@ -1,0 +1,189 @@
+/* Home + category browsing. Hover/transition/responsive rules that inline
+   styles can't express; dynamic accents come in via the --accent* custom
+   properties set on each element. */
+
+.hm-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--bg-topbar);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+  height: 62px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 32px;
+}
+
+.hm-topnav {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.hm-navlink {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border-radius: 7px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--tx-2b);
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.hm-navlink:hover {
+  color: var(--tx-strong);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+.hm-navlink[data-active='true'] {
+  font-weight: 600;
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+.hm-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 240px;
+}
+.hm-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--tx-bright);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.hm-home-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 64px 32px 110px;
+}
+.hm-cat-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 34px 32px 110px;
+}
+
+.hm-catgrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.hm-subgrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.hm-cat-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-top: 2px solid var(--accent);
+  border-radius: 14px;
+  padding: 24px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+.hm-cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(var(--accent-rgb), 0.16);
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.hm-course-card {
+  display: block;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 15px 16px;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.hm-course-card[data-available='true'] {
+  cursor: pointer;
+}
+.hm-course-card[data-available='true']:hover {
+  border-color: rgba(var(--accent-rgb), 0.5);
+  background: var(--bg-accent);
+  transform: translateY(-2px);
+}
+.hm-course-card[data-available='false'] {
+  cursor: default;
+  opacity: 0.72;
+}
+
+@media (max-width: 860px) {
+  .hm-catgrid {
+    grid-template-columns: 1fr;
+  }
+  .hm-subgrid {
+    grid-template-columns: 1fr;
+  }
+  .hm-hero h1 {
+    font-size: 34px !important;
+  }
+  .hm-topbar {
+    padding: 0 16px;
+  }
+  .hm-search {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .hm-topbar {
+    gap: 8px;
+    height: auto;
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+  .hm-topnav {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hm-topnav::-webkit-scrollbar {
+    display: none;
+  }
+  .hm-home-wrap {
+    padding: 38px 18px 80px;
+  }
+  .hm-cat-wrap {
+    padding: 24px 18px 80px;
+  }
+  .hm-hero {
+    margin-bottom: 38px !important;
+  }
+  .hm-hero h1 {
+    font-size: 30px !important;
+  }
+  .hm-hero p {
+    font-size: 15.5px !important;
+  }
+  .hm-cathead {
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+  .hm-cathead h1 {
+    font-size: 30px !important;
+  }
+}

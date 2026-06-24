@@ -1,0 +1,190 @@
+---
+title: PID 控制入門
+desc: 比例、積分、微分迴路——即時調校。
+kicker: PID 控制
+lead: >-
+  機器人領域中最實用的回授演算法。了解比例、積分與微分三項如何結合，把系統驅動到
+  設定點——然後親手即時調校一個。
+author: Oliver Chou
+minutes: 25
+level: intermediate
+order: 1
+isNew: true
+updated: 2025 年 10 月更新
+references:
+  - label: Wikipedia — PID controller
+    href: 'https://en.wikipedia.org/wiki/PID_controller'
+  - label: NI — LabVIEW PID for FRC
+    href: 'https://forums.ni.com/t5/FIRST-Robotics-Competition/PID-Tutorial-LabVIEW-for-FRC/ta-p/3732695'
+  - label: FRC Programming Done Right
+    href: 'https://frcpdr.readthedocs.io/en/latest/control/pid_control.html'
+upNext:
+  label: 調校：手動與 Ziegler–Nichols
+  href: '#'
+---
+
+{/*
+  PID 控制入門 — 繁體中文。
+  內容管理者可自由編輯文字，並用元件組合頁面：通用元件（Section、CodeTabs、
+  Quiz、Callout）以及本課程專屬的互動元件（BlockDiagram、PlantSchematic、
+  ThreeTerms、PIDSimulator、ZieglerNichols、ArmSimulator）。修改課程不需要寫程式。
+  所有課程的中繼資料都放在上方的 YAML frontmatter，而不是程式碼中。
+*/}
+
+<Section id="loop" n="01" title="開迴路 vs. 閉迴路" chip="控制迴路">
+
+在**開迴路**控制中，指令會忽略結果——簡單又便宜，但盲目。**閉迴路**會把量測到的
+輸出回授，與設定點比較，並依據*誤差*作動。PID 就位於下方的控制器方塊之中。
+
+<BlockDiagram />
+
+</Section>
+
+<Section id="plant" n="02" title="受控體——機械系統" chip="受控體">
+
+大多數機器人機構都可化簡為三個元素：**質量**、**彈簧**與**阻尼**。施加一個力，
+位置就會遵循二階微分方程式。撥動它，感受它自然的阻尼響應。
+
+<PlantSchematic />
+
+</Section>
+
+<Section id="terms" n="03" title="三個項" chip="三個項">
+
+控制器將對誤差 `e(t) = 設定點 − 量測值` 的三種反應加總。每一項看待誤差的方式都
+不同：現在、過去與未來。
+
+<ThreeTerms />
+
+</Section>
+
+<Section id="sim" n="04" title="即時模擬器——親手調校" chip="即時模擬器">
+
+在 `t = 0` 施加一個單位階躍指令來驅動受控體。拖動增益，即時看著響應重新計算。
+先試一個預設，再微調。
+
+<PIDSimulator plant="balanced" />
+
+</Section>
+
+<Section id="tune" n="05" title="調校——Ziegler–Nichols" chip="調校">
+
+提高 Kp（讓 Ki = Kd = 0），直到迴路穩定地持續振盪——那就是週期為 **Tu** 時的
+**臨界增益 Ku**。把它們代入，經典公式就會給你一組起始調校值。
+
+<ZieglerNichols />
+
+</Section>
+
+<Section id="code" n="06" title="用程式實作 PID" chip="程式">
+
+離散形式會在每個迴圈週期（這裡約 20 毫秒）執行：計算誤差、累加積分、取微分，
+再把加權後的三項加總成馬達指令。
+
+<CodeTabs>
+<CodeTab label="Drive.java">
+
+```java
+public class Drive {
+    double P = 0.6, I = 0.02, D = 4.0;
+    double integral, previousError, setpoint = 0;
+    Gyro gyro;
+    DifferentialDrive robotDrive;
+
+    public Drive(Gyro gyro) {
+        this.gyro = gyro;
+    }
+
+    public void setSetpoint(double setpoint) {
+        this.setpoint = setpoint;
+    }
+
+    public void pid() {
+        double error = setpoint - gyro.getAngle();   // error = target - actual
+        this.integral += error * 0.02;               // integral grows by error * dt (20 ms)
+        double derivative = (error - previousError) / 0.02;
+        double rcw = P * error + I * integral + D * derivative;
+        previousError = error;
+        robotDrive.arcadeDrive(0, rcw);
+    }
+}
+```
+
+</CodeTab>
+<CodeTab label="Drive.cpp">
+
+```cpp
+class Drive {
+    double P = 0.6, I = 0.02, D = 4.0;
+    double integral = 0, previousError = 0, setpoint = 0;
+    Gyro& gyro;
+    DifferentialDrive& robotDrive;
+
+public:
+    Drive(Gyro& g, DifferentialDrive& d) : gyro(g), robotDrive(d) {}
+
+    void setSetpoint(double sp) {
+        this->setpoint = sp;
+    }
+
+    void pid() {
+        double error = setpoint - gyro.getAngle();   // error = target - actual
+        this->integral += error * 0.02;              // integral grows by error * dt
+        double derivative = (error - previousError) / 0.02;
+        double rcw = P * error + I * integral + D * derivative;
+        previousError = error;
+        robotDrive.arcadeDrive(0, rcw);
+    }
+};
+```
+
+</CodeTab>
+</CodeTabs>
+
+</Section>
+
+<Section id="arm" n="07" title="手臂模擬器——對抗重力" chip="手臂模擬器">
+
+真實機構很少表現得像無摩擦的受控體。這裡有一顆 **Falcon 500** 驅動一支樞轉手臂，
+**重力持續把它往下拉**——要撐住它所需的力矩會隨角度改變。單靠 P 會留下下垂；
+開啟重力**前饋**項，PID 就能專心修正剩下的部分。
+
+<ArmSimulator />
+
+</Section>
+
+<Section id="quiz" n="08" title="隨堂測驗" chip="隨堂測驗">
+
+三道小問題。
+
+<Quiz>
+  <Q
+    prompt="純比例（P）控制器會以一個固定的偏移量停在設定點附近。要消除這個穩態誤差，需要加入哪一項？"
+    explain="積分項會隨時間累加過去的誤差，持續施力直到誤差歸零，消除 P 留下的偏移。"
+  >
+    <Choice>微分（D）</Choice>
+    <Choice correct>積分（I）</Choice>
+    <Choice>更大的設定點</Choice>
+    <Choice>更多阻尼</Choice>
+  </Q>
+  <Q
+    prompt="提高微分（D）增益，主要會如何影響響應？"
+    explain="D 會對誤差的變化率作出反應，像煞車一樣讓軌跡變平緩並減少過衝。代價是對感測器雜訊較敏感。"
+  >
+    <Choice>消除穩態誤差</Choice>
+    <Choice>讓迴路永遠更快地振盪</Choice>
+    <Choice correct>抑制過衝並平滑趨近過程</Choice>
+    <Choice>提高設定點</Choice>
+  </Q>
+  <Q
+    prompt="在 Ziegler–Nichols 方法中，你會先提高 Kp（讓 Ki = Kd = 0），直到輸出……"
+    explain="在臨界增益 Ku 時，迴路會以週期 Tu 穩定振盪，這兩個數字就決定了所有 PID 增益。"
+  >
+    <Choice>剛好到達設定點</Choice>
+    <Choice correct>以固定振幅振盪——即臨界增益 Ku</Choice>
+    <Choice>完全停止反應</Choice>
+    <Choice>剛好過衝 2%</Choice>
+  </Q>
+</Quiz>
+
+</Section>

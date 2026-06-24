@@ -1,0 +1,36 @@
+{
+  "name": "cyberacademik",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "CyberAcademiK — an interactive FRC robotics learning library.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "lint": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@mdx-js/react": "^3.1.0",
+    "lucide-react": "^0.453.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.27.0"
+  },
+  "devDependencies": {
+    "@mdx-js/rollup": "^3.1.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^20.16.13",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "js-yaml": "^5.1.0",
+    "rehype-slug": "^6.0.0",
+    "remark-gfm": "^4.0.0",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.10"
+  },
+  "packageManager": "yarn@1.22.22"
+}
