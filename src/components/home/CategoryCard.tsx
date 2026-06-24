@@ -5,7 +5,7 @@ import { courseCountForSubteam } from '../../content/selectors'
 import { pad2 } from '../../i18n/format'
 import type { Subteam } from '../../content/types'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 interface CategoryCardProps {
   subteam: Subteam
@@ -95,7 +95,7 @@ export function CategoryCard({ subteam, index }: CategoryCardProps) {
           {t.courseCountLabel(count)} · {t.groupsCount(subteam.groups.length)}
         </span>
         <span style={{ fontFamily: mono, fontSize: 12, fontWeight: 600, color: 'var(--accent)' }}>
-          Browse →
+          {t.browse}
         </span>
       </div>
     </Link>

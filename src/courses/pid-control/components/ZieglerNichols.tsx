@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { usePidGains } from '../PidGains'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 export function ZieglerNichols() {
   const { setGains, scrollToSimulator } = usePidGains()

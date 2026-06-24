@@ -23,7 +23,7 @@ export function Figure({ src, alt = '', caption }: FigureProps) {
       {caption && (
         <figcaption
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
             fontSize: 11.5,
             color: 'var(--tx-4)',
             marginTop: 9,

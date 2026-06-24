@@ -6,7 +6,7 @@ import { useI18n } from '../../i18n/I18nProvider'
 import type { CourseMeta } from '../../content/types'
 import type { Subteam } from '../../content/types'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 interface CourseTopbarProps {
   meta: CourseMeta

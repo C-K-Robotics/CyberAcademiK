@@ -4,7 +4,7 @@ import { formatMinutes, pad2 } from '../../i18n/format'
 import { getLessonPosition } from '../../content/selectors'
 import type { CourseMeta } from '../../content/types'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 function levelLabel(level: CourseMeta['level'], t: ReturnType<typeof useI18n>['t']): string {
   return level === 'beginner'

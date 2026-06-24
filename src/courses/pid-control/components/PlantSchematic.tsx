@@ -114,7 +114,7 @@ export function PlantSchematic() {
       >
         <div
           style={{
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
             fontSize: 10,
             letterSpacing: '0.12em',
             color: 'var(--tx-5)',
@@ -157,7 +157,7 @@ export function PlantSchematic() {
             x="92"
             y="46"
             textAnchor="middle"
-            fontFamily="'IBM Plex Mono', monospace"
+            fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
             fontSize="11"
             fill="var(--ac2)"
           >
@@ -174,7 +174,7 @@ export function PlantSchematic() {
             x="96"
             y="146"
             textAnchor="middle"
-            fontFamily="'IBM Plex Mono', monospace"
+            fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
             fontSize="11"
             fill="var(--ac3)"
           >
@@ -201,7 +201,7 @@ export function PlantSchematic() {
               x="290"
               y="80"
               textAnchor="middle"
-              fontFamily="'IBM Plex Mono', monospace"
+              fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
               fontSize="11"
               fill="var(--ac4)"
             >
@@ -222,7 +222,7 @@ export function PlantSchematic() {
               x="218"
               y="173"
               textAnchor="middle"
-              fontFamily="'IBM Plex Mono', monospace"
+              fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
               fontSize="10"
               fill="var(--tx-5)"
             >
@@ -238,7 +238,7 @@ export function PlantSchematic() {
             background: 'rgba(var(--ac1-rgb),0.1)',
             border: '1px solid rgba(var(--ac1-rgb),0.45)',
             color: 'var(--ac1)',
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
             fontSize: 12,
             padding: '8px 16px',
             borderRadius: 8,
@@ -265,7 +265,7 @@ export function PlantSchematic() {
         <div>
           <div
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
               fontSize: 10,
               letterSpacing: '0.12em',
               color: 'var(--tx-5)',
@@ -276,7 +276,7 @@ export function PlantSchematic() {
           </div>
           <div
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
               fontSize: 17,
               color: 'var(--tx-strong)',
               lineHeight: 1.5,
@@ -293,7 +293,7 @@ export function PlantSchematic() {
             <span
               style={{
                 color: 'var(--ac1)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
                 fontWeight: 600,
                 width: 34,
                 flex: 'none',
@@ -307,7 +307,7 @@ export function PlantSchematic() {
             <span
               style={{
                 color: 'var(--ac3)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
                 fontWeight: 600,
                 width: 34,
                 flex: 'none',
@@ -321,7 +321,7 @@ export function PlantSchematic() {
             <span
               style={{
                 color: 'var(--ac2)',
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
                 fontWeight: 600,
                 width: 34,
                 flex: 'none',

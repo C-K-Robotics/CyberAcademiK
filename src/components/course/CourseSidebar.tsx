@@ -5,7 +5,7 @@ import { getSubteam } from '../../content/selectors'
 import type { CourseEntry, CourseMeta } from '../../content/types'
 import type { Locale } from '../../i18n/strings'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 /** Filled dot for the lesson you're on, hollow ring for the rest. */
 function LessonBullet({ current }: { current: boolean }) {

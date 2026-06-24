@@ -47,7 +47,7 @@
 }
 
 .course-chipnav .chip {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace;
   font-size: 11px;
   color: var(--tx-2b);
   padding: 5px 11px;

@@ -5,7 +5,7 @@ import { isCourseAvailable } from '../../content/selectors'
 import { formatMinutes, pad2 } from '../../i18n/format'
 import type { CourseEntry, Subteam } from '../../content/types'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 interface CategoryDetailProps {
   subteam: Subteam

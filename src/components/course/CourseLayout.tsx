@@ -18,7 +18,7 @@ function LoadingLesson() {
       style={{
         padding: '60px 0',
         textAlign: 'center',
-        fontFamily: "'IBM Plex Mono', monospace",
+        fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
         fontSize: 13,
         color: 'var(--tx-4)',
       }}

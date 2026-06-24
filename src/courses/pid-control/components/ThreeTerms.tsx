@@ -1,4 +1,4 @@
-const MONO = "'IBM Plex Mono', monospace"
+const MONO = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 export function ThreeTerms() {
   return (

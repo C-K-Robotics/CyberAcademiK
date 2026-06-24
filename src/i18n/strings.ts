@@ -29,6 +29,7 @@ export interface Strings {
   coursesCount: (n: number) => string
   groupsCount: (n: number) => string
   courseCountLabel: (n: number) => string
+  browse: string
   badgeNew: string
   comingSoon: string
   // course chrome
@@ -72,6 +73,7 @@ const en: Strings = {
   coursesCount: (n) => `${n} courses`,
   groupsCount: (n) => `${n} groups`,
   courseCountLabel: (n) => `${n} courses`,
+  browse: 'Browse →',
   badgeNew: 'NEW',
   comingSoon: 'Coming soon',
   myCourses: 'MY COURSES',
@@ -111,6 +113,7 @@ const zhHant: Strings = {
   coursesCount: (n) => `${n} 門課程`,
   groupsCount: (n) => `${n} 個分組`,
   courseCountLabel: (n) => `${n} 門課程`,
+  browse: '瀏覽 →',
   badgeNew: '新',
   comingSoon: '即將推出',
   myCourses: '我的課程',

@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 interface ChoiceProps {
   correct?: boolean

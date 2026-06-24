@@ -1,7 +1,7 @@
 import type { MDXComponents } from 'mdx/types'
 import type { CSSProperties, HTMLAttributes } from 'react'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 const pStyle: CSSProperties = {
   fontSize: 15.5,

@@ -2,7 +2,7 @@ import { ArrowRight, ExternalLink } from 'lucide-react'
 import { useI18n } from '../../i18n/I18nProvider'
 import type { CourseMeta } from '../../content/types'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 /** The end-of-lesson block: an "up next" card and the references list (from meta). */
 export function CourseFooterNav({ meta }: { meta: CourseMeta }) {

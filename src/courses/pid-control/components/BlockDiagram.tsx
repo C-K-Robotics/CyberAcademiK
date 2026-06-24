@@ -16,7 +16,7 @@ export function BlockDiagram() {
             position: 'absolute',
             top: 13,
             left: 16,
-            fontFamily: "'IBM Plex Mono', monospace",
+            fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
             fontSize: 10,
             letterSpacing: '0.12em',
             color: 'var(--tx-5)',
@@ -36,10 +36,10 @@ export function BlockDiagram() {
           </defs>
 
           {/* input */}
-          <text x="20" y="86" fontFamily="'IBM Plex Mono', monospace" fontSize="13" fill="var(--tx-2b)">
+          <text x="20" y="86" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="13" fill="var(--tx-2b)">
             r(t)
           </text>
-          <text x="20" y="100" fontFamily="'IBM Plex Mono', monospace" fontSize="9" fill="var(--tx-5)">
+          <text x="20" y="100" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="9" fill="var(--tx-5)">
             setpoint
           </text>
           <line x1="56" y1="90" x2="104" y2="90" stroke="#54677b" strokeWidth="1.6" markerEnd="url(#ah)" />
@@ -57,7 +57,7 @@ export function BlockDiagram() {
           </text>
 
           {/* error */}
-          <text x="150" y="82" fontFamily="'IBM Plex Mono', monospace" fontSize="12" fill="var(--ac1)">
+          <text x="150" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="12" fill="var(--ac1)">
             e(t)
           </text>
           <line
@@ -77,12 +77,12 @@ export function BlockDiagram() {
           <text x="267" y="86" textAnchor="middle" fontSize="13.5" fontWeight="600" fill="var(--tx-strong)">
             PID Controller
           </text>
-          <text x="267" y="104" textAnchor="middle" fontFamily="'IBM Plex Mono', monospace" fontSize="10" fill="var(--ac1b)">
+          <text x="267" y="104" textAnchor="middle" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="10" fill="var(--ac1b)">
             Kp · Ki · Kd
           </text>
 
           {/* u(t) */}
-          <text x="350" y="82" fontFamily="'IBM Plex Mono', monospace" fontSize="12" fill="var(--tx-2b)">
+          <text x="350" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="12" fill="var(--tx-2b)">
             u(t)
           </text>
           <line x1="336" y1="90" x2="404" y2="90" stroke="#54677b" strokeWidth="1.6" markerEnd="url(#ah)" />
@@ -92,15 +92,15 @@ export function BlockDiagram() {
           <text x="481" y="86" textAnchor="middle" fontSize="13.5" fontWeight="600" fill="var(--tx-strong)">
             Process / Plant
           </text>
-          <text x="481" y="104" textAnchor="middle" fontFamily="'IBM Plex Mono', monospace" fontSize="10" fill="var(--tx-3)">
+          <text x="481" y="104" textAnchor="middle" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="10" fill="var(--tx-3)">
             mass · spring · damper
           </text>
 
           {/* output */}
-          <text x="640" y="82" fontFamily="'IBM Plex Mono', monospace" fontSize="13" fill="var(--tx-2b)">
+          <text x="640" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="13" fill="var(--tx-2b)">
             y(t)
           </text>
-          <text x="640" y="96" fontFamily="'IBM Plex Mono', monospace" fontSize="9" fill="var(--tx-5)">
+          <text x="640" y="96" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="9" fill="var(--tx-5)">
             measured
           </text>
           <line x1="556" y1="90" x2="700" y2="90" stroke="#54677b" strokeWidth="1.6" />
@@ -123,7 +123,7 @@ export function BlockDiagram() {
           display: 'flex',
           gap: 9,
           marginTop: 14,
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
           fontSize: 11,
           color: 'var(--tx-3)',
           flexWrap: 'wrap',

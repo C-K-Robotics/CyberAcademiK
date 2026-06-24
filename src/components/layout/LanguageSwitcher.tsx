@@ -27,7 +27,7 @@ export function LanguageSwitcher() {
             title={LOCALE_NAMES[loc]}
             aria-pressed={active}
             style={{
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
               fontSize: 12,
               fontWeight: 600,
               padding: '4px 9px',

@@ -24,7 +24,7 @@ export function NotFound() {
       <Link
         to="/"
         style={{
-          fontFamily: "'IBM Plex Mono', monospace",
+          fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
           fontSize: 13,
           color: 'var(--ac1)',
           border: '1px solid rgba(var(--ac1-rgb),0.45)',

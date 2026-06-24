@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 interface SectionProps {
   /** Stable id; the DOM id becomes `sec-${id}` and the chip nav links to it. */

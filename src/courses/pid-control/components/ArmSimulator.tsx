@@ -105,7 +105,7 @@ export function ArmSimulator() {
       py = H * 0.8,
       L = Math.min(W * 0.5, H * 0.62)
     const pal = palRef.current
-    g.font = "11px 'IBM Plex Mono', monospace"
+    g.font = "11px 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
     // horizontal baseline (dashed)
     g.strokeStyle = pal.baseline
     g.setLineDash([4, 4])
@@ -178,7 +178,7 @@ export function ArmSimulator() {
     g.lineTo(ex + 4.5, ey + 39)
     g.closePath()
     g.fill()
-    g.font = "600 12px 'IBM Plex Mono', monospace"
+    g.font = "600 12px 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
     g.fillText('W=mg', ex + 8, ey + 42)
     // pivot
     g.fillStyle = pal.pivotBg
@@ -219,7 +219,7 @@ export function ArmSimulator() {
     g.stroke()
     g.shadowBlur = 0
     // ticks + labels
-    g.font = "9px 'IBM Plex Mono', monospace"
+    g.font = "9px 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
     g.textAlign = 'center'
     ;[0, 30, 60, 90].forEach((v) => {
       const ang = Math.PI + Math.PI * (v / 90)
@@ -248,7 +248,7 @@ export function ArmSimulator() {
     g.arc(cx, cy, 4, 0, Math.PI * 2)
     g.fill()
     g.fillStyle = pal.strong
-    g.font = "600 17px 'IBM Plex Mono', monospace"
+    g.font = "600 17px 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
     g.fillText(((a.th * 180) / Math.PI).toFixed(0) + '°', cx, cy - R * 0.3)
     g.textAlign = 'left'
   }
@@ -275,7 +275,7 @@ export function ArmSimulator() {
     const Yd = (v: number) => padT + ph - (Math.max(0, Math.min(v, degMax)) / degMax) * ph
     const Yv = (v: number) =>
       padT + ph - ((Math.max(velMin, Math.min(v, velMax)) - velMin) / (velMax - velMin)) * ph
-    g.font = "9px 'IBM Plex Mono', monospace"
+    g.font = "9px 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
     const pal = palRef.current
     // grid
     g.strokeStyle = pal.grid
@@ -394,7 +394,7 @@ export function ArmSimulator() {
     display: 'flex',
     alignItems: 'center',
     gap: '7px',
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
     fontSize: '11.5px',
     fontWeight: 600,
     padding: '7px 13px',
@@ -414,7 +414,7 @@ export function ArmSimulator() {
   }
   const kgWrapStyle: React.CSSProperties = { color: 'var(--ac6)', opacity: ffOn ? 1 : 0.4 }
 
-  const mono = "'IBM Plex Mono', monospace"
+  const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
   const metricCard: React.CSSProperties = {
     background: 'var(--bg-inset)',
     border: '1px solid rgba(86,130,170,0.16)',

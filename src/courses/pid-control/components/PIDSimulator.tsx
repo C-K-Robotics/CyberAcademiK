@@ -136,7 +136,7 @@ const PRESET_DEFS: Array<[string, string]> = [
   ['Hot', 'Aggressive'],
 ]
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 export function PIDSimulator(props: PIDSimulatorProps) {
   const plant = props.plant ?? 'balanced'

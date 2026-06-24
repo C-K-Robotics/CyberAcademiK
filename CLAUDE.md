@@ -16,6 +16,8 @@ yarn lint         # identical to typecheck — there is NO ESLint/Prettier in th
 
 There is **no test runner** — verification is `yarn build` (it typechecks via `tsc -b`) plus manual checking in the browser. `lint` and `typecheck` are the same command; "linting" rules are TypeScript's strict-mode flags in `tsconfig.app.json` (`noUnusedLocals`, `noUnusedParameters`, etc.).
 
+**Always commit after making a change** — create a commit (and push when appropriate) once a change is complete and verified, rather than leaving the working tree dirty.
+
 ## The content pipeline (the core architecture)
 
 Courses are **auto-discovered from the `content/` directory at build time — nothing is registered in code.** The directory layout *is* the taxonomy:

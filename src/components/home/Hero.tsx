@@ -1,7 +1,7 @@
 import { useI18n } from '../../i18n/I18nProvider'
 import { TOTAL_COURSES, TOTAL_SUBTEAMS } from '../../content/selectors'
 
-const mono = "'IBM Plex Mono', monospace"
+const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 export function Hero() {
   const { t } = useI18n()
