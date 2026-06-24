@@ -18,6 +18,9 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 export interface Strings {
   brandTagline: string
   searchPlaceholder: string
+  searchNoResults: (query: string) => string
+  searchSubteamTag: string
+  searchHint: string
   // home hero
   heroKicker: string
   heroTitle: string
@@ -63,6 +66,9 @@ export interface Strings {
 const en: Strings = {
   brandTagline: 'LEARNING LIBRARY',
   searchPlaceholder: 'Search courses…',
+  searchNoResults: (query) => `No results for “${query}”`,
+  searchSubteamTag: 'Subteam',
+  searchHint: '↑↓ to navigate · ↵ to open · esc to close',
   heroKicker: 'CYBERACADEMIK · LEARNING LIBRARY',
   heroTitle: 'Build the whole robot, one skill at a time.',
   heroLead:
@@ -103,6 +109,9 @@ const en: Strings = {
 const zhHant: Strings = {
   brandTagline: '學習資料庫',
   searchPlaceholder: '搜尋課程…',
+  searchNoResults: (query) => `找不到「${query}」的結果`,
+  searchSubteamTag: '分隊',
+  searchHint: '↑↓ 切換 · ↵ 開啟 · esc 關閉',
   heroKicker: 'CYBERACADEMIK · 學習資料庫',
   heroTitle: '一次一項技能，打造整台機器人。',
   heroLead:

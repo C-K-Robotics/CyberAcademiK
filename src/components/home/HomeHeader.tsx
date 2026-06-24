@@ -1,9 +1,9 @@
-import { useState, type CSSProperties } from 'react'
+import { type CSSProperties } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Search } from 'lucide-react'
 import { BrandLogo } from '../layout/BrandLogo'
 import { ThemeToggle } from '../layout/ThemeToggle'
 import { LanguageSwitcher } from '../layout/LanguageSwitcher'
+import { CourseSearch } from '../search/CourseSearch'
 import { useI18n } from '../../i18n/I18nProvider'
 import { SUBTEAMS } from '../../content/catalog'
 import type { Subteam } from '../../content/types'
@@ -15,9 +15,8 @@ function navLabel(subteam: Subteam, locale: 'en' | 'zh-Hant'): string {
 }
 
 export function HomeHeader() {
-  const { t, locale } = useI18n()
+  const { locale } = useI18n()
   const { id: activeSubteamId } = useParams<{ id: string }>()
-  const [query, setQuery] = useState('')
 
   return (
     <header className="hm-topbar">
@@ -43,15 +42,7 @@ export function HomeHeader() {
         ))}
       </nav>
       <div style={{ flex: 1 }} />
-      <label className="hm-search">
-        <Search size={14} color="var(--tx-4)" style={{ flex: 'none' }} />
-        <input
-          type="text"
-          placeholder={t.searchPlaceholder}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-      </label>
+      <CourseSearch variant="home" />
       <LanguageSwitcher />
       <ThemeToggle />
     </header>

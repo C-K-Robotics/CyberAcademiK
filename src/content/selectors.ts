@@ -7,4 +7,6 @@ export {
   isCourseAvailable,
   findCourseEntry,
   getLessonPosition,
+  searchCatalog,
 } from './discovery'
+export type { SearchHit, CourseHit, SubteamHit } from './discovery'

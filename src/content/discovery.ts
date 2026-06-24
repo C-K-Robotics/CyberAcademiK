@@ -166,3 +166,105 @@ export function getLessonPosition(slug: string): { number: number; total: number
   }
   return undefined
 }
+
+/** A course matched by the catalog search, flattened with its owning subteam. */
+export interface CourseHit {
+  kind: 'course'
+  slug: string
+  title: string
+  desc: string
+  groupName: string
+  subteamId: string
+  subteamTitle: string
+  accent: string
+  accentRgb: string
+  level: Level
+  minutes: number
+  isNew?: boolean
+}
+
+/** A subteam (category) matched by the catalog search. */
+export interface SubteamHit {
+  kind: 'subteam'
+  id: string
+  title: string
+  blurb: string
+  accent: string
+  accentRgb: string
+  courseCount: number
+}
+
+export type SearchHit = CourseHit | SubteamHit
+
+const MAX_SEARCH_HITS = 8
+
+/**
+ * Search the discovered catalog for the given locale. Every whitespace-separated
+ * token must appear somewhere in a candidate's text; results are ranked with
+ * title matches first (prefix > substring) and capped at MAX_SEARCH_HITS.
+ * Courses outrank subteams at equal relevance.
+ */
+export function searchCatalog(rawQuery: string, locale: Locale): SearchHit[] {
+  const q = rawQuery.trim().toLowerCase()
+  if (!q) return []
+  const tokens = q.split(/\s+/).filter(Boolean)
+  const scored: { hit: SearchHit; score: number }[] = []
+
+  for (const subteam of SUBTEAMS) {
+    const stTitle = subteam.title[locale]
+    const stBlurb = subteam.blurb[locale]
+    const tags = subteam.tags[locale] ?? []
+
+    const subteamHay = `${stTitle} ${stBlurb} ${tags.join(' ')}`.toLowerCase()
+    if (tokens.every((tok) => subteamHay.includes(tok))) {
+      const lt = stTitle.toLowerCase()
+      const score = 1 + (lt.startsWith(q) ? 80 : lt.includes(q) ? 40 : 0)
+      scored.push({
+        hit: {
+          kind: 'subteam',
+          id: subteam.id,
+          title: stTitle,
+          blurb: stBlurb,
+          accent: subteam.accent,
+          accentRgb: subteam.accentRgb,
+          courseCount: courseCountForSubteam(subteam),
+        },
+        score,
+      })
+    }
+
+    for (const group of subteam.groups) {
+      const groupName = group.name[locale]
+      for (const course of group.courses) {
+        const title = course.title[locale]
+        const desc = course.desc[locale]
+        const hay = `${title} ${desc} ${stTitle} ${groupName}`.toLowerCase()
+        if (!tokens.every((tok) => hay.includes(tok))) continue
+        const lt = title.toLowerCase()
+        // +2 base so a course outranks a subteam at otherwise-equal relevance.
+        let score = 2 + (lt.startsWith(q) ? 100 : lt.includes(q) ? 50 : 0)
+        if (stTitle.toLowerCase().includes(q) || groupName.toLowerCase().includes(q)) score += 15
+        scored.push({
+          hit: {
+            kind: 'course',
+            slug: course.slug,
+            title,
+            desc,
+            groupName,
+            subteamId: subteam.id,
+            subteamTitle: stTitle,
+            accent: subteam.accent,
+            accentRgb: subteam.accentRgb,
+            level: course.level,
+            minutes: course.minutes,
+            isNew: course.isNew,
+          },
+          score,
+        })
+      }
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score)
+  return scored.slice(0, MAX_SEARCH_HITS).map((s) => s.hit)
+}
