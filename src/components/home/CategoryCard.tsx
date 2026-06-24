@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react'
+import { Link } from 'react-router-dom'
 import { useI18n } from '../../i18n/I18nProvider'
 import { courseCountForSubteam } from '../../content/selectors'
 import { pad2 } from '../../i18n/format'
@@ -9,10 +10,9 @@ const mono = "'IBM Plex Mono', monospace"
 interface CategoryCardProps {
   subteam: Subteam
   index: number
-  onClick: () => void
 }
 
-export function CategoryCard({ subteam, index, onClick }: CategoryCardProps) {
+export function CategoryCard({ subteam, index }: CategoryCardProps) {
   const { t, locale } = useI18n()
   const Icon = subteam.icon
   const count = courseCountForSubteam(subteam)
@@ -22,7 +22,7 @@ export function CategoryCard({ subteam, index, onClick }: CategoryCardProps) {
   } as CSSProperties
 
   return (
-    <button type="button" className="hm-cat-card" style={accentStyle} onClick={onClick}>
+    <Link to={`/subteams/${subteam.id}`} className="hm-cat-card" style={accentStyle}>
       <div
         style={{
           display: 'flex',
@@ -98,6 +98,6 @@ export function CategoryCard({ subteam, index, onClick }: CategoryCardProps) {
           Browse →
         </span>
       </div>
-    </button>
+    </Link>
   )
 }

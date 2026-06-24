@@ -46,7 +46,9 @@ export function CourseTopbar({ meta, subteam, onToggleNav }: CourseTopbarProps) 
         {subteam && (
           <>
             <span style={{ color: 'var(--tx-faint)' }}>/</span>
-            <span>{subteam.title[locale]}</span>
+            <Link to={`/subteams/${subteam.id}`} style={{ color: 'var(--tx-3)' }}>
+              {subteam.title[locale]}
+            </Link>
           </>
         )}
         <span style={{ color: 'var(--tx-faint)' }}>/</span>

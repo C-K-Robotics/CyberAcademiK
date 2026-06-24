@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Home } from './components/home/Home'
+import { SubteamPage } from './components/home/SubteamPage'
 import { CoursePage } from './components/course/CoursePage'
 import { NotFound } from './components/NotFound'
 import { ScrollToTop } from './components/ScrollToTop'
@@ -15,6 +16,7 @@ export function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/subteams/:id" element={<SubteamPage />} />
         <Route path="/courses/:slug" element={<CoursePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

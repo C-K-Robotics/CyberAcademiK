@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, type CSSProperties } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { BrandLogo } from '../layout/BrandLogo'
 import { ThemeToggle } from '../layout/ThemeToggle'
@@ -8,38 +8,27 @@ import { useI18n } from '../../i18n/I18nProvider'
 import { SUBTEAMS } from '../../content/catalog'
 import type { Subteam } from '../../content/types'
 
-interface HomeHeaderProps {
-  activeSubteamId: string | null
-  onSelectSubteam: (id: string) => void
-  onHome: () => void
-  query: string
-  onQuery: (q: string) => void
-}
-
 /** Short nav label: drop the verbose suffixes used in full subteam titles. */
 function navLabel(subteam: Subteam, locale: 'en' | 'zh-Hant'): string {
   if (locale === 'zh-Hant') return subteam.title['zh-Hant']
   return subteam.title.en.replace(' Engineering', '').replace(' × Programming', ' × Prog')
 }
 
-export function HomeHeader({
-  activeSubteamId,
-  onSelectSubteam,
-  onHome,
-  query,
-  onQuery,
-}: HomeHeaderProps) {
+export function HomeHeader() {
   const { t, locale } = useI18n()
+  const { id: activeSubteamId } = useParams<{ id: string }>()
+  const [query, setQuery] = useState('')
+
   return (
     <header className="hm-topbar">
-      <Link to="/" onClick={onHome} style={{ display: 'flex', alignItems: 'center', flex: 'none' }}>
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', flex: 'none' }}>
         <BrandLogo height={36} />
       </Link>
       <nav className="hm-topnav">
         {SUBTEAMS.map((subteam) => (
-          <button
+          <Link
             key={subteam.id}
-            type="button"
+            to={`/subteams/${subteam.id}`}
             className="hm-navlink"
             data-active={activeSubteamId === subteam.id}
             style={
@@ -48,10 +37,9 @@ export function HomeHeader({
                 '--accent-rgb': `var(${subteam.accentRgb})`,
               } as CSSProperties
             }
-            onClick={() => onSelectSubteam(subteam.id)}
           >
             {navLabel(subteam, locale)}
-          </button>
+          </Link>
         ))}
       </nav>
       <div style={{ flex: 1 }} />
@@ -61,7 +49,7 @@ export function HomeHeader({
           type="text"
           placeholder={t.searchPlaceholder}
           value={query}
-          onChange={(e) => onQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value)}
         />
       </label>
       <LanguageSwitcher />

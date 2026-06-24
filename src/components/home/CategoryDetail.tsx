@@ -9,7 +9,6 @@ const mono = "'IBM Plex Mono', monospace"
 
 interface CategoryDetailProps {
   subteam: Subteam
-  onHome: () => void
 }
 
 function levelLabel(level: CourseEntry['level'], t: ReturnType<typeof useI18n>['t']): string {
@@ -110,7 +109,7 @@ function CourseCard({
   )
 }
 
-export function CategoryDetail({ subteam, onHome }: CategoryDetailProps) {
+export function CategoryDetail({ subteam }: CategoryDetailProps) {
   const { t, locale } = useI18n()
   const Icon = subteam.icon
   const accentStyle = {
@@ -132,13 +131,9 @@ export function CategoryDetail({ subteam, onHome }: CategoryDetailProps) {
           marginBottom: 30,
         }}
       >
-        <button
-          type="button"
-          onClick={onHome}
-          style={{ color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer', font: 'inherit', padding: 0 }}
-        >
+        <Link to="/" style={{ color: 'var(--tx-3)' }}>
           {t.library}
-        </button>
+        </Link>
         <span style={{ color: 'var(--tx-faint)' }}>/</span>
         <span style={{ color: 'var(--tx-1)' }}>{subteam.title[locale]}</span>
       </div>
