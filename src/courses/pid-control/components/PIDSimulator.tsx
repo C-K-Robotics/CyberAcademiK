@@ -127,6 +127,7 @@ const PRESET_MAP: Record<string, { kp: number; ki: number; kd: number }> = {
   PI: { kp: 90, ki: 120, kd: 0 },
   PID: { kp: 120, ki: 160, kd: 14 },
   Hot: { kp: 240, ki: 340, kd: 6 },
+  Stable: { kp: 245, ki: 159, kd: 23 },
 }
 
 const PRESET_DEFS: Array<[string, string]> = [
@@ -134,6 +135,7 @@ const PRESET_DEFS: Array<[string, string]> = [
   ['PI', 'PI'],
   ['PID', 'PID'],
   ['Hot', 'Aggressive'],
+  ['Stable', 'Stable'],
 ]
 
 const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
