@@ -20,6 +20,26 @@ yarn build      # typecheck + production build into dist/
 yarn preview    # preview the production build locally
 ```
 
+### Docker usage
+
+To run the project in a containerized development environment:
+
+```bash
+# First time setup (builds the image):
+docker compose up --build
+
+# Subsequent runs:
+docker compose up
+```
+
+This launches the site in a container and mounts your local files to enable hot-reloading. The site will be available at `http://localhost:5173/CyberAcademiK/`.
+
+To stop and remove the containers: ( :warning: **Make sure to do this to properly removes the container**)
+
+```bash
+docker compose down
+```
+
 > The site is served from a sub-path on GitHub Pages (`/CyberAcademiK/`), so the
 > dev server and preview run under that base too — open the URL Vite prints.
 
