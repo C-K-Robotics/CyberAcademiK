@@ -34,7 +34,7 @@ docker compose up
 
 This launches the site in a container and mounts your local files to enable hot-reloading. The site will be available at `http://localhost:5173/CyberAcademiK/`.
 
-To stop and remove the containers: ( :warning: **Make sure to do this to properly removes the container**)
+To stop and remove the containers: (:warning: **Make sure to do this to properly remove the containers**)
 
 ```bash
 docker compose down
