@@ -20,7 +20,7 @@ yarn build      # typecheck + production build into dist/
 yarn preview    # preview the production build locally
 ```
 
-### Docker usage
+### Docker usage (Recommended :white_check_mark:)
 
 To run the project in a containerized development environment:
 
