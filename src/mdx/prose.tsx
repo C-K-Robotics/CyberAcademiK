@@ -36,6 +36,13 @@ const inlineCodeStyle: CSSProperties = {
 
 /** Styled overrides for plain markdown elements inside lesson prose. */
 export const proseComponents: MDXComponents = {
+  img: ({ src, alt, ...rest }) => {
+    if (!src) return null
+    const base = import.meta.env.BASE_URL || location.pathname.replace(/\/[^/]*$/, '')
+    const relativeSrc = src.startsWith('/') ? src.slice(1) : src
+    const finalSrc = base.endsWith('/') ? `${base}${relativeSrc}` : `${base}/${relativeSrc}`
+    return <img src={finalSrc} alt={alt ?? ''} {...rest} crossOrigin="anonymous" />
+  },
   p: (props) => <p {...props} style={pStyle} />,
   h2: (props) => (
     <h2

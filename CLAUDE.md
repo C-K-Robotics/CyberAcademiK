@@ -18,6 +18,15 @@ There is **no test runner** — verification is `yarn build` (it typechecks via 
 
 **Always commit after making a change** — create a commit (and push when appropriate) once a change is complete and verified, rather than leaving the working tree dirty.
 
+## HMR caveat
+
+The dev server runs inside a **Docker** container with `content/` and `public/` mounted as volumes.
+
+- Editing existing source files (`.tsx`, `.ts`, `.css`) → HMR hot module replacement works instantly in the browser.
+- Editing content tree files or `_category.json`/`_subcategory.json` → full page reload (vite plugin `configureServer` watcher).
+- **Adding new files** (e.g. a new course MDX, a new `.tsx` component, any `public/` asset) → dev server picks them up automatically via `import.meta.glob`.
+- **Adding new importable modules** (any new `.ts`/`.tsx` files) → the dev server's static `import.meta.glob` cache needs a **container restart** to register the new modules. A full `docker restart cyberacademik-web-1` is needed, or use the container shell to create the file and then save an existing file to trigger a reload.
+
 ## The content pipeline (the core architecture)
 
 Courses are **auto-discovered from the `content/` directory at build time — nothing is registered in code.** The directory layout *is* the taxonomy:
@@ -43,6 +52,8 @@ Data flow:
 ### Adding content
 
 - **Pure-content course:** drop `content/<cat>/<sub>/<slug>/<locale>.mdx` with frontmatter. It appears in the catalog and counts automatically — no code changes.
+  - Frontmatter YAML **must not have a BOM** — the regex `/^---\r?\n.../` (no BOM prefix) is intentional; a BOM would cause `m[1]` to be `undefined` and return empty frontmatter objects.
+- **Images:** place in `public/<slug>/`. In MDX use `<Figure src="/<slug>/image.png" alt="..." caption="..." width="80%" />` or `![alt](/<slug>/image.png)` (the latter is handled by `prose.tsx`'s `img` override which prepends `BASE_URL`). Markdown image `alt` text is free-form — the `Figure` component parses `src` as an absolute path prefixed by `import.meta.env.BASE_URL || location.pathname`.
 - **Course with custom widgets:** also add `src/courses/<slug>/index.tsx` whose **default export is a `CourseBundle`** (`{ components, Wrapper? }`, see `src/content/types.ts`). `components` are merged over the generic MDX set for that course's MDX; `Wrapper` wraps the rendered lesson (e.g. `PidGainsProvider` shares simulator state). See `src/courses/pid-control/` for the reference example.
 - **New category / sub-category:** create the directory with a `_category.json` / `_subcategory.json` sidecar (copy the shape of an existing one).
 
@@ -51,7 +62,14 @@ Data flow:
 - `src/main.tsx` → provider stack: `ThemeProvider` → `I18nProvider` → `App`.
 - `src/App.tsx` uses **`BrowserRouter`** with `basename` derived from `import.meta.env.BASE_URL` (Vite's `base`, trailing slash trimmed). Routes: `/` (Home), `/courses/:slug` (CoursePage), `*` (NotFound). Deep-link safety on GitHub Pages comes from the deploy workflow copying `dist/index.html` → `dist/404.html` (SPA fallback for unmatched paths).
 - MDX rendering: `CoursePage` → `getCourseModule(slug)` → `CourseLayout` picks the active locale's lazy loader (falling back to `DEFAULT_LOCALE`), renders inside `<MDXProvider components={generic + course}>` + the course `Wrapper`.
-- Generic MDX components (available to every course) live in `src/mdx/`: `Section`, `Callout`, `Quiz`/`Q`/`Choice`, `CodeTabs`/`CodeTab`, `Figure`, plus prose element overrides. Registered in `src/mdx/components.tsx`.
+- Generic MDX components live in `src/mdx/` (registered in `components.tsx`):
+  - `Section` — numbered lesson section wrapper.
+  - `Callout` — styled aside blocks (`info`/`tip`/`warn`).
+  - `Quiz`/`Q`/`Choice` — self-assessment quiz; `Q`/`Choice` are inert markers parsed by `Quiz`.
+  - `CodeTabs`/`CodeTab` — tabbed code viewer with copy button.
+  - `Figure` — captioned image with configurable `width` prop; resolves `BASE_URL` internally.
+  - Prose element overrides (headings, tables, code, blockquotes etc.) — from `prose.tsx`.
+- Inline markdown in frontmatter: `LessonHeader.tsx` uses `src/mdx/ProseContent.tsx`'s `InlineMarkdownText` component to parse bold/italic/inline-code in the `lead` frontmatter. This works because `InlineMarkdownText` walks the string for `\*\*bold\*\*`, `*italic*`, and `` `code` `` patterns and renders styled JSX children.
 
 ## i18n
 

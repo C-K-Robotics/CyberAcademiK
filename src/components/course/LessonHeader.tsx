@@ -2,6 +2,7 @@ import { Clock, RefreshCw, SignalHigh, User } from 'lucide-react'
 import { useI18n } from '../../i18n/I18nProvider'
 import { formatMinutes, pad2 } from '../../i18n/format'
 import { getLessonPosition } from '../../content/selectors'
+import { InlineMarkdownText } from '../../mdx/ProseContent'
 import type { CourseMeta } from '../../content/types'
 
 const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
@@ -39,7 +40,7 @@ export function LessonHeader({ meta }: { meta: CourseMeta }) {
         {meta.title[locale]}
       </h1>
       <p style={{ fontSize: 17, lineHeight: 1.6, color: 'var(--tx-2)', maxWidth: 680, margin: '0 0 22px' }}>
-        {meta.lead[locale]}
+        <InlineMarkdownText content={meta.lead[locale]} />
       </p>
       <div
         style={{
