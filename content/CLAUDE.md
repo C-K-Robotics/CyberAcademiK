@@ -74,7 +74,7 @@ A lesson is prose plus components. These components are available in **every** c
 - `<Section id n title chip>` — a numbered lesson section. `n` is the displayed number string (e.g. `"01"`), `chip` a small label. Wraps the section's prose and components.
 - `<Callout type title>` — coloured aside; `type` is `info` (default) \| `tip` \| `warn`.
 - `<CodeTabs>` containing one `<CodeTab label="…">` per language, each wrapping a single fenced code block — a tabbed viewer with a copy button.
-- `<Quiz>` → `<Q prompt explain>` → `<Choice correct>` — `Q`/`Choice` are inert markers parsed and rendered by `Quiz`. Mark the right answer with `correct`; `explain` shows after answering.
+- `<Quiz>` → `<Q>` containing `<Prompt>` (question text), `<Explain>` (feedback), and `<Choice correct>` (answer options) children. All text children are rendered through `InlineMarkdownText`, which parses **bold**, _italic_, and `inline code` patterns before rendering.
 - `<Figure src alt caption>` — image with caption.
 
 ## Custom components (course-specific widgets)

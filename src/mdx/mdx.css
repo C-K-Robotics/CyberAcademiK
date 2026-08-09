@@ -20,3 +20,20 @@
 .lesson-prose a:hover {
   border-bottom-color: var(--ac1b);
 }
+
+/* Quiz component: inline markdown (bold, italic, code) in prompts, prompts & explanations */
+.quiz-markdown strong {
+  font-weight: 700;
+}
+.quiz-markdown em {
+  font-style: italic;
+}
+.quiz-markdown code {
+  font-family: 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace;
+  font-size: 0.88em;
+  background: rgba(var(--ac1-rgb), 0.1);
+  color: var(--ac1b);
+  padding: 1px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}

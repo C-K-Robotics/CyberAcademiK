@@ -65,7 +65,7 @@ Data flow:
 - Generic MDX components live in `src/mdx/` (registered in `components.tsx`):
   - `Section` — numbered lesson section wrapper.
   - `Callout` — styled aside blocks (`info`/`tip`/`warn`).
-  - `Quiz`/`Q`/`Choice` — self-assessment quiz; `Q`/`Choice` are inert markers parsed by `Quiz`.
+  - `Quiz`/`Q`/`Prompt`/`Explain`/`Choice` — self-assessment quiz. `Q` wraps `<Prompt>`, `<Explain>`, and `<Choice>` children. All text is rendered through `InlineMarkdownText` to support bold (`**text`), italic (`*text*`), and inline code (`` `code` ``).
   - `CodeTabs`/`CodeTab` — tabbed code viewer with copy button.
   - `Figure` — captioned image with configurable `width` prop; resolves `BASE_URL` internally.
   - Prose element overrides (headings, tables, code, blockquotes etc.) — from `prose.tsx`.

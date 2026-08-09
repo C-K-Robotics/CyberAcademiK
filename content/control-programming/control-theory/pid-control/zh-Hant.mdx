@@ -158,28 +158,25 @@ public:
 三道小問題。
 
 <Quiz>
-  <Q
-    prompt="純比例（P）控制器會以一個固定的偏移量停在設定點附近。要消除這個穩態誤差，需要加入哪一項？"
-    explain="積分項會隨時間累加過去的誤差，持續施力直到誤差歸零，消除 P 留下的偏移。"
-  >
+  <Q>
+    <Prompt>純比例（P）控制器會以一個固定的偏移量停在設定點附近。要消除這個穩態誤差，需要加入哪一項？</Prompt>
+    <Explain>積分項會隨時間累加過去的誤差，持續施力直到誤差歸零，消除 P 留下的偏移。</Explain>
     <Choice>微分（D）</Choice>
     <Choice correct>積分（I）</Choice>
     <Choice>更大的設定點</Choice>
     <Choice>更多阻尼</Choice>
   </Q>
-  <Q
-    prompt="提高微分（D）增益，主要會如何影響響應？"
-    explain="D 會對誤差的變化率作出反應，像煞車一樣讓軌跡變平緩並減少過衝。代價是對感測器雜訊較敏感。"
-  >
+  <Q>
+    <Prompt>提高微分（D）增益，主要會如何影響響應？</Prompt>
+    <Explain>D 會對誤差的變化率作出反應，像煞車一樣讓軌跡變平緩並減少過衝。代價是對感測器雜訊較敏感。</Explain>
     <Choice>消除穩態誤差</Choice>
     <Choice>讓迴路永遠更快地振盪</Choice>
     <Choice correct>抑制過衝並平滑趨近過程</Choice>
     <Choice>提高設定點</Choice>
   </Q>
-  <Q
-    prompt="在 Ziegler–Nichols 方法中，你會先提高 Kp（讓 Ki = Kd = 0），直到輸出……"
-    explain="在臨界增益 Ku 時，迴路會以週期 Tu 穩定振盪，這兩個數字就決定了所有 PID 增益。"
-  >
+  <Q>
+    <Prompt>在 Ziegler–Nichols 方法中，你會先提高 Kp（讓 Ki = Kd = 0），直到輸出……</Prompt>
+    <Explain>在臨界增益 Ku 時，迴路會以週期 Tu 穩定振盪，這兩個數字就決定了所有 PID 增益。</Explain>
     <Choice>剛好到達設定點</Choice>
     <Choice correct>以固定振幅振盪——即臨界增益 Ku</Choice>
     <Choice>完全停止反應</Choice>

@@ -7,45 +7,80 @@ import {
   type ReactNode,
 } from 'react'
 import { useI18n } from '../i18n/I18nProvider'
+import { InlineMarkdownText } from './ProseContent'
 
 const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
 interface ChoiceProps {
-  correct?: boolean
   children?: ReactNode
+  correct?: boolean
 }
 /** A single answer choice; mark the right one with `correct`. */
 export function Choice(_props: ChoiceProps) {
   return null
 }
+Choice.displayName = 'Choice'
 
 interface QProps {
-  prompt: string
-  explain?: string
   children?: ReactNode
 }
-/** A single quiz question wrapping its <Choice> options. */
-export function Q(_props: QProps) {
+/** A single quiz question wrapping its <Prompt>, <Explain> and <Choice> children. */
+export function Q({ children }: QProps) {
   return null
 }
+Q.displayName = 'Q'
+
+interface PromptProps {
+  children?: ReactNode
+}
+/** Marker: wraps the question prompt rendered via MDX. */
+export function Prompt({ children }: PromptProps) {
+  return null
+}
+Prompt.displayName = 'Prompt'
+
+interface ExplainProps {
+  children?: ReactNode
+}
+/** Marker: wraps the feedback explanation rendered via MDX. */
+export function Explain({ children }: ExplainProps) {
+  return null
+}
+Explain.displayName = 'Explain'
 
 interface ParsedQuestion {
-  prompt: string
-  explain?: string
+  prompt: ReactNode
+  explain?: ReactNode
   choices: { text: ReactNode; correct: boolean }[]
   correctIndex: number
 }
 
+function isTypeOf(type: unknown, name: string): boolean {
+  if (typeof type === 'function' && 'displayName' in type) {
+    return (type as { displayName: string }).displayName === name
+  }
+  return false
+}
+
 function parseQuestions(children: ReactNode): ParsedQuestion[] {
   return Children.toArray(children)
-    .filter((c): c is ReactElement<QProps> => isValidElement(c))
+    .filter((c): c is ReactElement => isValidElement(c))
     .map((qEl) => {
-      const choices = Children.toArray(qEl.props.children)
-        .filter((c): c is ReactElement<ChoiceProps> => isValidElement(c))
-        .map((cEl) => ({ text: cEl.props.children, correct: !!cEl.props.correct }))
+      let prompt: ReactNode | undefined
+      let explain: ReactNode | undefined
+      const choices: { text: ReactNode; correct: boolean }[] = []
+
+      Children.toArray(qEl.props.children).forEach((child) => {
+        if (!isValidElement(child)) return
+        const t = child.type
+        if (isTypeOf(t, 'Prompt')) prompt = child.props.children
+        else if (isTypeOf(t, 'Explain')) explain = child.props.children
+        else if (isTypeOf(t, 'Choice')) choices.push({ text: child.props.children, correct: !!child.props.correct })
+      })
+
       return {
-        prompt: qEl.props.prompt,
-        explain: qEl.props.explain,
+        prompt: prompt ?? '',
+        explain,
         choices,
         correctIndex: choices.findIndex((c) => c.correct),
       }
@@ -61,7 +96,9 @@ interface QuizProps {
  * markup — no logic — and the component handles scoring and per-question feedback:
  *
  * <Quiz>
- *   <Q prompt="…?" explain="…">
+ *   <Q>
+ *     <Prompt>…?</Prompt>
+ *     <Explain>…</Explain>
  *     <Choice>Wrong</Choice>
  *     <Choice correct>Right</Choice>
  *   </Q>
@@ -81,7 +118,7 @@ export function Quiz({ children }: QuizProps) {
     answeredCount === 0 ? t.quizNotStarted : t.quizScore(correctCount, questions.length)
 
   return (
-    <div>
+    <div className="quiz-markdown">
       <p style={{ fontSize: 13, color: 'var(--tx-3)', fontFamily: mono, margin: '0 0 16px' }}>
         {scoreLabel}
       </p>
@@ -105,7 +142,7 @@ export function Quiz({ children }: QuizProps) {
                   Q{qi + 1}
                 </span>
                 <span style={{ fontSize: 14.5, lineHeight: 1.5, color: 'var(--tx-strong)', fontWeight: 500 }}>
-                  {q.prompt}
+                  {renderMarkdown(q.prompt)}
                 </span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -153,7 +190,9 @@ export function Quiz({ children }: QuizProps) {
                         color: col,
                       }}
                     >
-                      <span style={{ flex: 1, textAlign: 'left' }}>{choice.text}</span>
+                      <span style={{ flex: 1, textAlign: 'left' }}>
+                        {renderMarkdown(choice.text)}
+                      </span>
                       <span style={{ fontFamily: mono, fontSize: 14 }}>{mark}</span>
                     </button>
                   )
@@ -175,7 +214,7 @@ export function Quiz({ children }: QuizProps) {
                   {isCorrect
                     ? t.quizCorrect
                     : t.quizNotQuite(String(reactToText(q.choices[q.correctIndex]?.text)))}
-                  {q.explain}
+                  {renderMarkdown(q.explain)}
                 </div>
               )}
             </div>
@@ -184,6 +223,15 @@ export function Quiz({ children }: QuizProps) {
       </div>
     </div>
   )
+}
+
+/** Render ReactNode → InlineMarkdownText if string, else pass through. */
+function renderMarkdown(node: ReactNode) {
+  if (node == null) return null
+  if (typeof node === 'string' || typeof node === 'number') {
+    return <InlineMarkdownText content={String(node)} />
+  }
+  return node
 }
 
 /** Best-effort flatten of a choice's React children to plain text for messages. */

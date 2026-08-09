@@ -2,7 +2,7 @@ import type { MDXComponents } from 'mdx/types'
 import { proseComponents } from './prose'
 import { Section } from './Section'
 import { Callout } from './Callout'
-import { Quiz, Q, Choice } from './Quiz'
+import { Quiz, Q, Choice, Prompt, Explain } from './Quiz'
 import { CodeTabs, CodeTab } from './CodeTabs'
 import { Figure } from './Figure'
 
@@ -16,6 +16,8 @@ export const genericMdxComponents: MDXComponents = {
   Callout,
   Quiz,
   Q,
+  Prompt,
+  Explain,
   Choice,
   CodeTabs,
   CodeTab,
