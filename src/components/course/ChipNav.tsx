@@ -18,8 +18,8 @@ interface Chip {
  * sections actually change — so the chips always match the visible language.
  * `contentKey` (slug + locale) resets the scan when the lesson swaps.
  */
-export function ChipNav({ contentKey }: { contentKey: string }) {
-  if (document.querySelector('.course-main[data-slide-mode]')) return null
+export function ChipNav({ contentKey, slideMode }: { contentKey: string; slideMode: boolean }) {
+  if (slideMode) return null
 
   const [chips, setChips] = useState<Chip[]>([])
   const [active, setActive] = useState('')

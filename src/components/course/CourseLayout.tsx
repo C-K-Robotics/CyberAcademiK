@@ -70,7 +70,7 @@ export function CourseLayout({ module }: { module: CourseModule }) {
         <CourseSidebar meta={meta} onHome={() => setNavOpen(false)} />
       </aside>
 
-      <main className="course-main" data-collapsed={navCollapsed} data-slide-mode={slideMode}>
+      <main className="course-main" data-collapsed={navCollapsed} {...(slideMode && { 'data-slide-mode': '' })}>
         <CourseTopbar
           meta={meta}
           subteam={subteam}
@@ -78,7 +78,7 @@ export function CourseLayout({ module }: { module: CourseModule }) {
           slideMode={slideMode}
           onToggleSlide={toggleSlide}
         />
-        {!slideMode && <ChipNav contentKey={`${meta.slug}:${locale}`} />}
+        {!slideMode && <ChipNav contentKey={`${meta.slug}:${locale}`} slideMode={slideMode} />}
         {slideMode && <SlideDeck onExit={toggleSlide} />}
 
         <div

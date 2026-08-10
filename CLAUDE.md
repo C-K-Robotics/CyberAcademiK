@@ -69,7 +69,7 @@ Data flow:
   - `CodeTabs`/`CodeTab` — tabbed code viewer with copy button.
   - `Figure` — captioned image with configurable `width` prop; resolves `BASE_URL` internally.
   - Prose element overrides (headings, tables, code, blockquotes etc.) — from `prose.tsx`.
-- Slide mode (v1): CourseTopbar shows a Monitor icon toggle (visible only inside `/courses/:slug`). CourseLayout manages `slideMode` state and hides ChipNav/LessonHeader/FooterNav in slide mode, rendering a floating SlideDeck with prev/next controls and keyboard navigation (←→Esc). SlideDeck polls `[data-section]` elements via rAF until content mounts, shows only one section at a time, and persists the index in localStorage under `cyberacademik:slide-mode` keyed by course slug.
+- Slide mode (v1): CourseTopbar shows a Monitor icon toggle (visible only inside `/courses/:slug`). CourseLayout manages `slideMode` state and hides ChipNav/LessonHeader/FooterNav in slide mode, rendering a floating SlideDeck with prev/next controls and keyboard navigation (←→Esc). SlideDeck polls `[data-section]` elements via rAF until content mounts, shows only one section at a time, and persists the index in localStorage under `cyberacademik:slide-mode` keyed by course slug. Navigation uses `useMemo` and `useRef` — all slide state lives in refs (`slidesRef`, `slideCountRef`, `activeIdxRef`) with `activeIdx` as the only React state for re-renders. Hide/show effect guards: (1) `slideCountRef.current === 0` bail on unmount, (2) `.course-main[data-slide-mode]` DOM check bail when exiting — prevents re-hiding sections after `handleExit` restores them.
 - Inline markdown in frontmatter: `LessonHeader.tsx` uses `src/mdx/ProseContent.tsx`'s `InlineMarkdownText` component to parse bold/italic/inline-code in the `lead` frontmatter.
 
 ## i18n
@@ -82,6 +82,19 @@ Data flow:
 
 - Light/dark via CSS custom properties on `:root[data-theme]` (`src/styles/theme.css`). Fonts: IBM Plex Sans + IBM Plex Mono.
 - Canvas/SVG widgets (the PID simulators) **can't cheaply read CSS vars**, so colors are mirrored per-theme in `src/theme/palette.ts`. Use `usePalette()` to get theme-matched colors that re-render on theme change — keep these values in sync with `theme.css` accents. RAF animation helper: `src/lib/useRafLoop.ts`; canvas helpers: `src/lib/canvas.ts`.
+
+- **React DOM staleness during render:** querying the DOM during a component's render function
+  (before React patches the DOM) returns stale results. The ChipNav `slideMode` check was moved
+  from `document.querySelector('.course-main[data-slide-mode]')` in render to a `slideMode` prop
+  (passed from CourseLayout state). Always use props or `useMemo`/`useLayoutEffect` instead of
+  `document.querySelector` in render to avoid race conditions during transitions where React
+  hasn't committed the DOM change yet.
+- **Slide mode exit lifecycle:** SlideDeck cleanup `useEffect` (line ~113) restores all sections
+  on unmount, but the hide/show `useEffect` can re-hide them if it fires during the transition.
+  Two guards prevent this: (1) `slideCountRef.current === 0` bail on unmount (set before effect),
+  (2) `.course-main[data-slide-mode]` DOM check — both bail before any DOM mutation. The `handleExit`
+  callback (line ~180) also restores sections synchronously before calling `onExit`, ensuring the
+  DOM is clean before React processes the state update that unmounts SlideDeck and mounts ChipNav.
 
 ## Deployment
 
