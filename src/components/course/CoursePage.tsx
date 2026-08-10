@@ -7,5 +7,5 @@ export function CoursePage() {
   const { slug } = useParams<{ slug: string }>()
   const module = slug ? getCourseModule(slug) : undefined
   if (!module) return <NotFound />
-  return <CourseLayout module={module} />
+  return <CourseLayout key={module.meta.slug} module={module} />
 }
