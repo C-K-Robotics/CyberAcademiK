@@ -19,6 +19,8 @@ interface Chip {
  * `contentKey` (slug + locale) resets the scan when the lesson swaps.
  */
 export function ChipNav({ contentKey }: { contentKey: string }) {
+  if (document.querySelector('.course-main[data-slide-mode]')) return null
+
   const [chips, setChips] = useState<Chip[]>([])
   const [active, setActive] = useState('')
   const sigRef = useRef('')

@@ -71,7 +71,7 @@ The dev server watches `content/` and full-reloads on any change, so edits show 
 
 A lesson is prose plus components. These components are available in **every** course's MDX with **no import statement** (registered in `src/mdx/components.tsx`; prose elements like headings, code, and tables are styled by `src/mdx/prose.tsx`):
 
-- `<Section id n title chip>` — a numbered lesson section. `n` is the displayed number string (e.g. `"01"`), `chip` a small label. Wraps the section's prose and components.
+- `<Section id n title chip>` — a numbered lesson section. `n` is the displayed number string (e.g. `"01"`), `chip` a small label. Wraps the section's prose and components. In slide mode (`.course-main[data-slide-mode]`) the section's scrollMarginTop drops to 0 and paddingTop halves to 32.
 - `<Callout type title>` — coloured aside; `type` is `info` (default) \| `tip` \| `warn`.
 - `<CodeTabs>` containing one `<CodeTab label="…">` per language, each wrapping a single fenced code block — a tabbed viewer with a copy button.
 - `<Quiz>` → `<Q>` containing `<Prompt>` (question text), `<Explain>` (feedback), and `<Choice correct>` (answer options) children. All text children are rendered through `InlineMarkdownText`, which parses **bold**, _italic_, and `inline code` patterns before rendering.

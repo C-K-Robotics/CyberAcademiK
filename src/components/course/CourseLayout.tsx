@@ -3,6 +3,7 @@ import { MDXProvider } from '@mdx-js/react'
 import './course.css'
 import { CourseSidebar } from './CourseSidebar'
 import { CourseTopbar } from './CourseTopbar'
+import { SlideDeck } from './SlideDeck'
 import { ChipNav } from './ChipNav'
 import { LessonHeader } from './LessonHeader'
 import { CourseFooterNav } from './CourseFooterNav'
@@ -32,6 +33,7 @@ export function CourseLayout({ module }: { module: CourseModule }) {
   const { locale } = useI18n()
   const [navOpen, setNavOpen] = useState(false)
   const [navCollapsed, setNavCollapsed] = useState(false)
+  const [slideMode, setSlideMode] = useState(false)
 
   const meta = module.meta
   const subteam = findCourseEntry(meta.slug)?.subteam
@@ -53,6 +55,8 @@ export function CourseLayout({ module }: { module: CourseModule }) {
     else setNavCollapsed((c) => !c)
   }
 
+  const toggleSlide = () => setSlideMode((m) => !m)
+
   return (
     <div className="app-grid">
       <div
@@ -66,21 +70,28 @@ export function CourseLayout({ module }: { module: CourseModule }) {
         <CourseSidebar meta={meta} onHome={() => setNavOpen(false)} />
       </aside>
 
-      <main className="course-main" data-collapsed={navCollapsed}>
-        <CourseTopbar meta={meta} subteam={subteam} onToggleNav={toggleNav} />
-        <ChipNav contentKey={`${meta.slug}:${locale}`} />
+      <main className="course-main" data-collapsed={navCollapsed} data-slide-mode={slideMode}>
+        <CourseTopbar
+          meta={meta}
+          subteam={subteam}
+          onToggleNav={toggleNav}
+          slideMode={slideMode}
+          onToggleSlide={toggleSlide}
+        />
+        {!slideMode && <ChipNav contentKey={`${meta.slug}:${locale}`} />}
+        {slideMode && <SlideDeck onExit={toggleSlide} />}
 
         <div
           className="course-content lesson-prose"
           style={{ maxWidth: 940, margin: '0 auto', padding: '44px 28px 120px' }}
         >
-          <LessonHeader meta={meta} />
+          {!slideMode && <LessonHeader meta={meta} />}
           <MDXProvider components={components}>
             <Wrapper>
               <Suspense fallback={<LoadingLesson />}>{Lazy ? <Lazy /> : null}</Suspense>
             </Wrapper>
           </MDXProvider>
-          <CourseFooterNav meta={meta} />
+          {!slideMode && <CourseFooterNav meta={meta} />}
         </div>
       </main>
     </div>

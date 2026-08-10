@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Menu } from 'lucide-react'
+import { Menu, Monitor, MonitorOff } from 'lucide-react'
 import { ThemeToggle } from '../layout/ThemeToggle'
 import { LanguageSwitcher } from '../layout/LanguageSwitcher'
 import { CourseSearch } from '../search/CourseSearch'
@@ -13,9 +13,11 @@ interface CourseTopbarProps {
   meta: CourseMeta
   subteam?: Subteam
   onToggleNav: () => void
+  slideMode: boolean
+  onToggleSlide: () => void
 }
 
-export function CourseTopbar({ meta, subteam, onToggleNav }: CourseTopbarProps) {
+export function CourseTopbar({ meta, subteam, onToggleNav, slideMode, onToggleSlide }: CourseTopbarProps) {
   const { t, locale } = useI18n()
   return (
     <header
@@ -59,6 +61,23 @@ export function CourseTopbar({ meta, subteam, onToggleNav }: CourseTopbarProps) 
       <div style={{ flex: 1 }} />
 
       <CourseSearch variant="course" />
+
+      <button
+        type="button"
+        className="course-slide-toggle"
+        onClick={onToggleSlide}
+        title={slideMode ? t.slideExit : t.slideMode}
+        aria-pressed={slideMode}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 36, height: 36, background: 'var(--bg-input)',
+          border: '1px solid var(--line)', borderRadius: 8,
+          cursor: 'pointer', color: 'var(--tx-1)',
+          padding: 0,
+        }}
+      >
+        {slideMode ? <MonitorOff size={16} /> : <Monitor size={16} />}
+      </button>
 
       <LanguageSwitcher />
       <ThemeToggle />

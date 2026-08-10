@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
@@ -20,13 +21,17 @@ interface SectionProps {
  * the navigation builds itself.
  */
 export function Section({ id, n, title, chip, children }: SectionProps) {
+  const inSlideMode = useMemo(() => {
+    if (typeof document === 'undefined') return false
+    return document.querySelector('.course-main[data-slide-mode]') !== null
+  }, [])
   return (
     <section
       id={`sec-${id}`}
       data-section={id}
       data-chip={chip ?? title}
       data-n={n}
-      style={{ scrollMarginTop: 118, paddingTop: 50 }}
+      style={{ scrollMarginTop: inSlideMode ? 0 : 118, paddingTop: inSlideMode ? 32 : 50 }}
     >
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 8 }}>
         <span style={{ fontFamily: mono, fontSize: 13, color: 'var(--ac1)' }}>{n}</span>

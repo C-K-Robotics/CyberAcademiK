@@ -63,13 +63,14 @@ Data flow:
 - `src/App.tsx` uses **`BrowserRouter`** with `basename` derived from `import.meta.env.BASE_URL` (Vite's `base`, trailing slash trimmed). Routes: `/` (Home), `/courses/:slug` (CoursePage), `*` (NotFound). Deep-link safety on GitHub Pages comes from the deploy workflow copying `dist/index.html` → `dist/404.html` (SPA fallback for unmatched paths).
 - MDX rendering: `CoursePage` → `getCourseModule(slug)` → `CourseLayout` picks the active locale's lazy loader (falling back to `DEFAULT_LOCALE`), renders inside `<MDXProvider components={generic + course}>` + the course `Wrapper`.
 - Generic MDX components live in `src/mdx/` (registered in `components.tsx`):
-  - `Section` — numbered lesson section wrapper.
+  - `Section` — numbered lesson section wrapper. In slide mode (`.course-main[data-slide-mode]`) scrollMarginTop drops to 0 and paddingTop is 32.
   - `Callout` — styled aside blocks (`info`/`tip`/`warn`).
-  - `Quiz`/`Q`/`Prompt`/`Explain`/`Choice` — self-assessment quiz. `Q` wraps `<Prompt>`, `<Explain>`, and `<Choice>` children. All text is rendered through `InlineMarkdownText` to support bold (`**text`), italic (`*text*`), and inline code (`` `code` ``).
+  - `Quiz`/`Q`/`Prompt`/`Explain`/`Choice` — self-assessment quiz. `Q` wraps `<Prompt>`, `<Explain>`, and `<Choice>` children (no prop attributes). All text is rendered through `InlineMarkdownText` to support inline markdown (`**bold**`, `*italic*`, `` `code` ``).
   - `CodeTabs`/`CodeTab` — tabbed code viewer with copy button.
   - `Figure` — captioned image with configurable `width` prop; resolves `BASE_URL` internally.
   - Prose element overrides (headings, tables, code, blockquotes etc.) — from `prose.tsx`.
-- Inline markdown in frontmatter: `LessonHeader.tsx` uses `src/mdx/ProseContent.tsx`'s `InlineMarkdownText` component to parse bold/italic/inline-code in the `lead` frontmatter. This works because `InlineMarkdownText` walks the string for `\*\*bold\*\*`, `*italic*`, and `` `code` `` patterns and renders styled JSX children.
+- Slide mode (v1): CourseTopbar shows a Monitor icon toggle (visible only inside `/courses/:slug`). CourseLayout manages `slideMode` state and hides ChipNav/LessonHeader/FooterNav in slide mode, rendering a floating SlideDeck with prev/next controls and keyboard navigation (←→Esc). SlideDeck polls `[data-section]` elements via rAF until content mounts, shows only one section at a time, and persists the index in localStorage under `cyberacademik:slide-mode` keyed by course slug.
+- Inline markdown in frontmatter: `LessonHeader.tsx` uses `src/mdx/ProseContent.tsx`'s `InlineMarkdownText` component to parse bold/italic/inline-code in the `lead` frontmatter.
 
 ## i18n
 

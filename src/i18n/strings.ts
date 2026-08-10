@@ -57,6 +57,8 @@ export interface Strings {
   notFoundTitle: string
   notFoundBody: string
   backToLibrary: string
+  slideMode: string
+  slideExit: string
   footerContentBy: string
   footerSiteBy: string
   footerCopyright: string
@@ -100,6 +102,8 @@ const en: Strings = {
   notFoundTitle: 'Page not found',
   notFoundBody: "We couldn't find what you were looking for.",
   backToLibrary: 'Back to the library',
+  slideMode: 'Slide mode',
+  slideExit: 'Exit slide mode',
   footerContentBy: 'Course content by FRC#8020 Mentors & Members',
   footerSiteBy: 'CyberAcademiK · tutorial site by Nathan Lee',
   footerCopyright: '© 2026 CyberAcademiK · FRC Learning Library',
@@ -143,6 +147,8 @@ const zhHant: Strings = {
   notFoundTitle: '找不到頁面',
   notFoundBody: '我們找不到您要的內容。',
   backToLibrary: '返回資料庫',
+  slideMode: '投影片模式',
+  slideExit: '退出投影片模式',
   footerContentBy: '課程內容由 FRC#8020 Mentor 與隊員提供',
   footerSiteBy: 'CyberAcademiK · 教學網站由 Nathan Lee 製作',
   footerCopyright: '© 2026 CyberAcademiK · FRC 學習資料庫',
