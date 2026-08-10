@@ -40,6 +40,11 @@ To stop and remove the containers: (:warning: **Make sure to do this to properly
 docker compose down
 ```
 
+> **Use compose, not a bare `docker build`.** The image intentionally ships no
+> application source — it only installs dependencies, and the bind mount defined
+> in `docker-compose.yml` supplies the code. An image built on its own has
+> nothing to serve.
+
 > The site is served from a sub-path on GitHub Pages (`/CyberAcademiK/`), so the
 > dev server and preview run under that base too — open the URL Vite prints.
 

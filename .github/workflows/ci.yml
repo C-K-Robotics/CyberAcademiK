@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Superseded runs on the same PR are worthless — only the tip needs to be green.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        # `yarn build` is `tsc -b && vite build`, so this is the typecheck gate
+        # too (`yarn lint`/`yarn typecheck` are the same `tsc -b` — there is no
+        # ESLint and no test runner, so a green build is the verification gate).
+        #
+        # VITE_BASE mirrors the deploy workflow so PRs build under the same
+        # project-Pages sub-path that actually ships, not a bare `/`.
+        run: yarn build
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
