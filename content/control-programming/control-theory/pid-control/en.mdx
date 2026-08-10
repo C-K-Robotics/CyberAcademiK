@@ -165,28 +165,25 @@ to hold it changes with angle. P alone leaves a droop; switch on a gravity
 Three quick questions.
 
 <Quiz>
-  <Q
-    prompt="A pure proportional (P) controller settles with a constant offset from the setpoint. Which term is added to eliminate this steady-state error?"
-    explain="The integral term accumulates past error over time and keeps pushing until the error reaches zero, removing the offset P leaves behind."
-  >
+  <Q>
+    <Prompt>A pure proportional (P) controller settles with a constant offset from the setpoint. Which term is added to eliminate this steady-state error?</Prompt>
+    <Explain>The integral term accumulates past error over time and keeps pushing until the error reaches zero, removing the offset P leaves behind.</Explain>
     <Choice>Derivative (D)</Choice>
     <Choice correct>Integral (I)</Choice>
     <Choice>A larger setpoint</Choice>
     <Choice>More damping</Choice>
   </Q>
-  <Q
-    prompt="Increasing the derivative (D) gain primarily affects the response by…"
-    explain="D reacts to the rate of change of error, acting like a brake that flattens the trajectory and reduces overshoot. The trade-off is sensitivity to sensor noise."
-  >
+  <Q>
+    <Prompt>Increasing the derivative (D) gain primarily affects the response by…</Prompt>
+    <Explain>D reacts to the rate of change of error, acting like a brake that flattens the trajectory and reduces overshoot. The trade-off is sensitivity to sensor noise.</Explain>
     <Choice>Eliminating steady-state error</Choice>
     <Choice>Making the loop oscillate faster forever</Choice>
     <Choice correct>Damping overshoot and smoothing the approach</Choice>
     <Choice>Increasing the setpoint</Choice>
   </Q>
-  <Q
-    prompt="In the Ziegler–Nichols method you first raise Kp (with Ki = Kd = 0) until the output…"
-    explain="At the ultimate gain Ku the loop oscillates steadily with period Tu, and those two numbers set all of the PID gains."
-  >
+  <Q>
+    <Prompt>In the Ziegler–Nichols method you first raise Kp (with Ki = Kd = 0) until the output…</Prompt>
+    <Explain>At the ultimate gain Ku the loop oscillates steadily with period Tu, and those two numbers set all of the PID gains.</Explain>
     <Choice>Reaches the setpoint exactly</Choice>
     <Choice correct>Oscillates with constant amplitude — the ultimate gain Ku</Choice>
     <Choice>Stops responding entirely</Choice>

@@ -1,0 +1,309 @@
+---
+title: Intro to Robotics
+desc: From sense to plan to act — a bird's-eye view of how robot software turns sensors into motion.
+kicker: INTRO TO ROBOTICS
+lead: >-
+  Before a robot can *do* anything, it must first *understand*: where am I, what's around me, and what
+  should I do next? This course walks through the classic **sense–plan–act** pipeline and its five
+  pillars of robot autonomy — the conceptual map that the rest of this library will build on.
+author: FRC 8020
+minutes: 20
+level: beginner
+order: 1
+references:
+  - label: 'R.U.R. — Karel Čapek, 1920'
+    href: 'https://en.wikisource.org/wiki/R.U.R.'
+---
+
+<Section id="robot-definition" n="01" title="What is a robot?">
+
+In everyday language the word **robot** means several different things:
+
+- In science fiction — a machine that *moves* and *behaves* like a human.
+- In older British English — a set of automatic traffic lights (*"waiting at the robot"*).
+- In South Africa — a colloquial term for a traffic signal.
+
+The formal dictionary definition, however, is more precise:
+
+> **A machine capable of carrying out a complex series of actions automatically,
+> especially one programmable by a computer.**
+
+The word itself comes from the Czech word **_robota_** meaning *forced labour*,
+coined by Karel Čapek in his 1920 play *R.U.R.* (*Rossum's Universal Robots*).
+
+For robotics — not science fiction — a robot is best understood not as a single
+object but as a **system**: a set of tightly coupled mechanical, electrical,
+computational, and software subsystems working together to perceive and act on
+the physical world.
+
+</Section>
+
+<Section id="mechanics" n="02" title="Robots as mechatronic systems">
+
+Every robot is a **mechatronic system** — it joins mechanics with electronics
+and software. The diagram below shows the main subsystems and how they connect:
+
+<Figure src="/intro-to-robotics/robot-systems.png" alt="Robot subsystems diagram" caption="Mechatronic system overview: sensor → controller → actuator → feedback" width="80%" />
+
+> Reference: https://electricalacademia.com/electronics/mechatronic-system-examples/
+
+| Subsystem | What it provides | Typical examples |
+|---|---|---|
+| **Mechanical** | Structure and motion | Gears, linkages, arms, wheels, end-effectors |
+| **Electrical** | Power and signal routing | Battery, motor drivers, wiring harness, PCBs |
+| **Sensing** | Information about state and environment | Encoders, IMU, cameras, LiDAR, force sensors |
+| **Computational** | Intelligence — the software brain | Microcontroller, SBC, real-time OS |
+
+Data flows from sensors into the computer, and commands flow from the computer
+to actuators. Between those two directions sits the **software pipeline** that
+turns raw sensor numbers into motion — and that pipeline is the subject of this
+course.
+
+> **Key idea:** In a tele-operated robot the human is the planner. In an
+> autonomous robot the *software* must sense, plan, and act on its own.
+
+</Section>
+
+<Section id="five-pillars" n="03" title="The five pillars of autonomy">
+
+  <Slide>
+    Mobile robot autonomy is a research area that does not belong to a single
+    discipline. It draws on **five** major scientific fields, each of which solves a
+    distinct sub-problem:
+
+    ### 1. Computer Vision & Signal Processing
+
+    Real-world sensor data is noisy, incomplete, and changes fast. Computer vision
+    turns raw pixel grids into objects, lanes, and features. Signal processing
+    filters audio, vibration, and electrical noise so the rest of the pipeline
+    receives clean, actionable data.
+
+    > 🔜 **Future course preview:** Signal filtering and basic image analysis form
+    > the core of the *Perception* topic.
+
+    ### 2. Probability Theory & Estimation
+
+    Sensors are never perfect. Motors slip. The environment changes. Probability
+    theory lets the robot **estimate** where it is — and what is happening around
+    it — even when every single reading has uncertainty.
+
+    > 🔜 **Future course preview:** State estimation and filters under
+    > *Localization / State-Estimation*.
+
+    ### 3. Optimization Theory
+
+    Given a set of constraints and a goal, optimization finds the *best* behaviour.
+    Path planning, schedule design, motor torque allocation — they all boil down to
+    **"*Find the maximum or minimum of a function.*"**
+  </Slide>
+
+  <Slide>
+    ### 4. Control Theory
+
+    Planning tells the robot *what* to do. **Control** tells it *how* to do it,
+    feedback loop by feedback loop, continuously closing the gap between the plan
+    and reality.
+
+    > 🔜 **Future course preview:** The full PID loop, tuning, and code
+    > implementation under *Control Theory*.
+
+    ### 5. Machine Learning
+
+    Data is the new calibration. Supervised, self-supervised, unsupervised, and
+    reinforcement learning let a robot *improve* over time — without a human
+    rewriting its rules by hand.
+
+    > 🔜 **Future course preview:** ML in the context of robot perception and
+    > adaptive control.
+
+  </Slide>
+
+</Section>
+
+<Section id="sense-plan-act" n="04" title="Sense → Plan → Act">
+
+All autonomy pipelines — from Mars rovers to autonomous cars to competition
+robots — boil down to one loop:
+
+```
+[ Sense  ] → [ Plan  ] → [ Act  ] →  (repeat)
+   ↑                                     │
+   └──────────── feedback ───────────────┘
+```
+
+Each **arrow** to the outside world introduces **uncertainty**:
+
+- **Sense → Plan**: raw sensor data is noisy; the robot must interpret it into a coherent model.
+- **Plan → Act**: a perfect plan fails if the robot's hardware cannot execute it precisely.
+- **Act → Sense**: executing *changes* the world, which must be sensed again.
+
+This is the **sense–plan–act loop**. Every autonomy system on any platform implements
+this loop in some form.
+
+> **Why it matters:** The loop's three stages are not rigidly sequential. In some
+> robots, sensing, planning, and control run on a single microcontroller at 100+ Hz.
+> In others they span different machines (a perception server, a planning server,
+> a control board). The *sequence of logic* remains the same regardless.
+
+</Section>
+
+<Section id="perception" n="05" title="Perception — reading the world">
+
+Perception is the study of turning **raw sensor values** into **meaningful
+models** the robot (and its software) can reason about.
+
+A camera does not "see" a person. It records a grid of numbers — thousands of
+pixels, each an RGB triplet. Perception turns those numbers into the concept:
+*"there is a person at position X, moving at velocity V, of class 'human'."*
+
+**Common perception tasks:**
+- Object detection (people, goals, targets) from camera images
+- Point-cloud processing from LiDAR / sonar for obstacle avoidance
+- IMU fusion for orientation and acceleration estimates
+
+> **Key insight:** Perception is often the **processing bottleneck** of an
+> autonomy system because raw sensor data is orders of magnitude larger — and
+> noisier — than what the planning stage actually needs. Good perception
+> compresses noise into reliable abstractions.
+
+</Section>
+
+<Section id="estimation" n="06" title="Localization & State Estimation">
+
+At any moment the robot must answer: *"Given everything I've sensed so far, what
+is my best guess about where I am and what is happening around me?"*
+
+This is an **estimation problem**, not a simple measurement problem. Common
+approaches include:
+
+| Approach | What it does | Trade-off |
+|---|---|---|
+| **Particle filter** | Maintains many position hypotheses, weights them by sensor match | Accurate in any environment; slow for many particles |
+| **Kalman filter** | Recursive estimator optimal for linear systems + Gaussian noise | Fast; breaks down for highly non-linear situations |
+| **Visual odometry** | Tracks features between camera frames to estimate motion (Forster et al., RSS 2015) | No dedicated hardware needed; drifts over long distances |
+
+</Section>
+
+<Section id="planning" n="07" title="Planning — finding a path">
+
+Given a goal and a model of the world, planning finds the *best* sequence of
+actions to reach it. The simplest case is **shortest path** on a known map:
+
+| Step | Current node | Visited nodes | Time |
+|------|-------------|---------------|------|
+| 1 | Start (0,0) | {(0,0)} | 0 s |
+| 2 | (0, 1) | {(0,0), (0,1)} | 0.02 s |
+| 3 | (1, 1) | {(0,0), (0,1), (1,1)} | 0.04 s |
+| 4 | Goal (2,2) | … | 0.06 s |
+
+A real robot's planner must also handle things that don't appear on paper —
+dynamics (a robot can't instantaneously change velocity), moving obstacles, joint
+limits, and the trade-off between optimal path quality and computation time.
+
+> **Key insight:** Planning is about **trade-offs**. The path that looks perfect
+> in simulation may fail on a real robot because of slip, sensor noise, and
+> latency. Good planning *anticipates* failure.
+
+</Section>
+
+<Section id="control" n="08" title="Control — executing the plan">
+
+A planner might say *"move the arm to 45° in 2 seconds".*
+A controller turns that command into **actual** servo movements — and
+continuously corrects when reality drifts away from the plan.
+
+**Feedback control** is the machinery that does this: it measures the gap
+between where the robot *is* and where the plan says it *should be*, then
+applies a corrective action. Repeat.
+
+This is where we meet the **PID controller** — the proportional, integral, and
+derivative loop — in a later course. The key takeaway here is that control is
+**not optional**: even with a perfect plan and perfect sensors, mechanical
+imperfections make feedback indispensable.
+
+</Section>
+
+<Section id="simulation" n="09" title="Simulation — the bridge between real and planned">
+
+Simulation lets engineers verify a perception–planning–control pipeline without
+worrying about risking hardware, draining battery cells, or damaging mechanisms.
+
+Modern tools like [**Foxglove Studio**](https://foxglove.dev/) receive real-time sensor messages from the
+robot over a WebSocket bridge, rendering them in interactive visual panels.
+Engineers can validate each pipeline stage — perception, estimation, planning,
+control — in a shared view, side-by-side with live telemetry.
+
+> **Key insight:** Simulation is not a replacement for real-robot testing. It is
+> a **bridge** — a way to catch logic errors early, practice new strategies, and
+> share data across a team *before* the hardware ever moves.
+
+</Section>
+
+<Section id="quiz" n="10" title="Knowledge check">
+
+Five quick questions testing understanding.
+
+<Quiz>
+  <Q>
+    <Prompt>Which field of study most directly enables a robot to correct the gap between its plan and reality?</Prompt>
+    <Explain>Control theory implements the feedback machinery that continuously measures the error between desired state and measured state, producing the corrective command that closes the loop.</Explain>
+    <Choice>Machine Learning</Choice>
+    <Choice correct>Control Theory</Choice>
+    <Choice>Probability Theory</Choice>
+    <Choice>Signal Processing</Choice>
+  </Q>
+  <Q>
+    <Prompt>The word 'robot' originates from the Czech word _robota_, which means:</Prompt>
+    <Explain>Karel Čapek introduced the word in his 1920 play R.U.R. from the Czech 'robota' — meaning forced labour or drudgery. This captures the original notion of a machine replacing human effort.</Explain>
+    <Choice>A self-aware machine</Choice>
+    <Choice>A mechanical servant</Choice>
+    <Choice correct>Forced labour</Choice>
+    <Choice>An automated factory</Choice>
+  </Q>
+  <Q>
+    <Prompt>In the sense–plan–act loop, which arrow introduces the most uncertainty?</Prompt>
+    <Explain>Every single arrow in the loop introduces uncertainty: sensing is noisy, a plan doesn't account for slip or latency, and executing changes the world which must be sensed again. The correct answer is that *all* arrows carry uncertainty.</Explain>
+    <Choice>Only sense → plan</Choice>
+    <Choice>Only plan → act</Choice>
+    <Choice correct>Every arrow introduces uncertainty</Choice>
+    <Choice>Only act → sense</Choice>
+  </Q>
+  <Q>
+    <Prompt>Which of these is a correct list of the five pillars of robot autonomy?</Prompt>
+    <Explain>The five pillars are: (1) Computer Vision & Signal Processing, (2) Probability & Estimation, (3) Optimization, (4) Control Theory, (5) Machine Learning. Each pillar tackles a distinct sub-problem; a robot needs all five for true autonomy.</Explain>
+    <Choice correct>Computer Vision, Probability, Optimization, Control, Machine Learning</Choice>
+    <Choice>Programming, Electronics, Mechanics, Aerodynamics, AI</Choice>
+    <Choice>Sensing, Computing, Acting, Networking, Power</Choice>
+    <Choice>Perception, Navigation, Manipulation, Power, AI</Choice>
+  </Q>
+  <Q>
+    <Prompt>Visual odometry falls under which area of the autonomy pipeline?</Prompt>
+    <Explain>Visual odometry estimates ego-motion by tracking visual features across camera frames. It is a perception-derived estimate that feeds into state estimation — it answers 'where have I moved?' from raw image data.</Explain>
+    <Choice>Planning</Choice>
+    <Choice>Actuation</Choice>
+    <Choice correct>Perception (feeding into state estimation)</Choice>
+    <Choice>Control</Choice>
+  </Q>
+</Quiz>
+
+</Section>
+
+<Section id="next" n="11" title="Where to go next">
+
+The five pillars you just encountered form the backbone of every autonomy project.
+Some of them have courses in this library; others are still being written.
+
+| Pillar / Pipeline stage | Status | Upcoming course |
+|---|---|---|
+| Perception | In progress | _Coming soon_ |
+| Localization & Estimation | In progress | _Coming soon_ |
+| Planning | Planned | _Coming soon_ |
+| Control Theory | ✅ Available | [Introducing PID Control](/courses/pid-control) |
+| Machine Learning | Planned | _Coming soon_ |
+| Mechanical subsystems | Planned | _Coming soon_ |
+| Electrical subsystems | Planned | _Coming soon_ |
+
+The **PID Control** course (linked above) is the first course that builds directly
+on the Control Theory pillar. Start there when you're ready to write actual code.
+
+</Section>

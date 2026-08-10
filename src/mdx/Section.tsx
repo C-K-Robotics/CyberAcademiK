@@ -21,12 +21,16 @@ interface SectionProps {
  */
 export function Section({ id, n, title, chip, children }: SectionProps) {
   return (
+    // Spacing differs in slide mode (no sticky chip nav to scroll clear of). That
+    // is a CSS rule keyed off `.course-main[data-slide-mode]` rather than a prop
+    // or a DOM read: the lesson body is lazily mounted and does not re-render when
+    // slide mode toggles, so anything computed here would go stale.
     <section
       id={`sec-${id}`}
+      className="lesson-section"
       data-section={id}
       data-chip={chip ?? title}
       data-n={n}
-      style={{ scrollMarginTop: 118, paddingTop: 50 }}
     >
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 8 }}>
         <span style={{ fontFamily: mono, fontSize: 13, color: 'var(--ac1)' }}>{n}</span>

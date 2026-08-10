@@ -72,10 +72,11 @@ The dev server watches `content/` and full-reloads on any change, so edits show 
 A lesson is prose plus components. These components are available in **every** course's MDX with **no import statement** (registered in `src/mdx/components.tsx`; prose elements like headings, code, and tables are styled by `src/mdx/prose.tsx`):
 
 - `<Section id n title chip>` — a numbered lesson section. `n` is the displayed number string (e.g. `"01"`), `chip` a small label. Wraps the section's prose and components.
+- `<Slide>` — an optional slide break *inside* a `<Section>`. It renders nothing on its own; in slide mode each `<Slide>` becomes its own step, so a long section can be paged through instead of shown at once. A section with no `<Slide>` children is a single step. Anything left outside a `<Slide>` stays visible on every step of that section — useful for a standing intro, surprising otherwise.
 - `<Callout type title>` — coloured aside; `type` is `info` (default) \| `tip` \| `warn`.
 - `<CodeTabs>` containing one `<CodeTab label="…">` per language, each wrapping a single fenced code block — a tabbed viewer with a copy button.
-- `<Quiz>` → `<Q prompt explain>` → `<Choice correct>` — `Q`/`Choice` are inert markers parsed and rendered by `Quiz`. Mark the right answer with `correct`; `explain` shows after answering.
-- `<Figure src alt caption>` — image with caption.
+- `<Quiz>` → `<Q>` containing `<Prompt>` (question text), `<Explain>` (feedback), and `<Choice correct>` (answer options) children. All text children are rendered through `InlineMarkdownText`, which parses **bold**, _italic_, and `inline code` patterns before rendering.
+- `<Figure src alt caption width>` — captioned image. Put the file in `public/<slug>/` and give a root-relative `src` (`/<slug>/image.png`); the deploy base is prefixed for you. `width` is any CSS width (`"80%"`, `"400px"`) and defaults to full width. Plain markdown images (`![alt](/<slug>/image.png)`) resolve the same way.
 
 ## Custom components (course-specific widgets)
 

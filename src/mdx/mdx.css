@@ -20,3 +20,31 @@
 .lesson-prose a:hover {
   border-bottom-color: var(--ac1b);
 }
+
+/* Lesson sections. In slide mode there is no sticky chip nav above the content,
+   so sections need less top offset — see Section.tsx. */
+.lesson-section {
+  scroll-margin-top: 118px;
+  padding-top: 50px;
+}
+.course-main[data-slide-mode] .lesson-section {
+  scroll-margin-top: 0;
+  padding-top: 32px;
+}
+
+/* Quiz component: inline markdown (bold, italic, code) in prompts & explanations */
+.quiz-markdown strong {
+  font-weight: 700;
+}
+.quiz-markdown em {
+  font-style: italic;
+}
+.quiz-markdown code {
+  font-family: 'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace;
+  font-size: 0.88em;
+  background: rgba(var(--ac1-rgb), 0.1);
+  color: var(--ac1b);
+  padding: 1px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}

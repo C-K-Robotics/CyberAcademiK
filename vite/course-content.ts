@@ -17,20 +17,24 @@ import type { Plugin } from 'vite'
  * This plugin does two things:
  *  1. Exposes a `virtual:course-catalog` module holding the whole taxonomy plus
  *     every course's parsed frontmatter — light enough for the homepage, while
- *     the heavy MDX bodies stay lazily code-split via `import.meta.glob`.
+ *     the heavy MDX bodies stay lazily code-split.
  *  2. Strips the YAML frontmatter from MDX before it is compiled, so the metadata
  *     block never renders as page content.
  */
 
 const VIRTUAL_ID = 'virtual:course-catalog'
 const RESOLVED_ID = '\0' + VIRTUAL_ID
+// The optional ﻿ matters: editors on Windows routinely save MDX with a
+// UTF-8 BOM, and without it the frontmatter would neither be parsed (empty
+// catalog metadata) nor stripped (the raw YAML block renders as lesson text).
 const FRONTMATTER_RE = /^﻿?---\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/
 
 type Dict = Record<string, unknown>
 
 interface ScanResult {
   catalog: { categories: unknown[] }
-  files: string[]
+  /** All content MDX paths, e.g. `/content/<…>.mdx`. */
+  contentPaths: string[]
 }
 
 function isDir(p: string): boolean {
@@ -62,10 +66,10 @@ function parseFrontmatter(file: string): Dict {
 }
 
 /** Build a `{ [locale]: frontmatter[key] }` map across all of a course's locales. */
-function pick(byLocale: Record<string, Dict>, key: string): Dict {
+function pick(m: Record<string, Dict>, key: string): Dict {
   const out: Dict = {}
-  for (const [locale, fm] of Object.entries(byLocale)) {
-    if (fm[key] !== undefined) out[locale] = fm[key]
+  for (const [locale, v] of Object.entries(m)) {
+    if (v?.[key] !== undefined) out[locale] = v[key]
   }
   return out
 }
@@ -76,14 +80,13 @@ function num(v: unknown, fallback: number): number {
 }
 
 function scanContent(contentDir: string): ScanResult {
-  const files: string[] = []
+  const contentPaths: string[] = []
   const categories: unknown[] = []
 
   for (const categoryDir of subdirs(contentDir)) {
     const categoryPath = join(contentDir, categoryDir)
     const categoryMetaPath = join(categoryPath, '_category.json')
     if (!existsSync(categoryMetaPath)) continue
-    files.push(categoryMetaPath)
     const cm = readJson(categoryMetaPath)
 
     const groups: unknown[] = []
@@ -91,7 +94,6 @@ function scanContent(contentDir: string): ScanResult {
       const subPath = join(categoryPath, subDir)
       const subMetaPath = join(subPath, '_subcategory.json')
       if (!existsSync(subMetaPath)) continue
-      files.push(subMetaPath)
       const sm = readJson(subMetaPath)
 
       const courses: Array<Record<string, unknown>> = []
@@ -100,18 +102,18 @@ function scanContent(contentDir: string): ScanResult {
         const mdxFiles = readdirSync(coursePath).filter((f) => f.endsWith('.mdx'))
         if (mdxFiles.length === 0) continue
 
-        const byLocale: Record<string, Dict> = {}
-        const contentPaths: Record<string, string> = {}
+        const byFm: Record<string, Dict> = {}
+        const localePaths: Record<string, string> = {}
         for (const f of mdxFiles) {
           const locale = f.replace(/\.mdx$/, '')
-          const full = join(coursePath, f)
-          files.push(full)
-          byLocale[locale] = parseFrontmatter(full)
-          contentPaths[locale] = `/content/${categoryDir}/${subDir}/${slug}/${f}`
+          const rel = `/content/${categoryDir}/${subDir}/${slug}/${f}`
+          contentPaths.push(rel)
+          byFm[locale] = parseFrontmatter(join(coursePath, f))
+          localePaths[locale] = rel
         }
 
-        const locales = Object.keys(byLocale)
-        const base = byLocale['en'] ?? byLocale[locales[0]]
+        const locales = Object.keys(byFm)
+        const base = byFm['en'] ?? byFm[locales[0]]
 
         courses.push({
           slug,
@@ -119,16 +121,14 @@ function scanContent(contentDir: string): ScanResult {
           subcategoryId: String(sm.id ?? subDir),
           order: num(base.order, 999),
           locales,
-          contentPaths,
-          // Localized fields — one value per available locale.
-          title: pick(byLocale, 'title'),
-          desc: pick(byLocale, 'desc'),
-          kicker: pick(byLocale, 'kicker'),
-          lead: pick(byLocale, 'lead'),
-          updated: pick(byLocale, 'updated'),
-          references: pick(byLocale, 'references'),
-          upNext: base.upNext ? pick(byLocale, 'upNext') : null,
-          // Locale-independent fields — taken from the canonical (default) locale.
+          contentPaths: localePaths,
+          title: pick(byFm, 'title'),
+          desc: pick(byFm, 'desc'),
+          kicker: pick(byFm, 'kicker'),
+          lead: pick(byFm, 'lead'),
+          updated: pick(byFm, 'updated'),
+          references: pick(byFm, 'references'),
+          upNext: base.upNext ? pick(byFm, 'upNext') : null,
           author: String(base.author ?? ''),
           minutes: num(base.minutes, 0),
           level: String(base.level ?? 'intermediate'),
@@ -159,7 +159,7 @@ function scanContent(contentDir: string): ScanResult {
   }
 
   categories.sort((a, b) => (a as { order: number }).order - (b as { order: number }).order)
-  return { catalog: { categories }, files }
+  return { catalog: { categories }, contentPaths }
 }
 
 export function courseContent(): Plugin {
@@ -179,10 +179,12 @@ export function courseContent(): Plugin {
 
     load(id) {
       if (id !== RESOLVED_ID) return
-      const { catalog, files } = scanContent(contentDir)
-      // Re-run this module when any content file changes.
-      for (const f of files) this.addWatchFile(f)
-      return `export const CATALOG = ${JSON.stringify(catalog)}\n`
+      const { catalog, contentPaths } = scanContent(contentDir)
+      return [
+        `export const CATALOG = ${JSON.stringify(catalog)}`,
+        `export const CONTENT_PATHS = ${JSON.stringify(contentPaths)}`,
+        '',
+      ].join('\n')
     },
 
     // Remove the YAML frontmatter block so it is not rendered as lesson content.
