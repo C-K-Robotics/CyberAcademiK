@@ -1,33 +1,33 @@
 import type { ReactNode } from 'react'
+import { assetUrl } from '../lib/assetUrl'
 
 interface FigureProps {
   src: string
   alt?: string
   caption?: ReactNode
-  width?: string // e.g. '60%' '400px' '100%'
+  /** CSS width for the image, e.g. `'60%'`, `'400px'`. Defaults to full width. */
+  width?: string
 }
 
 /** A captioned image for lesson content. */
 export function Figure({ src, alt = '', caption, width = '100%' }: FigureProps) {
-  const base = import.meta.env.BASE_URL || location.pathname.replace(/\/[^/]*$/, '')
-  const relativeSrc = src.startsWith('/') ? src.slice(1) : src
-  const fullSrc = base.endsWith('/') ? `${base}${relativeSrc}` : `${base}/${relativeSrc}`
+  const full = width === '100%'
 
   return (
-    <div
+    <figure
       style={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: width === '100%' ? 'stretch' : 'center',
+        alignItems: full ? 'stretch' : 'center',
         margin: '22px 0',
       }}
     >
       <img
-        src={fullSrc}
+        src={assetUrl(src)}
         alt={alt}
         style={{
           width,
-          maxWidth: width === '100%' ? undefined : `100%`,
+          maxWidth: '100%',
           height: 'auto',
           display: 'block',
           borderRadius: 12,
@@ -35,7 +35,7 @@ export function Figure({ src, alt = '', caption, width = '100%' }: FigureProps) 
         }}
       />
       {caption && (
-        <div
+        <figcaption
           style={{
             fontFamily: "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace",
             fontSize: 11.5,
@@ -46,8 +46,8 @@ export function Figure({ src, alt = '', caption, width = '100%' }: FigureProps) 
           }}
         >
           {caption}
-        </div>
+        </figcaption>
       )}
-    </div>
+    </figure>
   )
 }

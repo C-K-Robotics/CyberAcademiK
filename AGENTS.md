@@ -47,23 +47,17 @@ Course metadata lives in MDX frontmatter only — never in code or `strings.ts`.
 - **Provider stack:** `ThemeProvider` → `I18nProvider` → `App`, mounted in
   `src/main.tsx` (no `<StrictMode>` at the top-level wrapper — it's inside `<App>`
   in main.tsx).
-- **Slide mode (v1):** CourseTopbar has a Monitor icon toggle. `CourseLayout` manages
-  `slideMode` state — when active, hides ChipNav/LessonHeader/FooterNav and renders
-  a floating SlideDeck at the bottom of the viewport. SlideDeck polls `[data-section]`
-  elements via rAF until content mounts, shows only one section at a time, and persists
-  the index in localStorage under `cyberacademik:slide-mode` keyed by course slug.
-  Keyboard: ←→navigate, Esc exits. CSS hook: `.course-main[data-slide-mode]`.
-- **Slide mode navigation:** SlideDeck uses `useMemo` and `useRef` (not `useState`)
-  for all slide state: `slidesRef` (the `[data-section]` DOM elements), `slideCount`
-  (count of sections, 0 on unmount), `activeIdxRef`, and `activeIdx` (state for
-  re-render). The hide/show effect at `SlideDeck.tsx` line 132 uses two guards:
-  (1) `slideCount === 0` bail on unmount, and (2) DOM query
-  `.course-main[data-slide-mode]` bail when exiting slide mode — these prevent the
-  effect from re-hiding sections that cleanup effects (line 113) and `handleExit`
-  (line 180) already restored.
-- **ChipNav scroll nav:** ChipNav at line 22 uses a `slideMode` prop guard (not DOM
-  query) to decide whether to render — this avoids the stale DOM attribute problem
-  where React hasn't committed the `data-slide-mode` removal yet during renders.
+- **Slide mode:** CourseTopbar has a Monitor icon toggle. `CourseLayout` owns the
+  `slideMode` state — when active it hides ChipNav/LessonHeader/FooterNav, sets
+  `data-slide-mode` on `.course-main` (the CSS hook), and renders a floating
+  `SlideDeck`. SlideDeck discovers steps from the DOM (every `<Slide>` inside a
+  `<Section>`, or the whole section when it has no `<Slide>` breaks), retrying via
+  rAF until the lazily code-split lesson body mounts and re-scanning on mutation
+  so a locale switch keeps working. Steps are shown/hidden with inline `display`,
+  restored by the effect cleanup — so unmounting always leaves the page readable.
+  Position persists in localStorage under `cyberacademik:slide-mode`, keyed by
+  course slug, and is clamped to the current step count on load.
+  Keyboard: ←→ ↑↓ PageUp/PageDown navigate, Esc exits (ignored while typing).
 - **Quiz markdown:** `Q` wraps `<Prompt>`, `<Explain>`, and `<Choice>` children. All
   text is rendered through `InlineMarkdownText` to support inline
   markdown (`**bold**`, `*italic*`, `` `code` ``).
@@ -80,15 +74,15 @@ Course metadata lives in MDX frontmatter only — never in code or `strings.ts`.
 - **TypeScript strict mode** — `noUnusedLocals`, `noUnusedParameters`,
   `noUncheckedSideEffectImports` are all `true`. Unused imports cause build failures.
 - **`yarn` v1 (classic)** pinned in `packageManager` field. Use `yarn` not npm/pnpm.
-- **Frontmatter regex in `vite/course-content.ts` intentionally has no BOM prefix** (`/^---\r?\n...`).
-  A BOM in an MDX file causes `m[1]` to be `undefined` and returns empty frontmatter objects.
+- **The frontmatter regex in `vite/course-content.ts` tolerates a leading UTF-8 BOM.**
+  Windows editors write them routinely, and without that prefix the frontmatter is
+  neither parsed (empty catalog metadata) nor stripped (raw YAML renders as lesson text).
 - **Content discovery via `import.meta.glob`** in `src/content/discovery.ts` — not an injected list.
   Content/MDX files appear automatically (dev server rescans); code modules need a container restart.
-- **React DOM staleness:** querying the DOM during a component's render function (before React
-  commits) returns stale results. Always use props or `useMemo`/`useLayoutEffect` instead of
-  `document.querySelector` in render to avoid race conditions during transitions. The ChipNav
-  `slideMode` prop guard is the correct pattern (vs. the old DOM-query approach).
-- **Slide mode exit flow:** SlideDeck's cleanup `useEffect` (line 113) restores all sections on
-  unmount, but the hide/show `useEffect` (line 132) can re-hide them if it fires during unmount.
-  Two guards prevent this: (1) `slideCountRef.current === 0` (set to 0 in cleanup before effects run),
-  (2) `.course-main[data-slide-mode]` DOM attribute check — both bail before any DOM mutation.
+- **Never read the DOM during render.** It returns pre-commit state, and the lesson body
+  does not re-render when app state (slide mode, nav collapse) changes — anything derived
+  that way goes stale. Drive it from props, an effect, or a CSS rule keyed off a data
+  attribute. `Section`'s slide-mode spacing is the CSS version of this.
+- **Images in MDX** — `<Figure src="/slug/x.png">` and `![alt](/slug/x.png)` both point at
+  `public/`, and both resolve through `src/lib/assetUrl.ts` so the `/CyberAcademiK/` deploy
+  base is prefixed. Absolute (`https://…`) and `data:` URLs pass through untouched.

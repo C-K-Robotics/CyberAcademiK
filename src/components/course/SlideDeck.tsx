@@ -1,261 +1,264 @@
-import { useCallback, useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
+import { useI18n } from '../../i18n/I18nProvider'
 
+/** One navigable step: either a `<Slide>` block or a whole `<Section>`. */
 interface SlideItem {
+  /** The element shown for this step. */
   el: HTMLElement
-  sectionId: string
+  /** The `<Section>` the step lives in — always shown, so its heading stays put. */
+  section: HTMLElement
+  /** The section's display number, e.g. `"03"`. */
   n: string
-  breakIndex: number
-  totalBreaks: number
-  isSectionSlide: boolean
-  contentLength?: number
+  /** 1-based position of this step within its section. */
+  index: number
+  /** How many steps its section has. */
+  total: number
+  /** True when the step *is* the whole section (no `<Slide>` breaks inside). */
+  isWholeSection: boolean
 }
 
 interface SlideDeckProps {
+  /** Course slug — the saved position is per course. */
+  slug: string
   onExit: () => void
 }
 
-/** Restores the inline display style on the given elements. */
-export function exitAll(sec: HTMLElement[]) {
-  sec.forEach((el) => { el.style.display = '' })
-}
+const STORAGE_KEY = 'cyberacademik:slide-mode'
+/** Give up polling for the lazily-mounted lesson body after ~100 frames (~1.5s). */
+const MAX_SCAN_FRAMES = 100
 
-function getSavedIdx(): number {
+function readSavedIdx(slug: string): number {
   try {
-    const saved = JSON.parse(localStorage.getItem('cyberacademik:slide-mode') ?? '{}')
-    return (saved as { idx?: number })?.idx ?? 0
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Record<string, unknown>
+    const idx = Number(saved?.[slug])
+    return Number.isInteger(idx) && idx >= 0 ? idx : 0
   } catch {
     return 0
   }
 }
 
-/**
- * Scan DOM for [data-slide] elements inside sections (polls until content mounts).
- * If no [data-slide] elements exist, falls back to [data-section] (current v1 default).
- */
-function collectSlides(): SlideItem[] {
-  const sections = document.querySelectorAll<HTMLElement>('.lesson-prose [data-section]')
-  const result: SlideItem[] = []
-
-  for (const section of sections) {
-    const breaks = section.querySelectorAll<HTMLElement>('[data-slide]')
-
-    if (breaks.length > 0) {
-      breaks.forEach((el) => {
-        const idx = [...breaks].indexOf(el) + 1
-        result.push({
-          el,
-          sectionId: section.dataset.section ?? '',
-          n: section.dataset.n ?? '',
-          breakIndex: idx,
-          totalBreaks: breaks.length,
-          isSectionSlide: false,
-          contentLength: el.children.length,
-        })
-      })
-    } else {
-      result.push({
-        el: section,
-        sectionId: section.dataset.section ?? '',
-        n: section.dataset.n ?? '',
-        breakIndex: 0,
-        totalBreaks: 0,
-        isSectionSlide: true,
-        contentLength: section.children.length,
-      })
-    }
+function writeSavedIdx(slug: string, idx: number) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Record<string, unknown>
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, [slug]: idx }))
+  } catch {
+    /* private mode or quota — the saved position is a convenience, not state we need */
   }
-
-  return result
 }
 
-export function SlideDeck({ onExit }: SlideDeckProps) {
-  // All refs — values that persist across renders and can be mutated.
-  const slidesRef = useRef<SlideItem[]>([])
-  const slideCountRef = useRef(0)
-  const activeIdxRef = useRef(0)
+/**
+ * Build the slide list from the rendered lesson: every `<Slide>` inside a
+ * `<Section>` is a step, and a section with no `<Slide>` breaks is one step on
+ * its own. Nothing is registered up front — authors only add `<Slide>` markers.
+ */
+function collectSlides(): SlideItem[] {
+  const out: SlideItem[] = []
 
-  // State — values that trigger re-renders.
-  const [ready, setReady] = useState(false)
-  const [activeIdx, setActiveIdx] = useState(getSavedIdx)
+  document.querySelectorAll<HTMLElement>('.lesson-prose [data-section]').forEach((section) => {
+    const n = section.dataset.n ?? ''
+    const breaks = section.querySelectorAll<HTMLElement>('[data-slide]')
 
+    if (breaks.length === 0) {
+      out.push({ el: section, section, n, index: 1, total: 1, isWholeSection: true })
+      return
+    }
+    breaks.forEach((el, i) => {
+      out.push({ el, section, n, index: i + 1, total: breaks.length, isWholeSection: false })
+    })
+  })
+
+  return out
+}
+
+/** Show only `slides[idx]` (and the section it belongs to); hide every other step. */
+function showOnly(slides: SlideItem[], idx: number) {
+  for (const s of slides) {
+    s.section.style.display = 'none'
+    if (!s.isWholeSection) s.el.style.display = 'none'
+  }
+
+  const target = slides[idx]
+  if (!target) return
+  target.section.style.display = ''
+  target.el.style.display = ''
+  target.section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+/** Undo `showOnly` so the lesson reads as a normal scrolling page again. */
+function restoreAll(slides: SlideItem[]) {
+  for (const s of slides) {
+    s.section.style.display = ''
+    s.el.style.display = ''
+  }
+}
+
+/** True while the user is typing, so slide keys must not steal the keystroke. */
+function isTyping(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false
+  return (
+    target.isContentEditable ||
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement ||
+    target instanceof HTMLSelectElement
+  )
+}
+
+/**
+ * Slide-mode controller: a floating prev/next bar that walks the lesson one
+ * `<Slide>` (or `<Section>`) at a time.
+ *
+ * The steps are discovered from the DOM rather than passed in, because the
+ * lesson body is lazily code-split MDX that mounts *after* this component — the
+ * same reason ChipNav scans instead of taking a list. Visibility is applied as
+ * inline `display` and undone by the effect cleanup, so leaving slide mode (or
+ * unmounting for any other reason) always restores the page.
+ */
+export function SlideDeck({ slug, onExit }: SlideDeckProps) {
+  const { t } = useI18n()
+  const [slides, setSlides] = useState<SlideItem[]>([])
+  const [activeIdx, setActiveIdx] = useState(() => readSavedIdx(slug))
+
+  const count = slides.length
+  const ready = count > 0
+
+  // Discover the steps, retrying until the lazy lesson body has mounted, then
+  // keep watching: the body re-mounts when the locale changes, which would
+  // otherwise leave us holding detached elements.
   useEffect(() => {
-    let cancelled = false
+    let frame = 0
+    let timer = 0
+    let attempts = 0
+    let current: SlideItem[] = []
+
+    const unchanged = (next: SlideItem[]) =>
+      next.length === current.length && next.every((s, i) => s.el === current[i].el)
 
     const scan = () => {
-      if (cancelled) return
-
       const found = collectSlides()
-
       if (found.length === 0) {
-        // Content not loaded yet — retry, but stop after 100 attempts to avoid infinite loop
-        if (activeIdxRef.current < 100) {
-          activeIdxRef.current++
-          requestAnimationFrame(scan)
-        }
+        if (attempts++ < MAX_SCAN_FRAMES) frame = requestAnimationFrame(scan)
         return
       }
-
-      slidesRef.current = found
-      slideCountRef.current = found.length
-      setReady(true)
+      attempts = 0
+      if (unchanged(found)) return
+      current = found
+      setSlides(found)
     }
 
+    const schedule = () => {
+      clearTimeout(timer)
+      timer = window.setTimeout(scan, 0)
+    }
+
+    const target = document.querySelector('.course-content') ?? document.body
+    const mo = new MutationObserver(schedule)
+    mo.observe(target, { childList: true, subtree: true })
     scan()
 
-    // When this component unmounts, restore all sections so normal scroll mode works.
     return () => {
-      cancelled = true
-      exitAll(slidesRef.current.map((s) => s.el))
-      document.querySelectorAll('[data-section]').forEach((el) => {
-        ;(el as HTMLElement).style.display = ''
-      })
+      cancelAnimationFrame(frame)
+      clearTimeout(timer)
+      mo.disconnect()
     }
   }, [])
 
-  // Restore index from localStorage when slides are first found
+  // A saved position can outlive the lesson it came from (edited content, or a
+  // locale with fewer sections), so clamp it rather than land on nothing.
   useEffect(() => {
-    if (slidesRef.current.length === 0) return
-    const saved = JSON.parse(localStorage.getItem('cyberacademik:slide-mode') ?? '{}')
-    const idx = (saved as { idx?: number })?.idx ?? 0
-    if (idx < slidesRef.current.length) {
-      setActiveIdx(idx)
-    }
-  }, [ready])
+    if (count > 0) setActiveIdx((i) => Math.min(i, count - 1))
+  }, [count])
 
-  // Persist index to localStorage
   useEffect(() => {
-    if (ready) {
-      try {
-        localStorage.setItem('cyberacademik:slide-mode', JSON.stringify({ idx: activeIdx }))
-      } catch { /* silently ignore */ }
-    }
-  }, [activeIdx, ready])
+    if (count > 0) writeSavedIdx(slug, activeIdx)
+  }, [slug, activeIdx, count])
 
-  // Hide all except current slide, show only the active section's title.
-  // Guarded by slideCountRef (goes to 0 on unmount via cleanup) and the DOM check
-  // to bail when exiting slide mode — preventing the hide effect from re-hiding
-  // sections that were just restored by the cleanup effect or handleExit.
+  // Apply visibility; the cleanup restores it, which is also what makes exiting
+  // slide mode (this component unmounting) leave the page in a readable state.
   useEffect(() => {
-    if (slideCountRef.current === 0) return
-    if (slidesRef.current.length === 0) return
-    // When SlideDeck unmounts, data-slide-mode is removed from .course-main —
-    // bail silently, the cleanup effect has already restored the sections.
-    if (document.querySelector('.course-main[data-slide-mode]') === null) return
-    document.querySelectorAll('[data-section]').forEach((el) => { el.style.display = 'none' })
-    slidesRef.current.forEach((s) => { s.el.style.display = 'none' })
-    const target = slidesRef.current[activeIdx]
-    if (target) {
-      target.el.style.display = ''
-      target.el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      let parent = target.el.parentElement
-      while (parent) {
-        if (parent.dataset.section !== undefined) {
-          parent.style.display = ''
-          break
-        }
-        parent = parent.parentElement
-      }
-    }
-  }, [activeIdx, ready])
+    if (slides.length === 0) return
+    showOnly(slides, activeIdx)
+    return () => restoreAll(slides)
+  }, [slides, activeIdx])
 
-  // Keyboard navigation
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+    const onKey = (e: KeyboardEvent) => {
+      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown') {
         e.preventDefault()
-        setActiveIdx((i) => Math.min(slidesRef.current.length - 1, i + 1))
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        setActiveIdx((i) => Math.min(count - 1, i + 1))
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp' || e.key === 'PageUp') {
         e.preventDefault()
         setActiveIdx((i) => Math.max(0, i - 1))
       } else if (e.key === 'Escape') {
-        ;(window as Record<string, unknown>).__slideExit?.()
+        e.preventDefault()
+        onExit()
       }
     }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [])
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [count, onExit])
 
-  // Central exit handler: restore all sections before signaling exit.
-  const handleExit = useCallback(() => {
-    exitAll(slidesRef.current.map((s) => s.el))
-    document.querySelectorAll('[data-section]').forEach((el) => {
-      ;(el as HTMLElement).style.display = ''
-    })
-    onExit()
-    window.location.hash = ''
-  }, [onExit])
+  const hasPrev = activeIdx > 0
+  const hasNext = activeIdx < count - 1
 
-  // Expose exit function globally (for keyboard handler)
-  useEffect(() => {
-    ;(window as Record<string, unknown>).__slideExit = handleExit
-    return () => { delete (window as Record<string, unknown>).__slideExit }
-  }, [handleExit])
-
-  const prev = activeIdx > 0
-  const next = activeIdx < slidesRef.current.length - 1
-  const total = new Set(slidesRef.current.map((s) => s.n)).size
-
-  // Generate nav label
-  let navLabel = `${activeIdx + 1} / ${total}`
-  const activeSlide = slidesRef.current[activeIdx]
-  if (activeSlide) {
-    if (!activeSlide.isSectionSlide) {
-      // Break slide: "3 / 2" (no leading zeros, "pillars 1-3" / "pillars 4-5")
-      navLabel = `${Number(activeSlide.n)}.${activeSlide.breakIndex} / ${Number(activeSlide.n)}.${activeSlide.totalBreaks}`
-    } else {
-      // Section slide: show "N / total"
-      navLabel = `${Number(activeSlide.n)} / ${total}`
-    }
+  const active = slides[activeIdx]
+  const sectionCount = new Set(slides.map((s) => s.n)).size
+  let label = `${activeIdx + 1} / ${count}`
+  if (active) {
+    label = active.isWholeSection
+      ? `${Number(active.n)} / ${sectionCount}`
+      : `${Number(active.n)}.${active.index} / ${Number(active.n)}.${active.total}`
   }
 
-  return (
-    <nav
-      className="slide-deck"
-      style={{ position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 50, opacity: ready ? 1 : 0.25, transition: 'opacity 0.2s' }}
-      aria-label="Slide mode"
+  const stepButton = (dir: -1 | 1, enabled: boolean, title: string, glyph: string) => (
+    <button
+      type="button"
+      onClick={() => setActiveIdx((i) => Math.min(count - 1, Math.max(0, i + dir)))}
+      disabled={!enabled}
+      title={title}
+      aria-label={title}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: 30,
+        height: 30,
+        background: 'var(--bg-panel)',
+        border: '1px solid var(--line)',
+        borderRadius: 8,
+        cursor: enabled ? 'pointer' : 'default',
+        color: 'var(--tx-2)',
+        fontSize: 16,
+        opacity: enabled ? 1 : 0.35,
+      }}
     >
-      <button
-        type="button"
-        onClick={() => setActiveIdx((i) => Math.max(0, i - 1))}
-        disabled={!prev}
-        title="Previous slide"
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: 30, height: 30, background: 'var(--bg-panel)',
-          border: '1px solid var(--line)', borderRadius: 8,
-          cursor: prev ? 'pointer' : 'default', color: 'var(--tx-2)',
-          fontSize: 16, opacity: prev ? 1 : 0.35,
-        }}
-      >
-        ←
-      </button>
-      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--tx-2)', padding: '0 4px' }}>
-        {ready ? navLabel : '…'}
-      </span>
-      <button
-        type="button"
-        onClick={() => setActiveIdx((i) => Math.min(slidesRef.current.length - 1, i + 1))}
-        disabled={!next}
-        title="Next slide"
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: 30, height: 30, background: 'var(--bg-panel)',
-          border: '1px solid var(--line)', borderRadius: 8,
-          cursor: next ? 'pointer' : 'default', color: 'var(--tx-2)',
-          fontSize: 16, opacity: next ? 1 : 0.35,
-        }}
-      >
-        →
-      </button>
+      {glyph}
+    </button>
+  )
+
+  return (
+    <nav className="slide-deck" style={{ opacity: ready ? 1 : 0.25 }} aria-label={t.slideMode}>
+      {stepButton(-1, hasPrev, t.slidePrev, '←')}
+      <span style={{ padding: '0 4px' }}>{ready ? label : '…'}</span>
+      {stepButton(1, hasNext, t.slideNext, '→')}
       <div style={{ width: 1, height: 16, background: 'var(--line)', margin: '0 4px' }} />
       <button
         type="button"
-        onClick={handleExit}
-        title="Exit slide mode"
+        onClick={onExit}
+        title={t.slideExit}
+        aria-label={t.slideExit}
         style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          width: 30, height: 30, fontFamily: 'inherit', fontSize: 14,
-          background: 'none', border: 'none', cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: 30,
+          height: 30,
+          fontFamily: 'inherit',
+          fontSize: 14,
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
           color: 'var(--tx-2)',
         }}
       >

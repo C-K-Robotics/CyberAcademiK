@@ -56,6 +56,7 @@ export function CourseLayout({ module }: { module: CourseModule }) {
   }
 
   const toggleSlide = () => setSlideMode((m) => !m)
+  const exitSlide = () => setSlideMode(false)
 
   return (
     <div className="app-grid">
@@ -70,7 +71,7 @@ export function CourseLayout({ module }: { module: CourseModule }) {
         <CourseSidebar meta={meta} onHome={() => setNavOpen(false)} />
       </aside>
 
-      <main className="course-main" data-collapsed={navCollapsed} {...(slideMode && { 'data-slide-mode': '' })}>
+      <main className="course-main" data-collapsed={navCollapsed} data-slide-mode={slideMode || undefined}>
         <CourseTopbar
           meta={meta}
           subteam={subteam}
@@ -78,8 +79,8 @@ export function CourseLayout({ module }: { module: CourseModule }) {
           slideMode={slideMode}
           onToggleSlide={toggleSlide}
         />
-        {!slideMode && <ChipNav contentKey={`${meta.slug}:${locale}`} slideMode={slideMode} />}
-        {slideMode && <SlideDeck onExit={toggleSlide} />}
+        {!slideMode && <ChipNav contentKey={`${meta.slug}:${locale}`} />}
+        {slideMode && <SlideDeck slug={meta.slug} onExit={exitSlide} />}
 
         <div
           className="course-content lesson-prose"

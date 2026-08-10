@@ -24,7 +24,10 @@ import type { Plugin } from 'vite'
 
 const VIRTUAL_ID = 'virtual:course-catalog'
 const RESOLVED_ID = '\0' + VIRTUAL_ID
-const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/
+// The optional ﻿ matters: editors on Windows routinely save MDX with a
+// UTF-8 BOM, and without it the frontmatter would neither be parsed (empty
+// catalog metadata) nor stripped (the raw YAML block renders as lesson text).
+const FRONTMATTER_RE = /^﻿?---\r?\n([\s\S]*?)\r?\n---[ \t]*\r?\n?/
 
 type Dict = Record<string, unknown>
 
@@ -177,8 +180,11 @@ export function courseContent(): Plugin {
     load(id) {
       if (id !== RESOLVED_ID) return
       const { catalog, contentPaths } = scanContent(contentDir)
-      const nl = String.fromCharCode(10)
-      return `export const CATALOG = ${JSON.stringify(catalog)}${nl}export const CONTENT_PATHS = ${JSON.stringify(contentPaths)}`
+      return [
+        `export const CATALOG = ${JSON.stringify(catalog)}`,
+        `export const CONTENT_PATHS = ${JSON.stringify(contentPaths)}`,
+        '',
+      ].join('\n')
     },
 
     // Remove the YAML frontmatter block so it is not rendered as lesson content.

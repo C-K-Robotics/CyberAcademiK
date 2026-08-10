@@ -21,7 +21,18 @@
   border-bottom-color: var(--ac1b);
 }
 
-/* Quiz component: inline markdown (bold, italic, code) in prompts, prompts & explanations */
+/* Lesson sections. In slide mode there is no sticky chip nav above the content,
+   so sections need less top offset — see Section.tsx. */
+.lesson-section {
+  scroll-margin-top: 118px;
+  padding-top: 50px;
+}
+.course-main[data-slide-mode] .lesson-section {
+  scroll-margin-top: 0;
+  padding-top: 32px;
+}
+
+/* Quiz component: inline markdown (bold, italic, code) in prompts & explanations */
 .quiz-markdown strong {
   font-weight: 700;
 }

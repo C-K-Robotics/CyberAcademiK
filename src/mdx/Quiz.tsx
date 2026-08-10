@@ -25,7 +25,7 @@ interface QProps {
   children?: ReactNode
 }
 /** A single quiz question wrapping its <Prompt>, <Explain> and <Choice> children. */
-export function Q({ children }: QProps) {
+export function Q(_props: QProps) {
   return null
 }
 Q.displayName = 'Q'
@@ -34,7 +34,7 @@ interface PromptProps {
   children?: ReactNode
 }
 /** Marker: wraps the question prompt rendered via MDX. */
-export function Prompt({ children }: PromptProps) {
+export function Prompt(_props: PromptProps) {
   return null
 }
 Prompt.displayName = 'Prompt'
@@ -43,7 +43,7 @@ interface ExplainProps {
   children?: ReactNode
 }
 /** Marker: wraps the feedback explanation rendered via MDX. */
-export function Explain({ children }: ExplainProps) {
+export function Explain(_props: ExplainProps) {
   return null
 }
 Explain.displayName = 'Explain'

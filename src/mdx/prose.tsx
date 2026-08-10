@@ -1,5 +1,6 @@
 import type { MDXComponents } from 'mdx/types'
 import type { CSSProperties, HTMLAttributes } from 'react'
+import { assetUrl } from '../lib/assetUrl'
 
 const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
 
@@ -25,6 +26,15 @@ const preStyle: CSSProperties = {
   whiteSpace: 'pre',
 }
 
+const imgStyle: CSSProperties = {
+  maxWidth: '100%',
+  height: 'auto',
+  display: 'block',
+  margin: '22px 0',
+  borderRadius: 12,
+  border: '1px solid var(--line)',
+}
+
 const inlineCodeStyle: CSSProperties = {
   fontFamily: mono,
   fontSize: '0.88em',
@@ -36,12 +46,11 @@ const inlineCodeStyle: CSSProperties = {
 
 /** Styled overrides for plain markdown elements inside lesson prose. */
 export const proseComponents: MDXComponents = {
+  // Markdown images (`![alt](/slug/img.png)`) point at `public/`, so their
+  // root-relative src needs the deploy base prefixed. See lib/assetUrl.ts.
   img: ({ src, alt, ...rest }) => {
-    if (!src) return null
-    const base = import.meta.env.BASE_URL || location.pathname.replace(/\/[^/]*$/, '')
-    const relativeSrc = src.startsWith('/') ? src.slice(1) : src
-    const finalSrc = base.endsWith('/') ? `${base}${relativeSrc}` : `${base}/${relativeSrc}`
-    return <img src={finalSrc} alt={alt ?? ''} {...rest} crossOrigin="anonymous" />
+    if (typeof src !== 'string' || !src) return null
+    return <img {...rest} src={assetUrl(src)} alt={alt ?? ''} style={imgStyle} />
   },
   p: (props) => <p {...props} style={pStyle} />,
   h2: (props) => (

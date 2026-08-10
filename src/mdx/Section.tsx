@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 
 const mono = "'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace"
@@ -21,17 +20,17 @@ interface SectionProps {
  * the navigation builds itself.
  */
 export function Section({ id, n, title, chip, children }: SectionProps) {
-  const inSlideMode = useMemo(() => {
-    if (typeof document === 'undefined') return false
-    return document.querySelector('.course-main[data-slide-mode]') !== null
-  }, [])
   return (
+    // Spacing differs in slide mode (no sticky chip nav to scroll clear of). That
+    // is a CSS rule keyed off `.course-main[data-slide-mode]` rather than a prop
+    // or a DOM read: the lesson body is lazily mounted and does not re-render when
+    // slide mode toggles, so anything computed here would go stale.
     <section
       id={`sec-${id}`}
+      className="lesson-section"
       data-section={id}
       data-chip={chip ?? title}
       data-n={n}
-      style={{ scrollMarginTop: inSlideMode ? 0 : 118, paddingTop: inSlideMode ? 32 : 50 }}
     >
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 8 }}>
         <span style={{ fontFamily: mono, fontSize: 13, color: 'var(--ac1)' }}>{n}</span>
