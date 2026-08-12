@@ -17,3 +17,6 @@ dist-ssr
 .opencode/
 opencode.json
 eng.traineddata
+
+# temporary workspace
+tmp_ws/

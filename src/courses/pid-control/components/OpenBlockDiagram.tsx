@@ -50,11 +50,13 @@ export function OpenBlockDiagram() {
             open-loop gain
           </text>
 
-          {/* output */}
-          <line x1="320" y1="90" x2="620" y2="90" stroke="#54677b" strokeWidth="1.6" markerEnd="url(#ah0)" />
-          <text x="466" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="12" fill="var(--tx-2b)">
+          {/* u(t) — controller output, drawn in the gap before the plant */}
+          <text x="352" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="12" fill="var(--tx-2b)">
             u(t)
           </text>
+          <line x1="320" y1="90" x2="416" y2="90" stroke="#54677b" strokeWidth="1.6" markerEnd="url(#ah0)" />
+
+          {/* plant */}
           <rect x="418" y="62" width="100" height="56" rx="9" fill="var(--bg-block)" stroke="#54677b" strokeWidth="1.4" />
           <text x="468" y="86" textAnchor="middle" fontSize="13.5" fontWeight="600" fill="var(--tx-strong)">
             Plant
@@ -63,20 +65,20 @@ export function OpenBlockDiagram() {
             system
           </text>
 
-          {/* output label */}
-          <text x="624" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="13" fill="var(--tx-2b)">
+          {/* output — runs off the edge: nothing ever measures it */}
+          <line x1="518" y1="90" x2="700" y2="90" stroke="#54677b" strokeWidth="1.6" markerEnd="url(#ah0)" />
+          <text x="600" y="82" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="13" fill="var(--tx-2b)">
             y(t)
           </text>
-          <text x="624" y="96" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="9" fill="var(--ac5)">
+          <text x="600" y="108" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="9" fill="var(--ac5)">
             blind output
           </text>
-          <line x1="658" y1="90" x2="738" y2="90" stroke="#54677b" strokeWidth="1.6" markerEnd="url(#ah0)" />
 
-          {/* no feedback annotation */}
-          <line x1="500" y1="138" x2="500" y2="200" stroke="#cc6070" strokeWidth="1.2" strokeDasharray="4 4" />
-          <line x1="500" y1="200" x2="280" y2="200" stroke="#cc6070" strokeWidth="1.2" strokeDasharray="4 4" />
-          <rect x="300" y="185" width="130" height="24" rx="6" fill="#2b0a18" stroke="#cc6070" strokeWidth="1" />
-          <text x="365" y="202" textAnchor="middle" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="10" fill="#cc6070">
+          {/* the feedback path that isn't there */}
+          <line x1="500" y1="120" x2="500" y2="200" stroke="var(--ac5)" strokeWidth="1.2" strokeDasharray="4 4" />
+          <line x1="500" y1="200" x2="280" y2="200" stroke="var(--ac5)" strokeWidth="1.2" strokeDasharray="4 4" />
+          <rect x="300" y="185" width="130" height="24" rx="6" fill="var(--bg-panel)" stroke="var(--ac5)" strokeWidth="1" />
+          <text x="365" y="201" textAnchor="middle" fontFamily="'IBM Plex Mono', 'IBM Plex Sans', system-ui, monospace" fontSize="10" fill="var(--ac5)">
             ✕ no feedback
           </text>
         </svg>

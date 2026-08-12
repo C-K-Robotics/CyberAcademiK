@@ -15,14 +15,18 @@ updated: Updated Aug 2026
 references:
   - label: Wikipedia — PID controller
     href: 'https://en.wikipedia.org/wiki/PID_controller'
-  - label: WPILib PIDController
-    href: 'https://docs.wpilib.org/en/latest/docs/wpilib/controller/pidcontroller.html'
-  - label: FRC Programming Done Right
-    href: 'https://frcpdr.readthedocs.io/en/latest/control/pid_control.html'
-  - label: CSE 276F — Actuation & Control (UC San Diego)
-    href: 'https://cse276f.github.io/'
-  - label: CTRE — Motion Magic & Feed-forward
-    href: 'https://docs.wc-cte.com/wc2023/en/latest/control/position_control.html'
+  - label: WPILib — Introduction to PID
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html
+  - label: WPILib — PIDController
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html
+  - label: WPILib — Feedforward control
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/feedforward.html
+  - label: CTRE Phoenix 6 — closed-loop requests
+    href: >-
+      https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/closed-loop-requests.html
 upNext:
   label: 'Advanced: trajectory tracking'
   href: '#'
@@ -35,14 +39,11 @@ upNext:
   interactive widgets (BlockDiagram, PlantSchematic, ThreeTerms, PIDSimulator,
   ZieglerNichols, ArmSimulator). No code required to change the lesson.
   All course metadata lives in the YAML frontmatter above — not in code.
-  
-  Sections 01–06: PID fundamentals (existing content, verbatim)
-  Section 07: Sensing for PID (NEW — from CSE 276F SPA1 & SPA5)
-  Section 08: Actuation & feed-forward (NEW — from CSE 276F SPA5)
-  Section 09: Augmented PID in code (NEW — from CSE 276F patterns)
-  Section 10: Arm simulator — beating gravity (moved from 07, capstone)
-  Section 11: Consolidated quiz (7 questions total)
-  Section 12: Summary (NEW — CSE 276F closure)
+
+  Section order: 01–06 PID fundamentals, 07 sensing, 08 actuation & feed-forward,
+  09 augmented PID in code, 10 arm simulator (capstone), 11 quiz, 12 summary.
+  Keep `n=` in sync with this order when inserting a section, and mirror any
+  structural change into zh-Hant.mdx.
 */}
 
 <Section id="loop" n="01" title="Open loop vs. closed loop" chip="Control loop">
@@ -255,7 +256,7 @@ Motors spin fast with low torque. Gearing trades **speed for torque**:
 higher gear ratio → more torque at the output, but slower max speed.
 
 - **Spur gears**: simple, cheap, good ratio
-- **Planetary gears**: compact, high ratio, efficient (NEO, CMs)
+- **Planetary gears**: compact, high ratio, efficient (NEO and CIM gearboxes)
 - **Harmonic drives**: zero-backlash, very high ratio, expensive (robotic arms)
 
 ### Feed-forward control
@@ -282,16 +283,21 @@ residual error. The full equation:
 
   u(t) = u<sub>ff</sub>(t) + K<sub>p</sub>e(t) + K<sub>i</sub>∫e + K<sub>d</sub>ė
 
-### Holonomic vs Underactuated
+### Fully actuated vs underactuated
 
-- **Holonomic**: # actuators ≥ # degrees of freedom. A mecanum drive (4 motors, 3 DOF).
-- **Underactuated**: # actuators < # DOFs. A passive gripper, a swinging underactuated
-  leg. The arm in our simulator is underactuated (one motor, gravity is an
-  unactuated DOF) — but feed-forward + PID handles it well.
+- **Fully actuated**: # actuators ≥ # degrees of freedom. A mecanum drive (4 motors, 3 DOF),
+  or the single-joint arm in our simulator (1 motor, 1 DOF).
+- **Underactuated**: # actuators < # DOFs — a passive gripper, an acrobot, a double
+  pendulum driven at one joint. You cannot command every DOF directly, so the
+  unactuated ones have to be steered indirectly through the dynamics.
+
+Gravity is a *force* acting on the arm, not a degree of freedom — the arm stays fully
+actuated, and gravity feed-forward is exactly how you cancel that force before PID
+ever sees it.
 
 <Callout type="tip" title="Start with feed-forward, tune PID second">
 
-In production robots, engineers tune K<sub>ff</sub> and K<sub>g</sub> first
+In production robots, engineers tune K<sub>g</sub> and K<sub>v</sub> first
 (usually by hand, measuring what voltage holds the arm at each angle), then
 tweak K<sub>p</sub> for responsiveness and K<sub>d</sub> for smoothness.
 K<sub>i</sub> is often zero unless there's a persistent disturbance like
@@ -311,15 +317,18 @@ motion model, compute the PID from the residual error, and sum them.
 
 ```java
 public class ArmController {
-    // Feed-forward constants (tune by hand, measure angles)
-    double kG = 0.30;        // gravity compensation
-    double kV = 0.0;         // velocity feed-forward
-    double kA = 0.0;         // acceleration feed-forward
+    // Feed-forward constants (tune by hand — measure the voltage that holds
+    // the arm still at a few known angles, then fit kG)
+    static final double kG = 0.30;   // gravity compensation, at horizontal
+    static final double kV = 0.0;    // velocity feed-forward
+    static final double kA = 0.0;    // acceleration feed-forward
 
-    WPILibPIDController pid = new WPILibPIDController(kP, kI, kD);
+    // Feedback gains — tune after the feed-forward is close
+    static final double kP = 0.02, kI = 0.0, kD = 0.001;
 
-    TalonFX motor;
-    Encoder encoder;
+    private final PIDController pid = new PIDController(kP, kI, kD);
+    private final TalonFX motor;
+    private final Encoder encoder;
 
     public ArmController(TalonFX motor, Encoder encoder) {
         this.motor = motor;
@@ -327,17 +336,18 @@ public class ArmController {
         pid.setTolerance(0.5); // degrees
     }
 
+    /** Call every loop tick (50 Hz). Angles are degrees from horizontal. */
     public void goToAngle(double setpointDeg) {
-        double measuredDeg = encoder.getDistance() * 360.0;
+        double measuredDeg = encoder.getDistance();   // encoder configured in degrees
 
-        // Feed-forward: gravity + velocity + acceleration
+        // Feed-forward: gravity now, kV/kA once you have a motion profile
         double ff = kG * Math.cos(Math.toRadians(measuredDeg));
 
-        // Feedback: PID
+        // Feedback: PID on the residual error
         double pidOut = pid.calculate(measuredDeg, setpointDeg);
 
-        // Combined command
-        double output = ff + pidOut;
+        // Combined command, clamped to the [-1, 1] duty-cycle range
+        double output = MathUtil.clamp(ff + pidOut, -1.0, 1.0);
         motor.set(output);
     }
 }
@@ -348,31 +358,33 @@ public class ArmController {
 
 ```cpp
 class ArmController {
-    double kG = 0.30;
-    double kP = 0.5, kI = 0.0, kD = 0.0;
-    CTRE_PIDController pid;
+    // Same gains as the Java version — kG at horizontal, kP/kD on the residual
+    static constexpr double kG = 0.30;
+    static constexpr double kP = 0.02, kI = 0.0, kD = 0.001;
 
-    CANTalonFX motor;
-    Encoder encoder;
+    // Declaration order == construction order; keep the init list in this order
+    frc::PIDController pid;
+    ctre::phoenix6::hardware::TalonFX& motor;
+    frc::Encoder& encoder;
 
 public:
-    ArmController(CANTalonFX& m, Encoder& e)
-        : motor(m), encoder(e), pid(kP, kI, kD) {
-        pid.setTolerance(0.5);
+    ArmController(ctre::phoenix6::hardware::TalonFX& m, frc::Encoder& e)
+        : pid(kP, kI, kD), motor(m), encoder(e) {
+        pid.SetTolerance(0.5);  // degrees
     }
 
-    void update(double setpointDeg) {
-        double measured = encoder.GetDistance() * 2 * M_PI;
-        double err = setpointDeg - measured;
+    // Call every loop tick (50 Hz). Everything below is in degrees.
+    void Update(double setpointDeg) {
+        double measuredDeg = encoder.GetDistance();  // encoder configured in degrees
 
-        // Gravity feed-forward
-        double ff = kG * std::cos(measured);
+        // Gravity feed-forward — cos() wants radians, so convert
+        double ff = kG * std::cos(measuredDeg * M_PI / 180.0);
 
-        // PID correction
-        double pidOut = pid.Calculate(measured, setpointDeg);
+        // PID correction on the residual error
+        double pidOut = pid.Calculate(measuredDeg, setpointDeg);
 
-        // Combined
-        motor.Set(ff + pidOut);
+        // Combined, clamped to the [-1, 1] duty-cycle range
+        motor.Set(std::clamp(ff + pidOut, -1.0, 1.0));
     }
 };
 ```
