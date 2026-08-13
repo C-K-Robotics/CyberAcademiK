@@ -5,9 +5,11 @@ import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import { courseContent } from './vite/course-content'
 
-// GitHub Pages project site is served from /<repo>/. Override with VITE_BASE
-// in CI if the repository name ever changes.
-const base = process.env.VITE_BASE ?? '/CyberAcademiK/'
+// Pages serves this repo from the root of its custom domain
+// (https://docs.ckrobotics.org/), so the base is '/'. Override with VITE_BASE
+// to build for a bare project Pages URL instead — e.g. VITE_BASE=/CyberAcademiK/
+// for https://<user>.github.io/CyberAcademiK/.
+const base = process.env.VITE_BASE ?? '/'
 
 // https://vite.dev/config/
 export default defineConfig({

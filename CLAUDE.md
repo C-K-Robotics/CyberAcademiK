@@ -7,7 +7,7 @@ CyberAcademiK is an interactive FRC robotics learning library — lessons author
 ## Commands
 
 ```bash
-yarn dev          # dev server (served under the /CyberAcademiK/ base — open the URL Vite prints)
+yarn dev          # dev server (served under the / base — open the URL Vite prints)
 yarn build        # tsc -b && vite build → dist/
 yarn preview      # serve the production build locally
 yarn typecheck    # tsc -b --noEmit
@@ -52,7 +52,7 @@ Data flow:
 ### Adding content
 
 - **Pure-content course:** drop `content/<cat>/<sub>/<slug>/<locale>.mdx` with frontmatter. It appears in the catalog and counts automatically — no code changes.
-- **Images:** place them in `public/<slug>/` and reference them root-relative — `<Figure src="/<slug>/image.png" alt="…" caption="…" width="80%" />` or `![alt](/<slug>/image.png)`. Both paths run through `src/lib/assetUrl.ts`, which prefixes the `/CyberAcademiK/` deploy base and leaves already-complete URLs (`https://…`, `data:…`) alone.
+- **Images:** place them in `public/<slug>/` and reference them root-relative — `<Figure src="/<slug>/image.png" alt="…" caption="…" width="80%" />` or `![alt](/<slug>/image.png)`. Both paths run through `src/lib/assetUrl.ts`, which prefixes the deploy base (`/` in production) and leaves already-complete URLs (`https://…`, `data:…`) alone.
 - **Course with custom widgets:** also add `src/courses/<slug>/index.tsx` whose **default export is a `CourseBundle`** (`{ components, Wrapper? }`, see `src/content/types.ts`). `components` are merged over the generic MDX set for that course's MDX; `Wrapper` wraps the rendered lesson (e.g. `PidGainsProvider` shares simulator state). See `src/courses/pid-control/` for the reference example.
 - **New category / sub-category:** create the directory with a `_category.json` / `_subcategory.json` sidecar (copy the shape of an existing one).
 
@@ -96,7 +96,7 @@ Data flow:
 ## Deployment
 
 - Pushing to `main` triggers `.github/workflows/deploy.yml` → `yarn build` → publishes `dist/` to GitHub Pages.
-- The site is a **project Pages site served from `/CyberAcademiK/`**. `vite.config.ts` reads `base` from `VITE_BASE` (CI sets it to `/<repo-name>/`, so a repo rename just works) and defaults to `/CyberAcademiK/` locally. Asset URLs and the dev server all run under this base.
+- The site is a project Pages site with a **custom domain (`docs.ckrobotics.org`), which Pages serves from the domain root** — so `base` is `/`, not `/<repo>/`. The bare `c-k-robotics.github.io/CyberAcademiK/` URL 301-redirects to the custom domain, so a `/<repo>/` base would 404 every asset and blank the page. `vite.config.ts` reads `base` from `VITE_BASE` and defaults to `/`; set `VITE_BASE=/CyberAcademiK/` only if the custom domain is removed.
 
 <!-- OPENWIKI:START -->
 
