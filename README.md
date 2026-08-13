@@ -32,7 +32,7 @@ docker compose up --build
 docker compose up
 ```
 
-This launches the site in a container and mounts your local files to enable hot-reloading. The site will be available at `http://localhost:5173/CyberAcademiK/`.
+This launches the site in a container and mounts your local files to enable hot-reloading. The site will be available at `http://localhost:5173/`.
 
 To stop and remove the containers: (:warning: **Make sure to do this to properly remove the containers**)
 
@@ -45,8 +45,9 @@ docker compose down
 > in `docker-compose.yml` supplies the code. An image built on its own has
 > nothing to serve.
 
-> The site is served from a sub-path on GitHub Pages (`/CyberAcademiK/`), so the
-> dev server and preview run under that base too — open the URL Vite prints.
+> The site is served from the root of its custom domain
+> (<https://docs.ckrobotics.org/>), so the base is `/` and the dev server and
+> preview run at the root too — open the URL Vite prints.
 
 ## How content works
 

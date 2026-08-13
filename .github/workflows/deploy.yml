@@ -30,11 +30,14 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build
-        # Base path must match the repository name for project Pages sites
-        # (https://<user>.github.io/<repo>/). Derived so a rename just works.
+        # The Pages custom domain (docs.ckrobotics.org) serves this repo from
+        # its root, so the base is '/'. The bare github.io project URL 301s to
+        # the custom domain, so a /<repo>/ base would 404 every asset. If the
+        # custom domain is ever removed, set this to
+        # /${{ github.event.repository.name }}/ instead.
         run: yarn build
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE: /
 
       - name: SPA fallback for client-side routing
         # GitHub Pages serves 404.html for any unmatched path. Mirroring

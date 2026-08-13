@@ -5,10 +5,11 @@ import { CoursePage } from './components/course/CoursePage'
 import { NotFound } from './components/NotFound'
 import { ScrollToTop } from './components/ScrollToTop'
 
-// React Router's basename must match Vite's base (e.g. /CyberAcademiK/) but
-// without the trailing slash. The deploy workflow copies index.html to 404.html
-// so GitHub Pages falls back to the SPA for deep links instead of 404ing.
-const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
+// React Router's basename must match Vite's base but without the trailing
+// slash — which leaves the root base ('/') as an empty string, so fall back to
+// '/'. The deploy workflow copies index.html to 404.html so GitHub Pages falls
+// back to the SPA for deep links instead of 404ing.
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
 
 export function App() {
   return (
