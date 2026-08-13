@@ -1,6 +1,7 @@
 import type { CourseBundle } from '../../content/types'
 import { PidGainsProvider } from './PidGains'
 import { BlockDiagram } from './components/BlockDiagram'
+import { OpenBlockDiagram } from './components/OpenBlockDiagram'
 import { PlantSchematic } from './components/PlantSchematic'
 import { ThreeTerms } from './components/ThreeTerms'
 import { PIDSimulator } from './components/PIDSimulator'
@@ -19,6 +20,7 @@ const bundle: CourseBundle = {
   Wrapper: PidGainsProvider,
   components: {
     BlockDiagram,
+    OpenBlockDiagram,
     PlantSchematic,
     ThreeTerms,
     PIDSimulator,

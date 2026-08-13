@@ -1,40 +1,61 @@
 ---
-title: PID 控制入門
-desc: 比例、積分、微分迴路——即時調校。
+title: PID 控制——從理論到機器人
+desc: 比例、積分、微分迴路——即時調校，正確量測。
 kicker: PID 控制
 lead: >-
   機器人領域中最實用的回授演算法。了解比例、積分與微分三項如何結合，把系統驅動到
-  設定點——然後親手即時調校一個。
+  設定點——然後帶上感測器與前饋，親手即時調校一個。
 author: Oliver Chou
-minutes: 25
+minutes: 40
 level: intermediate
 order: 1
 isNew: true
-updated: 2025 年 10 月更新
+updated: 2026 年 8 月更新
 references:
   - label: Wikipedia — PID controller
     href: 'https://en.wikipedia.org/wiki/PID_controller'
-  - label: NI — LabVIEW PID for FRC
-    href: 'https://forums.ni.com/t5/FIRST-Robotics-Competition/PID-Tutorial-LabVIEW-for-FRC/ta-p/3732695'
-  - label: FRC Programming Done Right
-    href: 'https://frcpdr.readthedocs.io/en/latest/control/pid_control.html'
+  - label: WPILib — Introduction to PID
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html
+  - label: WPILib — PIDController
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html
+  - label: WPILib — Feedforward control
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/feedforward.html
+  - label: CTRE Phoenix 6 — closed-loop requests
+    href: >-
+      https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/closed-loop-requests.html
 upNext:
-  label: 調校：手動與 Ziegler–Nichols
+  label: 進階：軌跡追蹤
   href: '#'
 ---
 
 {/*
-  PID 控制入門 — 繁體中文。
+  PID 控制 — 繁體中文。
   內容管理者可自由編輯文字，並用元件組合頁面：通用元件（Section、CodeTabs、
-  Quiz、Callout）以及本課程專屬的互動元件（BlockDiagram、PlantSchematic、
-  ThreeTerms、PIDSimulator、ZieglerNichols、ArmSimulator）。修改課程不需要寫程式。
+  Quiz、Callout）以及本課程專屬的互動元件（OpenBlockDiagram、BlockDiagram、
+  PlantSchematic、ThreeTerms、PIDSimulator、ZieglerNichols、ArmSimulator）。
+  修改課程不需要寫程式。
   所有課程的中繼資料都放在上方的 YAML frontmatter，而不是程式碼中。
+
+  章節順序：01–06 PID 基礎、07 感測、08 致動與前饋、09 增強型 PID 程式實作、
+  10 手臂模擬器（總結實作）、11 隨堂測驗、12 總結。
+  插入新章節時請同步更新 `n=`，並把結構變動一併反映到 en.mdx。
+
+  程式碼區塊與 en.mdx 保持逐字一致（含英文註解），以免兩個語系版本各自漂移。
 */}
 
 <Section id="loop" n="01" title="開迴路 vs. 閉迴路" chip="控制迴路">
 
 在**開迴路**控制中，指令會忽略結果——簡單又便宜，但盲目。**閉迴路**會把量測到的
 輸出回授，與設定點比較，並依據*誤差*作動。PID 就位於下方的控制器方塊之中。
+
+### 開迴路
+
+<OpenBlockDiagram />
+
+### 閉迴路
 
 <BlockDiagram />
 
@@ -143,19 +164,231 @@ public:
 
 </Section>
 
-<Section id="arm" n="07" title="手臂模擬器——對抗重力" chip="手臂模擬器">
+<Section id="sensors" n="07" title="為 PID 做感測" chip="感測">
 
-真實機構很少表現得像無摩擦的受控體。這裡有一顆 **Falcon 500** 驅動一支樞轉手臂，
-**重力持續把它往下拉**——要撐住它所需的力矩會隨角度改變。單靠 P 會留下下垂；
-開啟重力**前饋**項，PID 就能專心修正剩下的部分。
+你已經寫出一個裸的 PID 迴路——它會計算誤差、積分、微分，然後輸出馬達指令。但裸
+PID 只完成了一半。要把它部署到真實機器人上，還需要兩塊拼圖：
+
+- **感測**——如何量測受控體實際的位置（本章節）
+- **致動**——如何把 PID 輸出轉換成馬達指令（第 08 章）
+
+把兩者合起來，就得到**增強型 PID**：前饋 + 回授。
+
+### 感測流程
+
+```
+環境 → 感測器 → 原始資料 → 感知 → 低維度狀態
+```
+
+對 PID 而言，我們在意的是最終輸出：一個能讓控制器拿去和設定點比較的數值或向量。
+
+### 選擇合適的感測器
+
+| 感測器 | 量測對象 | 機器人上的典型用途 |
+|--------|----------|----------------------|
+| **增量式編碼器** | 軸的轉動量（脈衝數） | 馬達轉速、輪子行進距離 |
+| **絕對式編碼器** | 角度位置（0–360°） | 手臂角度、swerve 模組角度 |
+| **IMU／陀螺儀** | 角速度、航向 | 行進軌跡、機器人朝向 |
+| **電流感測器** | 馬達電流 | 力矩限制、堵轉偵測 |
+| **極限開關** | 二元接點 | 軟／硬限位、歸零 |
+
+### 雜訊問題
+
+每個編碼器都有雜訊。少量抖動對 P 和 I 沒什麼影響——它們會把雜訊**平均**掉。但
+微分項看的是誤差的*變化率*，而感測器雜訊是高頻的：
+
+  u<sub>D</sub> = K<sub>d</sub> · d(雜訊)/dt → 巨大的尖峰
+
+這就是為什麼實務程式碼會對微分項做**濾波**（低通）。許多機器人框架（WPILib 等）
+會套用一個簡單的一階濾波器：
+
+```
+filteredDerivative = α · newDeriv + (1 − α) · filteredDerivative
+```
+
+其中 α 介於 0 與 1 之間——數值越小輸出越平滑，但也帶來越多延遲。如果你的感測器
+雜訊很大，調低 Kd 通常比跟濾波器拉鋸來得容易。
+
+### 取樣率很重要
+
+PID 每個迴圈週期都會執行一次。如果週期會變動（例如網路延遲、感測器太慢、Java
+的 GC 暫停），積分與微分項就會漂移。永遠要把實際的迴圈週期傳進去，並加上上限：
+
+```java
+double dt = Math.min(actualDt, maxDt);   // guard against huge dt spikes
+integrated += error * dt;
+double deriv = (error - prevError) / dt;
+```
+
+一個穩定、已知的迴圈週期（例如 50 Hz 下剛好 20 毫秒）會讓調校結果好複製得多。
+
+</Section>
+
+<Section id="actuators" n="08" title="致動與前饋" chip="致動">
+
+現在你有了感測器讀值與 PID 輸出，接下來要驅動真實的致動器。有趣的地方就在這裡。
+
+### 認識致動器
+
+機器人的致動器把電能轉換成運動。常見的類型：
+
+| 類型 | 優點 | 缺點 | FRC 範例 |
+|------|------|------|-------------|
+| **有刷直流馬達** | 便宜、簡單 | 碳刷會磨耗，壽命有限 | Talon SRX（有刷） |
+| **無刷直流馬達** | 可靠、高功率、噪音低 | 較貴，需要 ESC | Falcon 500、NEO |
+| **步進馬達** | 開迴路即精準，保持力矩佳 | 高轉速下速度／力矩受限 | 3D 列印機軸 |
+| **伺服馬達** | 內建控制迴路 | 功率低，不適合驅動底盤 | SG90、Dynamixel |
+
+### 齒輪減速
+
+馬達轉得快但力矩小。齒輪減速是用**速度換力矩**：齒輪比越高 → 輸出端力矩越大，
+但最高轉速越慢。
+
+- **正齒輪**：簡單、便宜、齒比不錯
+- **行星齒輪**：體積小、齒比高、效率好（NEO 與 CIM 的齒輪箱）
+- **諧波減速機**：零背隙、齒比極高、昂貴（機械手臂）
+
+### 前饋控制
+
+與其等誤差出現，不如用動力學模型直接算出指令*應該是多少*。以機械手臂為例：
+
+  u<sub>ff</sub> = K<sub>g</sub>·cos(θ) + K<sub>v</sub>·ω + K<sub>a</sub>·α
+
+其中：
+- **K<sub>g</sub>（重力前饋）** 在角度 θ 撐住手臂
+- **K<sub>v</sub>（速度前饋）** 預先補償黏滯摩擦
+- **K<sub>a</sub>（加速度前饋）** 預先補償馬達慣量
+
+前饋做得好時，誤差會接近零——PID 只需要處理不確定性、建模誤差與擾動。這就是為
+什麼真實機器人可以用相對小的 PID 增益達到毫米級精度。
+
+### 純 PID vs 增強型 PID
+
+沒有模型時，純 PID 才是選項。**增強型 PID**（前饋 + PID）才是實務上的標準做法——
+前饋負責預測，PID 負責殘餘誤差。完整式子：
+
+  u(t) = u<sub>ff</sub>(t) + K<sub>p</sub>e(t) + K<sub>i</sub>∫e + K<sub>d</sub>ė
+
+### 全驅動 vs 欠驅動
+
+- **全驅動**：致動器數量 ≥ 自由度數量。例如麥輪底盤（4 顆馬達、3 個自由度），
+  或我們模擬器裡的單關節手臂（1 顆馬達、1 個自由度）。
+- **欠驅動**：致動器數量 < 自由度數量——被動夾爪、Acrobot、只在單一關節驅動的
+  雙擺。你無法直接命令每一個自由度，未被驅動的那些只能透過動力學間接操控。
+
+重力是作用在手臂上的*力*，不是一個自由度——手臂仍然是全驅動的，而重力前饋正是
+你在 PID 看到它之前就把這個力抵消掉的方法。
+
+<Callout type="tip" title="先調前饋，再調 PID">
+
+在量產機器人上，工程師會先調 K<sub>g</sub> 與 K<sub>v</sub>（通常是手動量測在各個
+角度撐住手臂所需的電壓），再調 K<sub>p</sub> 來拿到反應速度、調 K<sub>d</sub> 讓
+動作平順。除非有像齒輪卡澀這種持續性的擾動，否則 K<sub>i</sub> 常常就是零。
+
+</Callout>
+
+</Section>
+
+<Section id="code2" n="09" title="用程式實作增強型 PID" chip="程式">
+
+離散形式會在每個迴圈週期執行。用你的運動模型算出前饋，用殘餘誤差算出 PID，
+再把兩者相加。
+
+<CodeTabs>
+<CodeTab label="Arm.java">
+
+```java
+public class ArmController {
+    // Feed-forward constants (tune by hand — measure the voltage that holds
+    // the arm still at a few known angles, then fit kG)
+    static final double kG = 0.30;   // gravity compensation, at horizontal
+    static final double kV = 0.0;    // velocity feed-forward
+    static final double kA = 0.0;    // acceleration feed-forward
+
+    // Feedback gains — tune after the feed-forward is close
+    static final double kP = 0.02, kI = 0.0, kD = 0.001;
+
+    private final PIDController pid = new PIDController(kP, kI, kD);
+    private final TalonFX motor;
+    private final Encoder encoder;
+
+    public ArmController(TalonFX motor, Encoder encoder) {
+        this.motor = motor;
+        this.encoder = encoder;
+        pid.setTolerance(0.5); // degrees
+    }
+
+    /** Call every loop tick (50 Hz). Angles are degrees from horizontal. */
+    public void goToAngle(double setpointDeg) {
+        double measuredDeg = encoder.getDistance();   // encoder configured in degrees
+
+        // Feed-forward: gravity now, kV/kA once you have a motion profile
+        double ff = kG * Math.cos(Math.toRadians(measuredDeg));
+
+        // Feedback: PID on the residual error
+        double pidOut = pid.calculate(measuredDeg, setpointDeg);
+
+        // Combined command, clamped to the [-1, 1] duty-cycle range
+        double output = MathUtil.clamp(ff + pidOut, -1.0, 1.0);
+        motor.set(output);
+    }
+}
+```
+
+</CodeTab>
+<CodeTab label="Arm.cpp (CTRE)">
+
+```cpp
+class ArmController {
+    // Same gains as the Java version — kG at horizontal, kP/kD on the residual
+    static constexpr double kG = 0.30;
+    static constexpr double kP = 0.02, kI = 0.0, kD = 0.001;
+
+    // Declaration order == construction order; keep the init list in this order
+    frc::PIDController pid;
+    ctre::phoenix6::hardware::TalonFX& motor;
+    frc::Encoder& encoder;
+
+public:
+    ArmController(ctre::phoenix6::hardware::TalonFX& m, frc::Encoder& e)
+        : pid(kP, kI, kD), motor(m), encoder(e) {
+        pid.SetTolerance(0.5);  // degrees
+    }
+
+    // Call every loop tick (50 Hz). Everything below is in degrees.
+    void Update(double setpointDeg) {
+        double measuredDeg = encoder.GetDistance();  // encoder configured in degrees
+
+        // Gravity feed-forward — cos() wants radians, so convert
+        double ff = kG * std::cos(measuredDeg * M_PI / 180.0);
+
+        // PID correction on the residual error
+        double pidOut = pid.Calculate(measuredDeg, setpointDeg);
+
+        // Combined, clamped to the [-1, 1] duty-cycle range
+        motor.Set(std::clamp(ff + pidOut, -1.0, 1.0));
+    }
+};
+```
+
+</CodeTab>
+</CodeTabs>
+
+</Section>
+
+<Section id="arm" n="10" title="手臂模擬器——對抗重力" chip="手臂模擬器">
+
+現在把所有東西湊在一起。這裡有一顆 **Falcon 500** 驅動一支樞轉手臂，配上
+**重力前饋**（K<sub>g</sub>）與 **PID 回授**。沒有前饋時，重力會造成穩態下垂，
+單靠 P 只能用不穩定的增益才壓得下來。開啟重力前饋，PID 就能專心只修正殘餘誤差。
 
 <ArmSimulator />
 
 </Section>
 
-<Section id="quiz" n="08" title="隨堂測驗" chip="隨堂測驗">
+<Section id="quiz" n="11" title="隨堂測驗" chip="隨堂測驗">
 
-三道小問題。
+七道題，涵蓋目前為止的所有內容。
 
 <Quiz>
   <Q>
@@ -182,6 +415,55 @@ public:
     <Choice>完全停止反應</Choice>
     <Choice>剛好過衝 2%</Choice>
   </Q>
+  <Q>
+    <Prompt>為什麼感測器雜訊對微分（D）項的影響比 P 或 I 更大？</Prompt>
+    <Explain>D 計算的是誤差的變化率。感測器雜訊是高頻的——它的微分值非常大，會在輸出上造成劇烈尖峰。P 和 I 天生就會把它濾掉（P 是等比例的，I 會累加並平均），但 D 會放大它。</Explain>
+    <Choice>因為 D 用到了積分</Choice>
+    <Choice correct>因為 D 計算變化率，會放大高頻雜訊</Choice>
+    <Choice>因為雜訊是直流的</Choice>
+    <Choice>只有積分項對雜訊敏感</Choice>
+  </Q>
+  <Q>
+    <Prompt>相較於純回授，前饋最主要的優點是什麼？</Prompt>
+    <Explain>前饋會用模型預先算出所需的指令，所以系統不是在對誤差作出反應，而是依據預測先行動作。這表示一開始就不會產生那麼多誤差，PID 只需要處理殘餘的部分。</Explain>
+    <Choice>前饋比較便宜</Choice>
+    <Choice correct>它會預先算出所需的指令，而不是等誤差出現</Choice>
+    <Choice>前饋完全不需要調校</Choice>
+    <Choice>它讓編碼器變得沒有必要</Choice>
+  </Q>
+  <Q>
+    <Prompt>在增強型 PID（前饋 + 回授）中，PID 那一項負責修正什麼？</Prompt>
+    <Explain>前饋模型並不完美——它無法涵蓋每一種擾動或建模誤差。PID 負責處理模型與現實之間的落差。</Explain>
+    <Choice>全部——前饋根本沒有作用</Choice>
+    <Choice>只有重力——其餘由速度前饋處理</Choice>
+    <Choice correct>不確定性、建模誤差與外部擾動</Choice>
+    <Choice>它會被前饋項取代</Choice>
+  </Q>
+  <Q>
+    <Prompt>把一顆高轉速馬達減速到較慢的輸出，主要會造成什麼結果？</Prompt>
+    <Explain>齒輪減速是用速度換力矩。減速比越高，馬達就能克服越大的負載，但輸出端也轉不了那麼快。這是所有齒輪式致動器共通的力矩—速度取捨。</Explain>
+    <Choice correct>提高輸出力矩，降低最高輸出轉速</Choice>
+    <Choice>力矩與轉速同時提高</Choice>
+    <Choice>力矩與轉速同時降低</Choice>
+    <Choice>只改變方向，不改變力矩</Choice>
+  </Q>
 </Quiz>
+
+</Section>
+
+<Section id="summary" n="12" title="總結" chip="總結">
+
+你已經走過了完整的控制迴路——從開迴路與閉迴路，到 PID 三項、調校、感測、致動、
+前饋，以及增強型 PID。以下是值得帶著走的心智模型：
+
+- **前饋**負責預測指令應該是多少（來自模型）
+- **PID** 負責修正殘餘誤差（來自感測）
+- **感測**的品質，取決於你的雜訊濾波做得好不好
+- **齒輪減速**是用速度換力矩
+- **增強型 PID**（u<sub>ff</sub> + u<sub>pid</sub>）才是實務上的標準做法
+
+在真實機器人上調校時，先從前饋開始（K<sub>g</sub>、K<sub>v</sub>），接著加
+K<sub>p</sub> 取得反應速度、加 K<sub>d</sub> 讓動作平順，只有在看到持續性的穩態
+誤差時才動 K<sub>i</sub>。
 
 </Section>

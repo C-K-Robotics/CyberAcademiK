@@ -1,36 +1,49 @@
 ---
-title: Introducing PID Control
-desc: The proportional, integral, derivative loop — tuned live.
+title: PID Control — From Theory to Robots
+desc: The proportional, integral, derivative loop — tuned live, measured right.
 kicker: PID CONTROL
 lead: >-
   The single most useful feedback algorithm in robotics. Learn how the
   proportional, integral, and derivative terms combine to drive a system to its
-  setpoint — then tune one yourself, live.
+  setpoint — then tune one yourself, live, armed with sensors and feed-forward.
 author: Oliver Chou
-minutes: 25
+minutes: 40
 level: intermediate
 order: 1
 isNew: true
-updated: Updated Oct 2025
+updated: Updated Aug 2026
 references:
   - label: Wikipedia — PID controller
     href: 'https://en.wikipedia.org/wiki/PID_controller'
-  - label: NI — LabVIEW PID for FRC
-    href: 'https://forums.ni.com/t5/FIRST-Robotics-Competition/PID-Tutorial-LabVIEW-for-FRC/ta-p/3732695'
-  - label: FRC Programming Done Right
-    href: 'https://frcpdr.readthedocs.io/en/latest/control/pid_control.html'
+  - label: WPILib — Introduction to PID
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/introduction/introduction-to-pid.html
+  - label: WPILib — PIDController
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/pidcontroller.html
+  - label: WPILib — Feedforward control
+    href: >-
+      https://docs.wpilib.org/en/stable/docs/software/advanced-controls/controllers/feedforward.html
+  - label: CTRE Phoenix 6 — closed-loop requests
+    href: >-
+      https://v6.docs.ctr-electronics.com/en/stable/docs/api-reference/device-specific/talonfx/closed-loop-requests.html
 upNext:
-  label: 'Tuning: manual & Ziegler–Nichols'
+  label: 'Advanced: trajectory tracking'
   href: '#'
 ---
 
 {/*
-  Introducing PID Control — English.
+  PID Control — English.
   Authors edit prose freely and compose the page from components:
   generic ones (Section, CodeTabs, Quiz, Callout) plus the PID course's own
   interactive widgets (BlockDiagram, PlantSchematic, ThreeTerms, PIDSimulator,
   ZieglerNichols, ArmSimulator). No code required to change the lesson.
   All course metadata lives in the YAML frontmatter above — not in code.
+
+  Section order: 01–06 PID fundamentals, 07 sensing, 08 actuation & feed-forward,
+  09 augmented PID in code, 10 arm simulator (capstone), 11 quiz, 12 summary.
+  Keep `n=` in sync with this order when inserting a section, and mirror any
+  structural change into zh-Hant.mdx.
 */}
 
 <Section id="loop" n="01" title="Open loop vs. closed loop" chip="Control loop">
@@ -38,6 +51,12 @@ upNext:
 In **open-loop** control the command ignores the result — simple and cheap, but
 blind. A **closed loop** feeds the measured output back, comparing it to the
 setpoint and acting on the *error*. PID lives inside the controller block below.
+
+### Open loop
+
+<OpenBlockDiagram />
+
+### Closed loop
 
 <BlockDiagram />
 
@@ -149,20 +168,247 @@ public:
 
 </Section>
 
-<Section id="arm" n="07" title="Arm simulator — beating gravity" chip="Arm simulator">
+<Section id="sensors" n="07" title="Sensing for PID" chip="Sensing">
 
-A real mechanism rarely behaves like a frictionless plant. Here a **Falcon 500**
-drives a pivoting arm that **gravity constantly pulls down** — the torque needed
-to hold it changes with angle. P alone leaves a droop; switch on a gravity
-**feed-forward** term and PID is freed to correct only what's left.
+You've built a bare PID loop — it computes error, integrates, differentiates,
+and outputs a motor command. But bare PID is only half the battle. To deploy it
+on a real robot, you need two more pieces:
+
+- **Sensing** — how to measure where the plant actually is (this section)
+- **Actuation** — how to translate the PID output into motor commands (Section 08)
+
+Put them together and you get **augmented PID**: feed-forward + feedback.
+
+### The sensing pipeline
+
+```
+Environment → Sensors → Raw data → Perception → Low-dimensional state
+```
+
+For PID, we care about the final output: a single number or vector that the
+controller can compare to the setpoint.
+
+### Choosing the right sensor
+
+| Sensor | Measures | Typical use on a robot |
+|--------|----------|----------------------|
+| **Incremental encoder** | Shaft rotation (ticks) | Motor speed, wheel distance |
+| **Absolute encoder** | Angular position (0–360°) | Arm angle, swerve module angle |
+| **IMU / Gyro** | Angular rate, heading | Drive trajectory, robot orientation |
+| **Current sensor** | Motor current | Torque limiting, stall detection |
+| **Limit switch** | Binary contact | Soft/hard stops, homing |
+
+### The noise problem
+
+Every encoder is noisy. A small amount of jitter is fine for P and I — they
+**average** noise away. But the derivative term looks at the *rate of change*
+of error, and sensor noise is high-frequency:
+
+  u<sub>D</sub> = K<sub>d</sub> · d(noise)/dt → huge spikes
+
+That's why in real code the derivative is **filtered** (low-pass). Many robot
+frameworks (WPILib, etc.) apply a simple first-order filter:
+
+```
+filteredDerivative = α · newDeriv + (1 − α) · filteredDerivative
+```
+
+Where α is between 0 and 1 — smaller values give smoother output but add
+latency. If your sensor is very noisy, reducing Kd is often easier than
+fighting the filter.
+
+### Sampling rate matters
+
+PID runs every loop tick. If the period varies (e.g. network lag, slow sensors,
+GC pauses in Java), the integral and derivative terms drift. Always pass the
+actual loop period and clamp it:
+
+```java
+double dt = Math.min(actualDt, maxDt);   // guard against huge dt spikes
+integrated += error * dt;
+double deriv = (error - prevError) / dt;
+```
+
+A stable, known loop period (e.g. exactly 20 ms at 50 Hz) makes tuning far
+more repeatable.
+
+</Section>
+
+<Section id="actuators" n="08" title="Actuation & feed-forward" chip="Actuation">
+
+Now that you have a sensor reading and a PID output, you need to drive a real
+actuator. Here's where things get interesting.
+
+### Understanding actuators
+
+A robot's actuator converts electrical energy into motion. Common types:
+
+| Type | Pros | Cons | FRC example |
+|------|------|------|-------------|
+| **Brushed DC** | Cheap, simple | Brushes wear out, limited life | Talon SRX (brushed) |
+| **Brushless DC** | Reliable, high power, low noise | More expensive, needs ESC | Falcon 500, NEO |
+| **Stepper** | Precise open-loop, holding torque | Limited speed/torque at high RPM | 3D printer axes |
+| **Servo** | Built-in control loop | Low power, not for drive | SG90, Dynamixel |
+
+### Gearing
+
+Motors spin fast with low torque. Gearing trades **speed for torque**:
+higher gear ratio → more torque at the output, but slower max speed.
+
+- **Spur gears**: simple, cheap, good ratio
+- **Planetary gears**: compact, high ratio, efficient (NEO and CIM gearboxes)
+- **Harmonic drives**: zero-backlash, very high ratio, expensive (robotic arms)
+
+### Feed-forward control
+
+Instead of waiting for error, calculate what the command *should be* using a
+dynamic model. For a robotic arm:
+
+  u<sub>ff</sub> = K<sub>g</sub>·cos(θ) + K<sub>v</sub>·ω + K<sub>a</sub>·α
+
+Where:
+- **K<sub>g</sub> (gravity FF)** holds the arm up at angle θ
+- **K<sub>v</sub> (velocity FF)** anticipates viscous friction
+- **K<sub>a</sub> (acceleration FF)** anticipates motor inertia
+
+When feed-forward is good, the error is near zero — PID only handles
+uncertainties, modeling errors, and disturbances. This is why real robots
+achieve millimeter-level accuracy with relatively small PID gains.
+
+### Pure PID vs Augmented PID
+
+Pure PID works when you don't have a model. **Augmented PID** (feed-forward + PID)
+is the real-world standard — feed-forward does the prediction, PID handles the
+residual error. The full equation:
+
+  u(t) = u<sub>ff</sub>(t) + K<sub>p</sub>e(t) + K<sub>i</sub>∫e + K<sub>d</sub>ė
+
+### Fully actuated vs underactuated
+
+- **Fully actuated**: # actuators ≥ # degrees of freedom. A mecanum drive (4 motors, 3 DOF),
+  or the single-joint arm in our simulator (1 motor, 1 DOF).
+- **Underactuated**: # actuators < # DOFs — a passive gripper, an acrobot, a double
+  pendulum driven at one joint. You cannot command every DOF directly, so the
+  unactuated ones have to be steered indirectly through the dynamics.
+
+Gravity is a *force* acting on the arm, not a degree of freedom — the arm stays fully
+actuated, and gravity feed-forward is exactly how you cancel that force before PID
+ever sees it.
+
+<Callout type="tip" title="Start with feed-forward, tune PID second">
+
+In production robots, engineers tune K<sub>g</sub> and K<sub>v</sub> first
+(usually by hand, measuring what voltage holds the arm at each angle), then
+tweak K<sub>p</sub> for responsiveness and K<sub>d</sub> for smoothness.
+K<sub>i</sub> is often zero unless there's a persistent disturbance like
+sticky gears.
+
+</Callout>
+
+</Section>
+
+<Section id="code2" n="09" title="Augmented PID in code" chip="Code">
+
+The discrete form runs every loop iteration. Compute the feed-forward from your
+motion model, compute the PID from the residual error, and sum them.
+
+<CodeTabs>
+<CodeTab label="Arm.java">
+
+```java
+public class ArmController {
+    // Feed-forward constants (tune by hand — measure the voltage that holds
+    // the arm still at a few known angles, then fit kG)
+    static final double kG = 0.30;   // gravity compensation, at horizontal
+    static final double kV = 0.0;    // velocity feed-forward
+    static final double kA = 0.0;    // acceleration feed-forward
+
+    // Feedback gains — tune after the feed-forward is close
+    static final double kP = 0.02, kI = 0.0, kD = 0.001;
+
+    private final PIDController pid = new PIDController(kP, kI, kD);
+    private final TalonFX motor;
+    private final Encoder encoder;
+
+    public ArmController(TalonFX motor, Encoder encoder) {
+        this.motor = motor;
+        this.encoder = encoder;
+        pid.setTolerance(0.5); // degrees
+    }
+
+    /** Call every loop tick (50 Hz). Angles are degrees from horizontal. */
+    public void goToAngle(double setpointDeg) {
+        double measuredDeg = encoder.getDistance();   // encoder configured in degrees
+
+        // Feed-forward: gravity now, kV/kA once you have a motion profile
+        double ff = kG * Math.cos(Math.toRadians(measuredDeg));
+
+        // Feedback: PID on the residual error
+        double pidOut = pid.calculate(measuredDeg, setpointDeg);
+
+        // Combined command, clamped to the [-1, 1] duty-cycle range
+        double output = MathUtil.clamp(ff + pidOut, -1.0, 1.0);
+        motor.set(output);
+    }
+}
+```
+
+</CodeTab>
+<CodeTab label="Arm.cpp (CTRE)">
+
+```cpp
+class ArmController {
+    // Same gains as the Java version — kG at horizontal, kP/kD on the residual
+    static constexpr double kG = 0.30;
+    static constexpr double kP = 0.02, kI = 0.0, kD = 0.001;
+
+    // Declaration order == construction order; keep the init list in this order
+    frc::PIDController pid;
+    ctre::phoenix6::hardware::TalonFX& motor;
+    frc::Encoder& encoder;
+
+public:
+    ArmController(ctre::phoenix6::hardware::TalonFX& m, frc::Encoder& e)
+        : pid(kP, kI, kD), motor(m), encoder(e) {
+        pid.SetTolerance(0.5);  // degrees
+    }
+
+    // Call every loop tick (50 Hz). Everything below is in degrees.
+    void Update(double setpointDeg) {
+        double measuredDeg = encoder.GetDistance();  // encoder configured in degrees
+
+        // Gravity feed-forward — cos() wants radians, so convert
+        double ff = kG * std::cos(measuredDeg * M_PI / 180.0);
+
+        // PID correction on the residual error
+        double pidOut = pid.Calculate(measuredDeg, setpointDeg);
+
+        // Combined, clamped to the [-1, 1] duty-cycle range
+        motor.Set(std::clamp(ff + pidOut, -1.0, 1.0));
+    }
+};
+```
+
+</CodeTab>
+</CodeTabs>
+
+</Section>
+
+<Section id="arm" n="10" title="Arm simulator — beating gravity" chip="Arm simulator">
+
+Now put it all together. Here a **Falcon 500** drives a pivoting arm with
+**gravity feed-forward** (K<sub>g</sub>) and **PID feedback**. Without feed-forward,
+gravity creates a steady-state droop that P alone can't eliminate without
+unstable gains. Switch on gravity FF and PID is freed to correct only the
+residual error.
 
 <ArmSimulator />
 
 </Section>
 
-<Section id="quiz" n="08" title="Knowledge check" chip="Knowledge check">
+<Section id="quiz" n="11" title="Knowledge check" chip="Knowledge check">
 
-Three quick questions.
+Seven questions covering everything so far.
 
 <Quiz>
   <Q>
@@ -189,6 +435,56 @@ Three quick questions.
     <Choice>Stops responding entirely</Choice>
     <Choice>Overshoots by exactly 2%</Choice>
   </Q>
+  <Q>
+    <Prompt>Why does sensor noise affect the derivative (D) term more than P or I?</Prompt>
+    <Explain>D computes the rate of change of error. Sensor noise is high-frequency — its derivative is huge, creating large spikes in the output. P and I filter it out naturally (P is proportional, I accumulates and averages), but D amplifies it.</Explain>
+    <Choice>Because D uses integration</Choice>
+    <Choice correct>Because D computes the rate of change, amplifying high-frequency noise</Choice>
+    <Choice>Because noise is DC</Choice>
+    <Choice>Only the integral term is sensitive to noise</Choice>
+  </Q>
+  <Q>
+    <Prompt>What is the main advantage of feed-forward over pure feedback?</Prompt>
+    <Explain>Feed-forward anticipates the required command using a model, so the system isn't reacting to error — it's acting based on prediction. This means less error appears in the first place, and PID only handles the residual.</Explain>
+    <Choice>Feed-forward is cheaper</Choice>
+    <Choice correct>It anticipates the required command instead of waiting for error</Choice>
+    <Choice>Feed-forward never needs tuning</Choice>
+    <Choice>It eliminates the need for encoders</Choice>
+  </Q>
+  <Q>
+    <Prompt>In an augmented PID (feed-forward + feedback), what does the PID term correct for?</Prompt>
+    <Explain>The feed-forward model is imperfect — it doesn't account for every disturbance or modeling error. PID handles the gap between model and reality.</Explain>
+    <Choice>Everything — the feed-forward does nothing useful</Choice>
+    <Choice>Only gravity — velocity feed-forward handles the rest</Choice>
+    <Choice correct>Uncertainties, modeling errors, and external disturbances</Choice>
+    <Choice>It is replaced by the feed-forward term</Choice>
+  </Q>
+  <Q>
+    <Prompt>Gearing a faster motor to a slower output primarily does what?</Prompt>
+    <Explain>Gearing trades speed for torque. A higher reduction ratio means the motor can overcome larger loads, but the output can't spin as fast. This is the fundamental torque-speed tradeoff in all geared actuators.</Explain>
+    <Choice correct>Increases output torque, decreases max output speed</Choice>
+    <Choice>Increases both torque and speed</Choice>
+    <Choice>Decreases both torque and speed</Choice>
+    <Choice>Only changes direction, not torque</Choice>
+  </Q>
 </Quiz>
+
+</Section>
+
+<Section id="summary" n="12" title="Summary" chip="Summary">
+
+You've walked through the full control loop — from open and closed loop, through
+the three PID terms, tuning, sensing, actuation, feed-forward, and augmented PID.
+Here's the mental model to carry forward:
+
+- **Feed-forward** predicts what the command should be (from a model)
+- **PID** corrects the residual error (from sensing)
+- **Sensing** is only as good as your noise filtering
+- **Gearing** trades speed for torque
+- **Augmented PID** (u<sub>ff</sub> + u<sub>pid</sub>) is the real-world standard
+
+When tuning on a real robot, start with feed-forward (K<sub>g</sub>, K<sub>v</sub>),
+then add K<sub>p</sub> for responsiveness, K<sub>d</sub> for smoothness, and K<sub>i</sub>
+only if you see persistent steady-state error.
 
 </Section>
