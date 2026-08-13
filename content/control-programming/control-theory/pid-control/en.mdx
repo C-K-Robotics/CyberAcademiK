@@ -480,7 +480,7 @@ Here's the mental model to carry forward:
 - **Feed-forward** predicts what the command should be (from a model)
 - **PID** corrects the residual error (from sensing)
 - **Sensing** is only as good as your noise filtering
-- **Gearing** trades torque for speed
+- **Gearing** trades speed for torque
 - **Augmented PID** (u<sub>ff</sub> + u<sub>pid</sub>) is the real-world standard
 
 When tuning on a real robot, start with feed-forward (K<sub>g</sub>, K<sub>v</sub>),
