@@ -220,7 +220,47 @@ moves and gathers evidence.
 
 ### 4. Events, probability, and random variables
 
-Roll a six-sided die. The **sample space** Ω is the set of all possible
+Roll a fair six-sided die. The whole box below shows every outcome. The
+bubbles group the outcomes we want to ask about. Rolling a 3 also counts as
+rolling an odd number, so the smaller bubble fits entirely inside the larger one.
+
+<Figure
+  src="/intro-to-localization/die-sample-space.svg"
+  alt="Sample space Ω contains outcomes 1 through 6. The bubble for A₂ contains 1, 3, and 5. Inside it, the smaller A₁ bubble contains only 3. Outcomes 2, 4, and 6 are outside both events."
+  caption="A₁ is ‘roll a 3’; A₂ is ‘roll an odd number.’ Every outcome in A₁ is also in A₂."
+/>
+
+Now give each event a number that says **how likely it is**. On a fair die,
+three of the six outcomes are odd, so A₂ points to 1/2 on the probability line.
+
+<Figure
+  src="/intro-to-localization/event-probability.svg"
+  alt="Four arrows map events to a probability number line. The empty event maps to 0, A₁ to 1/6, A₂ to 1/2, and the full sample space Ω to 1."
+  caption="Probability maps a whole event to a value from 0 to 1. The impossible event has P(∅) = 0; the certain event has P(Ω) = 1."
+/>
+
+</Slide>
+<Slide>
+
+#### Give every outcome a number
+
+A **random variable** answers a different question: what number should we
+record for the outcome that actually happened? For example, use `X = 1` for
+an odd roll and `X = 0` for an even one. The roll of 3 maps to 1, even though
+the probability of rolling a 3 is 1/6.
+
+<Figure
+  src="/intro-to-localization/random-variable-mapping.svg"
+  alt="Two sets labeled Ω and ℝ. The die outcomes 1, 3, and 5 point to the real number 1, while 2, 4, and 6 point to 0."
+  caption="X assigns a value to each outcome in Ω. The output set ℝ is the real numbers, but this particular X only uses 0 and 1."
+/>
+
+</Slide>
+<Slide>
+
+#### From the diagrams to the notation
+
+For a six-sided die, the **sample space** Ω is the set of all possible
 outcomes: 1 through 6. An **event** is a set of outcomes you care about:
 “roll a 3” is one event; “roll an odd number” includes 1, 3, and 5. A
 probability assigns each event a number in `[0, 1]`.
@@ -316,6 +356,26 @@ and the errors can move together. For instance, if a robot is driving northeast
 and underestimates how far it drove, its actual position may be both farther
 east and farther north than predicted. **Correlation** ρ describes that tendency:
 a positive ρ means above-average x and above-average y tend to occur together.
+
+<Callout type="info" title="Reading a 2 × 2 covariance matrix">
+
+For the robot's position `(x, y)`, put the two standard deviations `σₓ` and
+`σᵧ` and the correlation `ρ` together in one **covariance matrix**:
+
+```text
+    ⎡ σₓ²       ρ σₓ σᵧ ⎤
+Σ = ⎣ ρ σₓ σᵧ   σᵧ²     ⎦
+```
+
+- **On the diagonal:** `σₓ²` (top left) and `σᵧ²` (bottom right) are the variances. Each tells you how spread out the uncertainty is along that map axis on its own.
+- **Off the diagonal:** both entries are `ρ σₓ σᵧ`, the covariance between x and y. They capture how the coordinates vary together. If `ρ = 0`, both entries are zero and the coordinates are uncorrelated.
+
+</Callout>
+
+</Slide>
+<Slide>
+
+#### See the matrix in the scatter plots
 
 <Figure
   src="/intro-to-localization/gaussian-uncorrelated.svg"
@@ -423,6 +483,51 @@ For a **linear** conversion `y = Ax`, the covariance transforms as
 as a rule that stretches, turns, or combines directions in the uncertainty cloud.
 For example, doubling a distance doubles its standard deviation and quadruples
 its variance.
+
+<details>
+<summary>Step-by-Step Math Derivation</summary>
+
+Here `x` and `y` are whole column vectors, and `A` is a fixed matrix.
+`E[…]` means an average over possible outcomes, and `μₓ` and `μᵧ` are the mean vectors.
+
+1. **Start with the covariance of `y`.** Subtract the mean, then multiply that column by its transpose to get the products of all pairs of deviations.
+
+   ```text
+   Σᵧ = E[(y − μᵧ)(y − μᵧ)ᵀ]
+   ```
+
+2. **Use linearity of expectation.** Applying the same fixed `A` to every input means we can apply it after averaging instead. Then substitute `y = Ax` and `μᵧ = Aμₓ`.
+
+   ```text
+   μᵧ = E[Ax] = A E[x] = Aμₓ
+   Σᵧ = E[(Ax − Aμₓ)(Ax − Aμₓ)ᵀ]
+   ```
+
+3. **Factor out `A` from each difference.** Both terms in each difference were multiplied by the same matrix.
+
+   ```text
+   Σᵧ = E[(A(x − μₓ))(A(x − μₓ))ᵀ]
+   ```
+
+4. **Transpose the product in reverse order.** The rule `(MN)ᵀ = NᵀMᵀ` moves the transposed `A` to the far right.
+
+   ```text
+   Σᵧ = E[A(x − μₓ)(x − μₓ)ᵀ Aᵀ]
+   ```
+
+5. **Take the constant matrices outside the expectation.** `A` and `Aᵀ` stay the same for every outcome.
+
+   ```text
+   Σᵧ = A E[(x − μₓ)(x − μₓ)ᵀ] Aᵀ
+   ```
+
+6. **Recognize the covariance of `x`.** The average between the two fixed matrices is exactly `Σₓ`.
+
+   ```text
+   Σᵧ = A Σₓ Aᵀ
+   ```
+
+</details>
 
 Real motion can be **nonlinear**: a change in heading sends a robot along an
 arc, not a straight line. Near the current best guess, we can approximate

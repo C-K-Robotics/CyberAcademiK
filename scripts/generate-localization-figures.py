@@ -229,9 +229,73 @@ def particles():
     ])
 
 
+def die_sample_space():
+    save('die-sample-space', 680, 200, 'Nested events in the sample space of a six-sided die', [
+        rect(20, 14, 640, 172, PANEL, GRID, 12),
+        text(40, 45, 'Ω = {1, 2, 3, 4, 5, 6}', size=24, bold=True),
+        '<ellipse cx="242" cy="117" rx="191" ry="59" fill="none" '
+        f'stroke="{TEAL}" stroke-width="2.5"/>',
+        text(242, 84, 'A₂ = {1, 3, 5}', anchor='middle', bold=True, color=TEAL),
+        '<ellipse cx="242" cy="129" rx="60" ry="30" '
+        f'fill="{TEAL_FILL}" stroke="{TEAL}" stroke-width="2"/>',
+        text(242, 121, 'A₁ = {3}', anchor='middle', size=17, color=TEAL),
+        text(242, 145, '3', anchor='middle', size=24, bold=True),
+        *[text(x, 139, n, anchor='middle', size=24, bold=True) for x, n in
+          [(117, '1'), (366, '5'), (481, '2'), (541, '4'), (601, '6')]],
+    ])
+
+
+def event_probability():
+    left, right, baseline = 64, 616, 115
+    cases = [(0, '∅', '0'), (1/6, 'A₁', '1/6'), (1/2, 'A₂', '1/2'), (1, 'Ω', '1')]
+    elements = [
+        rect(20, 14, 640, 150, PANEL, GRID, 12),
+        path(f'M{left},{baseline}H{right}', stroke=MUTED, width=2),
+    ]
+    for probability, event, label in cases:
+        x = left + (right-left)*probability
+        endpoint = probability in (0, 1)
+        color = TEAL if endpoint else BLUE
+        elements.extend([
+            rect(x-29, 28, 58, 36, TEAL_FILL if endpoint else PANEL, color, 7),
+            text(x, 54, event, anchor='middle', size=24, bold=endpoint),
+            path(f'M{x},71V{baseline-10}', stroke=color, width=2.5, arrow='teal' if endpoint else 'blue'),
+            text(x+10, 91, 'P', size=17, color=color),
+            circle(x, baseline, 4.5, color),
+            text(x, 145, label, anchor='middle', size=22, bold=endpoint),
+        ])
+    save('event-probability', 680, 178, 'Four events map to their probabilities on the interval from zero to one', elements)
+
+
+def random_variable_mapping():
+    elements = [
+        rect(23, 16, 251, 163, PANEL, GRID, 23),
+        rect(406, 16, 251, 163, PANEL, GRID, 23),
+        text(47, 51, 'Ω', bold=True, size=26),
+        text(430, 51, 'ℝ', bold=True, size=26),
+        text(583, 115, '…', anchor='middle', size=31, color=MUTED),
+    ]
+    for y, outcomes, value, color, marker in [
+        (81, (1, 3, 5), 1, TEAL, 'teal'),
+        (135, (2, 4, 6), 0, BLUE, 'blue'),
+    ]:
+        elements.extend([
+            rect(45, y-19, 206, 38, TEAL_FILL if value else PAPER, color, 9),
+            *[text(80+i*68, y+8, str(outcome), anchor='middle', size=23) for i, outcome in enumerate(outcomes)],
+            path(f'M251,{y}H448', stroke=color, width=2.5, arrow=marker),
+            text(340, y-10, 'X', anchor='middle', bold=True, color=color),
+            rect(461, y-19, 52, 38, TEAL_FILL if value else PAPER, color, 9),
+            text(487, y+8, str(value), anchor='middle', size=23, bold=True),
+        ])
+    save('random-variable-mapping', 680, 195, 'A random variable maps every die outcome to its odd or even indicator', elements)
+
+
 if __name__ == '__main__':
     doorway()
     particles()
+    die_sample_space()
+    event_probability()
+    random_variable_mapping()
     gaussian_pdf()
     scatter_comparison('gaussian-uncorrelated', 'Uncorrelated Gaussian scatter plots',
                        [('Equal spread', 1, 0), ('More vertical spread', 2, 0)])
