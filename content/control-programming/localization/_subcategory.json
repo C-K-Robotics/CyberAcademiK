@@ -1,5 +1,5 @@
 {
   "id": "localization",
   "order": 4,
-  "name": { "en": "Localizaton" }
+  "name": { "en": "Localization", "zh-Hant": "定位" }
 }
