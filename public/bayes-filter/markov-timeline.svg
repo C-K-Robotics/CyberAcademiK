@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 475" role="img" aria-labelledby="title desc" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title id="title">Markov state, action, and sensor timeline</title><desc id="desc">States x t-2 through x t+1 form a chain. Controls act from their same-index state toward the next state; sensors depend on their same-index state. Older history is faded; x t-1, u t-1, and z t are highlighted for estimating x t. The filter carries a belief over the unknown previous state.</desc>
+<style>@media (prefers-color-scheme: dark){[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#6b46c1"]{fill:#a78bfa}[stroke="#6b46c1"]{stroke:#a78bfa}[fill="#e8dff8"]{fill:#30234a}[stroke="#e8dff8"]{stroke:#30234a}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#b07c08"]{fill:#fbbf24}[stroke="#b07c08"]{stroke:#fbbf24}}</style>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475e6a"/></marker>
+</defs>
+<rect x="0" y="0" width="840" height="475" rx="0" fill="#eff5f8" stroke="none"/>
+<text x="28" y="36" fill="#15232c" font-size="25" text-anchor="start" font-weight="650">The present summarizes the past</text>
+<g opacity="0.4">
+<rect x="152" y="66" width="96" height="46" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="200" y="97" fill="#475e6a" font-size="25" text-anchor="middle" font-weight="650">uₜ₋₂</text>
+<path d="M200 114 L283 177" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+</g>
+<g opacity="1">
+<rect x="372" y="66" width="96" height="46" rx="12" fill="#c9edf0" stroke="#0a7d8f"/>
+<text x="420" y="97" fill="#0a7d8f" font-size="25" text-anchor="middle" font-weight="650">uₜ₋₁</text>
+<path d="M420 114 L503 177" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+</g>
+<g opacity="1">
+<rect x="592" y="66" width="96" height="46" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="640" y="97" fill="#475e6a" font-size="25" text-anchor="middle" font-weight="650">uₜ</text>
+<path d="M640 114 L723 177" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+</g>
+<g opacity="0.4">
+<path d="M134 208 H265" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="90" cy="208" r="44" fill="#fbfdfe" stroke="#cad9df" stroke-width="2"/>
+<text x="90" y="216" fill="#475e6a" font-size="25" text-anchor="middle" font-weight="650">xₜ₋₂</text>
+<path d="M90 253 V289" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="42" y="292" width="96" height="46" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="90" y="323" fill="#475e6a" font-size="24" text-anchor="middle" font-weight="650">zₜ₋₂</text>
+</g>
+<g opacity="1">
+<path d="M354 208 H485" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="310" cy="208" r="44" fill="#c9edf0" stroke="#0a7d8f" stroke-width="2"/>
+<text x="310" y="216" fill="#0a7d8f" font-size="25" text-anchor="middle" font-weight="650">xₜ₋₁</text>
+<path d="M310 253 V289" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="262" y="292" width="96" height="46" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="310" y="323" fill="#475e6a" font-size="24" text-anchor="middle" font-weight="650">zₜ₋₁</text>
+</g>
+<g opacity="1">
+<path d="M574 208 H705" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="530" cy="208" r="44" fill="#e8dff8" stroke="#6b46c1" stroke-width="2"/>
+<text x="530" y="216" fill="#6b46c1" font-size="25" text-anchor="middle" font-weight="650">xₜ</text>
+<path d="M530 253 V289" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="482" y="292" width="96" height="46" rx="12" fill="#e8dff8" stroke="#6b46c1"/>
+<text x="530" y="323" fill="#6b46c1" font-size="24" text-anchor="middle" font-weight="650">zₜ</text>
+</g>
+<g opacity="1">
+<circle cx="750" cy="208" r="44" fill="#fbfdfe" stroke="#cad9df" stroke-width="2"/>
+<text x="750" y="216" fill="#475e6a" font-size="25" text-anchor="middle" font-weight="650">xₜ₊₁</text>
+<path d="M750 253 V289" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<rect x="702" y="292" width="96" height="46" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="750" y="323" fill="#475e6a" font-size="24" text-anchor="middle" font-weight="650">zₜ₊₁</text>
+</g>
+<text x="420" y="380" fill="#15232c" font-size="21" text-anchor="middle" font-weight="650">Predict xₜ from xₜ₋₁ and uₜ₋₁; then use measurement zₜ.</text>
+<text x="420" y="413" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">uₜ starts at xₜ and leads toward xₜ₊₁ — not backward into xₜ.</text>
+<text x="420" y="449" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">The filter carries bel(xₜ₋₁), because the true state is still unknown.</text>
+</svg>

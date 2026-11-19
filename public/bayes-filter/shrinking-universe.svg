@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 485" role="img" aria-labelledby="title desc" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title id="title">Conditioning shrinks the universe to observation Z</title><desc id="desc">Left: events X and Z overlap inside the sample space. Right: only Z remains, enlarged, with the same relative overlap. Conditional probability divides the joint probability by P(Z). Areas are schematic.</desc>
+<style>@media (prefers-color-scheme: dark){[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#6b46c1"]{fill:#a78bfa}[stroke="#6b46c1"]{stroke:#a78bfa}[fill="#e8dff8"]{fill:#30234a}[stroke="#e8dff8"]{stroke:#30234a}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#b07c08"]{fill:#fbbf24}[stroke="#b07c08"]{stroke:#fbbf24}}</style>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475e6a"/></marker>
+</defs>
+<rect x="0" y="0" width="840" height="485" rx="0" fill="#eff5f8" stroke="none"/>
+<text x="25" y="35" fill="#15232c" font-size="23" text-anchor="start" font-weight="650">Before: all possible outcomes</text>
+<text x="455" y="35" fill="#15232c" font-size="23" text-anchor="start" font-weight="650">Given Z: keep only Z</text>
+<rect x="20" y="60" width="365" height="265" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="37" y="88" fill="#475e6a" font-size="18" text-anchor="start" font-weight="400">Sample space Ω</text>
+<defs><clipPath id="left-z"><circle cx="245" cy="198" r="85"/></clipPath>
+<clipPath id="right-z"><circle cx="635" cy="195" r="110"/></clipPath></defs>
+<circle cx="150" cy="198" r="85" fill="#eff5f8" stroke="#6b46c1" stroke-width="2"/>
+<circle cx="245" cy="198" r="85" fill="#c9edf0" stroke="#0a7d8f" stroke-width="2"/>
+<g clip-path="url(#left-z)"><circle cx="150" cy="198" r="85" fill="#e8dff8" stroke="#6b46c1" stroke-width="2"/></g>
+<text x="105" y="205" fill="#6b46c1" font-size="25" text-anchor="start" font-weight="650">X</text>
+<text x="282" y="205" fill="#0a7d8f" font-size="25" text-anchor="start" font-weight="650">Z</text>
+<text x="193" y="194" fill="#6b46c1" font-size="17" text-anchor="middle" font-weight="650">X ∩ Z</text>
+<path d="M397 194 H447" fill="none" stroke="#475e6a" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<circle cx="635" cy="195" r="110" fill="#c9edf0" stroke="#0a7d8f" stroke-width="2"/>
+<g clip-path="url(#right-z)"><circle cx="512" cy="195" r="110" fill="#e8dff8" stroke="#6b46c1" stroke-width="2"/></g>
+<text x="557" y="199" fill="#6b46c1" font-size="19" text-anchor="middle" font-weight="650">X ∩ Z</text>
+<text x="674" y="185" fill="#0a7d8f" font-size="19" text-anchor="middle" font-weight="650">Z is now</text>
+<text x="674" y="213" fill="#0a7d8f" font-size="18" text-anchor="middle" font-weight="400">the universe</text>
+<text x="202" y="360" fill="#15232c" font-size="19" text-anchor="middle" font-weight="400">Joint P(x, z): overlap / whole box</text>
+<text x="630" y="360" fill="#15232c" font-size="19" text-anchor="middle" font-weight="400">Conditional P(x ∣ z): overlap / Z</text>
+<text x="420" y="400" fill="#15232c" font-size="25" text-anchor="middle" font-weight="650">P(x ∣ z) = P(x, z) / P(z)</text>
+<text x="420" y="432" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">Dividing by P(z) makes the remaining universe total 1.</text>
+<text x="420" y="462" fill="#475e6a" font-size="17" text-anchor="middle" font-weight="400">Schematic areas for intuition; not the glass-door probabilities.</text>
+</svg>

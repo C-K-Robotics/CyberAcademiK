@@ -32,6 +32,12 @@ Now add: “You're on a plane, and **both engines just caught fire**.” Would y
 still use the same odds? Of course not. You have learned something important
 about *this particular flight*. The baseline odds no longer describe your situation.
 
+<Figure
+  src="/bayes-filter/airplane-conditional.svg"
+  alt="Two panels show the same jet cruising peacefully, then with flames and smoke from both engines. New evidence changes the applicable odds; the quoted baseline is illustrative, not a current risk estimate."
+  caption="Same airplane, different information. The quoted 1-in-11-million figure is only the hook — see the caveat below, not a calculation of flight safety."
+/>
+
 <Callout type="info" title="A hook, not an aviation risk calculation">
 
 The widely repeated “1 in 11 million” claim above is an illustration, not a
@@ -67,6 +73,12 @@ are **camera labels**, not guarantees about reality.
 The vertical bar **∣** means **“given.”** Imagine shrinking your whole sample
 space to just the cases matching the observation; dividing by `P(z)` rescales
 that smaller world to a total probability of 1.
+
+<Figure
+  src="/bayes-filter/shrinking-universe.svg"
+  alt="Left: events X and Z overlap inside the full sample space. Right: Z is enlarged and becomes the entire universe; the overlap with X occupies the same fraction of Z. Joint probability uses the whole sample space as its denominator, while conditional probability uses only Z."
+  caption="Keep the overlap; change the denominator. These areas are schematic, not the probabilities from the door example."
+/>
 
 For instance, `P(door open, camera says Open)` counts both events together.
 `P(door open ∣ camera says Open)` asks how much to trust that reading.
@@ -141,6 +153,16 @@ But the robot **doesn't know which previous state is true**. It keeps the
 previous **belief** as a compact summary and combines predictions from every
 possible previous state. That is why a recursive filter can carry yesterday's
 information forward without storing every raw reading.
+
+<Figure
+  src="/bayes-filter/markov-timeline.svg"
+  alt="A chain of states x t−2, x t−1, x t, x t+1 has controls leading from each departure state into the next state and sensor readings below each same-index state. Older history is faded. Previous state x t−1, incoming action u t−1, and latest reading z t are highlighted for estimating x t."
+  caption="Our indexing: uₜ₋₁ leads into xₜ, and uₜ leads toward xₜ₊₁. The previous state summarizes relevant history; the filter carries a belief over that unknown state."
+/>
+
+The arrows show **model dependencies**, not certainty. Once a previous state
+is specified, earlier states add nothing to this motion model. Since we don't
+know that previous state, prediction still averages over its possible values.
 
 <Callout type="info" title="Under the Hood: models are not beliefs">
 
@@ -231,7 +253,9 @@ For the full filter, the “old belief” at measurement time is the prediction 
 
 We don't need to calculate `P(z)` separately. Compute an unnormalized score for
 each state, add the scores, then **divide each score by their sum**. That's
-multiplication by η. It preserves their relative sizes.
+multiplication by η. It preserves their relative sizes. In the
+[glass-door example below](#sec-glass-door-measurements), a before-and-after
+bar diagram shows exactly how η stretches two scores to total 100%.
 
 <Callout type="tip" title="Same reading, different meaning">
 
@@ -310,6 +334,12 @@ bel(open)   = 0.45 / 0.70 ≈ 0.643
 bel(closed) = 0.25 / 0.70 ≈ 0.357
 ```
 
+<Figure
+  src="/bayes-filter/normalization.svg"
+  alt="Before normalization, a stacked bar has open score 0.45 and closed score 0.25, totaling 0.70 below a dashed 1.0 line. After multiplying both by eta approximately 1.429, open is 0.643 and closed is 0.357, totaling 1.0. The open-to-closed ratio stays 9 to 5."
+  caption="η changes the total, not the balance of evidence. Both stacked segments stretch by the same factor; values are rounded only for display."
+/>
+
 The new belief is **64.3% open, 35.7% closed**. An `Open` reading favors an
 open door, but it isn't overwhelming evidence: closed glass doors produce that
 same reading half the time!
@@ -330,6 +360,12 @@ isn't a safety guarantee — the cost of being wrong matters.
 <Slide>
 
 ### 3. Repeat the update in Python
+
+<Figure
+  src="/bayes-filter/elementwise-update.svg"
+  alt="A two-by-two measurement model highlights the Open row [0.9, 0.5]. The prior column [0.5, 0.5] is labeled open then closed. Matching entries give open score 0.9 times 0.5 equals 0.45 and closed score 0.5 times 0.5 equals 0.25. A Closed reading would select row [0.1, 0.5] instead."
+  caption="Select one row, then pair likelihood and prior for each state. This element-wise operation produces scores, not yet a normalized belief."
+/>
 
 Each posterior becomes the next prior. This **recursive update** carries the
 earlier evidence forward in just two numbers. Run this with Python and NumPy
@@ -516,6 +552,12 @@ door is **87.8% likely to be open**.
 |---|---|---|
 | Measurement alone (`none`) | 0.500 open | **0.643 open** |
 | Push, then measurement | 0.800 open | **0.878 open** |
+
+<Figure
+  src="/bayes-filter/action-comparison.svg"
+  alt="Grouped bars compare probability open across three stages. Measure only: 0.500 prior, 0.500 prediction with no action, 0.643 after an Open reading. Push and measure: 0.500 prior, 0.800 after push u zero, 0.878 after the same Open reading z one."
+  caption="Same initial belief and sensor model. With no action the prediction stays 0.500; a push changes it to 0.800 before either track uses the Open reading."
+/>
 
 The camera didn't improve. The action changed the world and therefore changed
 what we should believe **before** seeing the reading. An action can also make
