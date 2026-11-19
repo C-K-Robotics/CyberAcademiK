@@ -94,23 +94,36 @@ the possibilities would instead be robot positions and headings.
 A belief `[0.6, 0.4]` means “60% probability open, 40% closed,” **not** “the door
 is 60% of the way open.” Our model only has two possible states.
 
-Let `t` count steps, `zₜ` be the latest sensor measurement, and `uₜ` be the latest
-control action. A colon such as `z₁:ₜ` means **all measurements from step 1 to t**.
+Let `t` count steps, starting with the initial state `x₀`. An action **uₜ is
+applied at state xₜ**, taking the system toward `xₜ₊₁`; measurement **zₜ describes
+state xₜ**. So the action leading into `xₜ` is **uₜ₋₁**, not uₜ.
 
 ```text
-bel(xₜ) = P(xₜ ∣ z₁:ₜ, u₁:ₜ)
+x₀ ──u₀──→ x₁ ──u₁──→ x₂ ── … ──uₜ₋₁──→ xₜ
+            ↓ z₁        ↓ z₂                 ↓ zₜ
+```
+
+The previous states run from `x₀` through `xₜ₋₁`, and the actions taken so far
+run from `u₀` through `uₜ₋₁`. Measurements run from `z₁` through `zₜ`.
+A colon such as `z₁:ₜ` means **all measurements from step 1 to t**.
+We start with an initial prior `bel(x₀)`.
+
+```text
+bel(xₜ) = P(xₜ ∣ z₁:ₜ, u₀:ₜ₋₁)
 ```
 
 This **posterior belief** describes the state *after* using the latest
-measurement. It includes the evidence from all measurements and actions so far.
+measurement. It includes the evidence from all measurements and actions so far;
+the earlier states are uncertain, not extra known values we condition on.
 
 ```text
-b̄el(xₜ₊₁) = P(xₜ₊₁ ∣ z₁:ₜ, u₁:ₜ₊₁)
+b̄el(xₜ) = P(xₜ ∣ z₁:ₜ₋₁, u₀:ₜ₋₁)
 ```
 
-This **predicted belief** describes the *next* state after the next action,
-**before** the next measurement. The bar above `bel` is our “prediction only” flag.
-We'll also write `b̄el(xₜ)` when discussing the prediction for the current step t.
+This **predicted belief** describes the same state xₜ after action uₜ₋₁,
+**before** measurement zₜ. The bar above `bel` is our “prediction only” flag.
+At step 1, the measurement history `z₁:₀` is empty: predict from `bel(x₀)`
+using u₀, then update with z₁.
 
 </Slide>
 <Slide>
@@ -131,12 +144,12 @@ information forward without storing every raw reading.
 
 <Callout type="info" title="Under the Hood: models are not beliefs">
 
-The motion model is `P(xₜ ∣ xₜ₋₁, uₜ)`: how likely is a new state if the previous
+The motion model is `P(xₜ ∣ xₜ₋₁, uₜ₋₁)`: how likely is a new state if the previous
 state and action are specified? The measurement model is `P(zₜ ∣ xₜ)`.
 For discrete states, the actual filter is:
 
 ```text
-Predict: b̄el(xₜ) = Σ over xₜ₋₁ [P(xₜ ∣ xₜ₋₁, uₜ) bel(xₜ₋₁)]
+Predict: b̄el(xₜ) = Σ over xₜ₋₁ [P(xₜ ∣ xₜ₋₁, uₜ₋₁) bel(xₜ₋₁)]
 Update:   bel(xₜ) = η P(zₜ ∣ xₜ) b̄el(xₜ)
 ```
 
@@ -144,8 +157,8 @@ Update:   bel(xₜ) = η P(zₜ ∣ xₜ) b̄el(xₜ)
 “chance we were there,” then add those paths. **Update:** multiply that
 prediction by how well the latest reading fits, then normalize.
 
-Don't equate `b̄el(xₜ)` with `P(xₜ ∣ xₜ₋₁, uₜ)` or equate `bel(xₜ)` with
-`P(xₜ ∣ xₜ₋₁, zₜ, uₜ)`. Those right-hand expressions condition on a particular
+Don't equate `b̄el(xₜ)` with `P(xₜ ∣ xₜ₋₁, uₜ₋₁)` or equate `bel(xₜ)` with
+`P(xₜ ∣ xₜ₋₁, zₜ, uₜ₋₁)`. Those right-hand expressions condition on a particular
 previous state; the belief must account for **all** possible previous states.
 If that previous state were known exactly, its belief would be 1 there and 0 elsewhere.
 
@@ -424,9 +437,10 @@ one action and previous state, so its two outcome probabilities sum to 1.
 
 ### 2. Predict after pushing, before measuring
 
-**Reset to a fresh 50/50 prior** — don't continue from Example 1. To find the
-chance of open after pushing, add two possible paths: it was already open, or
-it was closed and the push succeeded.
+**Reset to a fresh 50/50 prior** `bel(x₀)` — don't continue from Example 1.
+The first push is **u₀**, which predicts the door state **x₁**; the camera then
+provides **z₁**. To find the chance of open after pushing, add two possible paths:
+it was already open, or it was closed and the push succeeded.
 
 ```text
 b̄el(open)   = 1.0 × 0.5 + 0.6 × 0.5 = 0.8
@@ -530,7 +544,7 @@ uncertainty larger in other models; pushing is not a universal confidence boost.
 <path d="M575 294 V363 H185 V294" />
 </g>
 <g textAnchor="middle" fill="var(--tx-2)" fontSize="18">
-<text x="185" y="46">Action uₜ</text>
+<text x="185" y="46">Action uₜ₋₁</text>
 <text x="575" y="46">Measurement zₜ</text>
 <text x="185" y="198">Motion model</text>
 <text x="575" y="198">Sensor model</text>
