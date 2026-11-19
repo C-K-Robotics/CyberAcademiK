@@ -362,7 +362,7 @@ isn't a safety guarantee — the cost of being wrong matters.
 </Slide>
 <Slide>
 
-### 3. Repeat the update in Python
+### 3. Repeat the update in Python or Java
 
 <Figure
   src="/bayes-filter/elementwise-update.svg"
@@ -371,8 +371,11 @@ isn't a safety guarantee — the cost of being wrong matters.
 />
 
 Each posterior becomes the next prior. This **recursive update** carries the
-earlier evidence forward in just two numbers. Run this with Python and NumPy
-(`python -m pip install numpy` if needed):
+earlier evidence forward in just two numbers. Pick either version below. For
+Python, install NumPy with `python -m pip install numpy` if needed. For Java,
+save the code as `DoorMeasurements.java` and run `java DoorMeasurements.java`
+(JDK 11 or newer). The Java version uses ordinary arrays, so it works without
+WPILib or robot hardware.
 
 <CodeTabs>
 <CodeTab label="door_measurements.py">
@@ -407,12 +410,58 @@ for step, z in enumerate(measurements, start=1):
 ```
 
 </CodeTab>
+<CodeTab label="DoorMeasurements.java">
+
+```java
+import java.util.Locale;
+
+public class DoorMeasurements {
+    public static void main(String[] args) {
+        // State order everywhere: [open, closed].
+        double[] belief = {0.5, 0.5};
+
+        // Rows: camera reading [Open, Closed]. Columns: true state [open, closed].
+        double[][] measurementModel = {
+            {0.9, 0.5},  // P(camera says Open | each true state)
+            {0.1, 0.5}   // P(camera says Closed | each true state)
+        };
+
+        // Open, Open, Open, Open, Open, Closed, Open, Open
+        int[] measurements = {0, 0, 0, 0, 0, 1, 0, 0};
+        String[] labels = {"Open", "Closed"};
+
+        System.out.println("step  reading  bel(open)  bel(closed)");
+        for (int i = 0; i < measurements.length; i++) {
+            int z = measurements[i];
+            double[] likelihood = measurementModel[z];  // Select one row.
+
+            // Multiply matching entries. Use the old belief for both scores.
+            double openScore = likelihood[0] * belief[0];
+            double closedScore = likelihood[1] * belief[1];
+            double total = openScore + closedScore;
+            if (total <= 0.0) {
+                throw new IllegalStateException("This reading is impossible under our model.");
+            }
+
+            // Normalize. This posterior becomes the next prior.
+            belief[0] = openScore / total;
+            belief[1] = closedScore / total;
+            System.out.printf(Locale.ROOT, "%4d  %7s  %.3f      %.3f%n",
+                    i + 1, labels[z], belief[0], belief[1]);
+        }
+    }
+}
+```
+
+</CodeTab>
 </CodeTabs>
 
-For `z = 0`, we pick `[0.9, 0.5]`. For `z = 1`, we pick `[0.1, 0.5]`.
-The `*` operator does **element-wise multiplication**: open is paired with open,
-closed with closed. After normalizing, `belief` stores the updated distribution.
-Keep full precision internally; round only when printing.
+For `z = 0`, both versions pick `[0.9, 0.5]`. For `z = 1`, they pick `[0.1, 0.5]`.
+NumPy's `*` pairs the entries for us; Java writes the two scalar products out.
+This is **element-wise multiplication**: open is paired with open, closed with
+closed. A matrix product isn't needed for this measurement update. After
+normalizing, `belief` stores the updated distribution. Keep full precision
+internally; round only when printing.
 
 </Slide>
 <Slide>
@@ -633,7 +682,62 @@ belief representations. You don't need that heavier notation to understand the l
 
 </Section>
 
-<Section id="check-your-understanding" n="06" title="Check Your Understanding" chip="Knowledge check">
+<Section id="practical-concerns" n="06" title="Practical Concerns" chip="When models fail">
+
+<Slide>
+
+### What if we only have half the filter?
+
+1. **Measurement only: a zero prior can lock out the right answer.** Start
+   with `[1, 0]` in `[open, closed]` order. With no motion model to move
+   probability between states, even a `Closed` reading gives scores
+   `[0.1 × 1, 0.5 × 0] = [0.1, 0]`. Normalizing takes us right back to
+   `[1, 0]`: no number of these readings can bring the closed state back.
+   Reserve zero for a state you can truly rule out. If someone could close
+   the door between readings, model that possibility even when the robot
+   does nothing.
+2. **Action only: prediction isn't confirmation.** From `[0.5, 0.5]`, the
+   push model predicts an 80% chance that the door is open. A second push
+   predicts 92%, because it opens 60% of the remaining 20% closed cases.
+   But without a camera, the robot never learns whether either push actually
+   worked. In localization, a robot using only wheel encoders to predict motion
+   can drift away from its true position as small errors accumulate. If a
+   reading is missing, carry the prediction forward, but don't treat it as verified.
+
+</Slide>
+<Slide>
+
+### When sensor readings are unreliable
+
+3. **A reading can be real but uninformative.** If the camera says `Open`
+   half the time no matter what the door is doing, that reading multiplies
+   both scores by 0.5. Normalization cancels the common factor, so the
+   predicted belief stays as it was; it does **not** reset to 50/50.
+4. **Repeated readings aren't always fresh evidence.** Five copies of the
+   same camera frame don't count as five independent looks. A reflection
+   can also fool several consecutive frames in the same way. Don't count
+   duplicate data as new measurements; try a different viewpoint or a
+   second sensor if you need independent evidence.
+5. **A reading your model says is impossible needs special handling.** If
+   all the scores are zero, there's no total to divide by. For example, a
+   model that gives a sensor no chance of error may fail when that sensor
+   and the prior disagree. Check for bad data or a wrong model instead of
+   dividing by zero. For this robot, a sensible fallback is to keep the
+   prediction, flag the failed update, and stop to gather better evidence.
+
+<Callout type="tip" title="Test the filter before trusting it">
+
+Try an overconfident start, a dropped reading, and a stuck camera. Check that
+beliefs still sum to 1 after each successful update, and that the robot doesn't
+mistake an unchanged belief for fresh confirmation.
+
+</Callout>
+
+</Slide>
+
+</Section>
+
+<Section id="check-your-understanding" n="07" title="Check Your Understanding" chip="Knowledge check">
 
 <Quiz>
   <Q>
