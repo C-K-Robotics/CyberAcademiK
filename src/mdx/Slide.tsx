@@ -21,3 +21,8 @@ export function Slide({ children, id }: SlideProps) {
   )
 }
 Slide.displayName = 'Slide'
+
+/** One opt-in reveal step. In reading mode this is just an inline wrapper. */
+export function Reveal({ children }: { children?: ReactNode }) {
+  return <span data-slide-reveal="">{children}</span>
+}

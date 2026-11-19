@@ -40,6 +40,17 @@
   padding-top: 32px;
 }
 
+/* Reserve the space for unrevealed text without leaving it focusable. */
+.course-main[data-slide-mode] [data-slide-reveal-state='hidden'] {
+  visibility: hidden;
+  opacity: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .course-main[data-slide-mode] [data-slide-reveal-state='shown'] {
+    transition: opacity 160ms ease-out;
+  }
+}
+
 /* Quiz component: inline markdown (bold, italic, code) in prompts & explanations */
 .quiz-markdown strong {
   font-weight: 700;

@@ -73,6 +73,7 @@ A lesson is prose plus components. These components are available in **every** c
 
 - `<Section id n title chip>` — a numbered lesson section. `n` is the displayed number string (e.g. `"01"`), `chip` a small label. Wraps the section's prose and components.
 - `<Slide>` — an optional slide break *inside* a `<Section>`. It renders nothing on its own; in slide mode each `<Slide>` becomes its own step, so a long section can be paged through instead of shown at once. A section with no `<Slide>` children is a single step. Anything left outside a `<Slide>` stays visible on every step of that section — useful for a standing intro, surprising otherwise.
+- `<Reveal>` — marks one inline sentence or bullet for the slide arrows to reveal. For a whole bullet (including its marker), write `- <Reveal>**Measure first:** Scan both jambs.</Reveal>` with nothing else in the item. Put reveals inside the active `<Slide>` (or a `<Section>` with no slide breaks). Unmarked content appears immediately, and all content is visible in normal reading mode.
 - `<Callout type title>` — coloured aside; `type` is `info` (default) \| `tip` \| `warn`.
 - `<CodeTabs>` containing one `<CodeTab label="…">` per language, each wrapping a single fenced code block — a tabbed viewer with a copy button.
 - `<Quiz>` → `<Q>` containing `<Prompt>` (question text), `<Explain>` (feedback), and `<Choice correct>` (answer options) children. All text children are rendered through `InlineMarkdownText`, which parses **bold**, _italic_, and `inline code` patterns before rendering.

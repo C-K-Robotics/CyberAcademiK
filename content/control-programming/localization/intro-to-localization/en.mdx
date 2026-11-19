@@ -50,14 +50,14 @@ uncertainty in both **state estimation** (what's likely true now?) and **control
 outcomes** (what's likely to happen if I send this command?). Three things make
 that uncertainty unavoidable:
 
-1. **The environment changes.** Someone walks between the robot and a landmark,
-   or a lighting change makes the landmark harder for a camera to see.
-2. **Sensors are noisy and sometimes misleading.** A distance sensor aimed at a
+1. **The environment changes.** <Reveal>Someone walks between the robot and a landmark,
+   or a lighting change makes the landmark harder for a camera to see.</Reveal>
+2. **Sensors are noisy and sometimes misleading.** <Reveal>A distance sensor aimed at a
    stationary wall might flicker between 99 and 101 cm. An encoder can correctly
-   count wheel turns even when the wheel slips and the robot barely moves.
-3. **Motion is hard to predict.** Command “drive forward 1 meter” and you might
+   count wheel turns even when the wheel slips and the robot barely moves.</Reveal>
+3. **Motion is hard to predict.** <Reveal>Command “drive forward 1 meter” and you might
    get 0.98 m on one run and 1.02 m on the next. Battery voltage, floor grip,
-   and tiny steering differences all matter; exactly 1.000 m is unlikely.
+   and tiny steering differences all matter; exactly 1.000 m is unlikely.</Reveal>
 
 Rather than pretending one reading or command tells the whole story, a robot
 can keep track of several possible answers and how plausible each one is.
@@ -154,14 +154,14 @@ are**.
 
 Here's how that answer can get more useful:
 
-1. **“About 50% full.”** A best guess, but no idea how far off it might be.
-2. **“Between 49% and 51% full.”** An interval, but no sense of how much to trust it.
-3. **“Between 49% and 51%, with 90% confidence.”** Now we can weigh the risk of being outside the interval.
-4. **“Between 49% and 51%, with 90% confidence, Gaussian.”** Now we've named the shape of our uncertainty: a bell curve.
+1. <Reveal>**“About 50% full.”** A best guess, but no idea how far off it might be.</Reveal>
+2. <Reveal>**“Between 49% and 51% full.”** An interval, but no sense of how much to trust it.</Reveal>
+3. <Reveal>**“Between 49% and 51%, with 90% confidence.”** Now we can weigh the risk of being outside the interval.</Reveal>
+4. <Reveal>**“Between 49% and 51%, with 90% confidence, Gaussian.”** Now we've named the shape of our uncertainty: a bell curve.</Reveal>
 
-Here, “90% confidence” means our model assigns 90% probability to the fill
+<Reveal> Here, “90% confidence” means our model assigns 90% probability to the fill
 level being in that interval. The last version lets us ask other questions,
-too: is it nearly as likely to be 52% full as 50% full, or much less likely?
+too: is it nearly as likely to be 52% full as 50% full, or much less likely?</Reveal>
 
 </Slide>
 <Slide>
@@ -186,11 +186,10 @@ clearance on each side**. What if its position estimate is off by 8 cm?
 Depending on the quality of its measurements and the cost of being wrong, the
 robot can:
 
-- **Go through** and accept the estimated risk if the margin looks good enough.
-- **Decline to move** if it can't make the crossing safely.
-- **Take the long way** through a wider opening it can locate more reliably.
-- **Measure first:** stop and scan both jambs before deciding. Moving a sensor or
-  changing viewpoint to get better information is called **active perception**.
+- <Reveal>**Go through** and accept the estimated risk if the margin looks good enough.</Reveal>
+- <Reveal>**Decline to move** if it can't make the crossing safely.</Reveal>
+- <Reveal>**Take the long way** through a wider opening it can locate more reliably.</Reveal>
+- <Reveal>**Measure first:** stop and scan both jambs before deciding. Moving a sensor or changing viewpoint to get better information is called **active perception**.</Reveal>
 
 </Slide>
 <Slide>
@@ -202,8 +201,8 @@ its software store those possible locations?
 
 | Representation | What the robot stores | When it's useful |
 |---|---|---|
-| **Parametric** | A named distribution and a few numbers that describe it. For a Gaussian, those are a mean (the center) and a covariance (the spread and how directions vary together). | One reasonably compact cluster of likely positions. |
-| **Non-parametric (Monte Carlo)** | A cloud of **particles**, each representing a possible pose with an **importance weight**. A pose whose predicted sensor readings better match the real ones can receive more weight. | Several plausible positions at once, such as two distinct doorways that look alike. |
+| **Parametric** | <Reveal>A named distribution and a few numbers that describe it. For a Gaussian, those are a mean (the center) and a covariance (the spread and how directions vary together).</Reveal> | <Reveal>One reasonably compact cluster of likely positions.</Reveal> |
+| **Non-parametric (Monte Carlo)** | <Reveal>A cloud of **particles**, each representing a possible pose with an **importance weight**. A pose whose predicted sensor readings better match the real ones can receive more weight.</Reveal> | <Reveal>Several plausible positions at once, such as two distinct doorways that look alike.</Reveal> |
 
 Think of the bell curve as a compact description of one hill. Particles are
 like weighted pins on a map: they can bunch up on one hill or split across

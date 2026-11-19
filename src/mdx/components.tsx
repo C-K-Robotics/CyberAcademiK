@@ -5,7 +5,7 @@ import { Callout } from './Callout'
 import { Quiz, Q, Choice, Prompt, Explain } from './Quiz'
 import { CodeTabs, CodeTab } from './CodeTabs'
 import { Figure } from './Figure'
-import { Slide } from './Slide'
+import { Reveal, Slide } from './Slide'
 
 /**
  * Components available in *every* course's MDX. Course modules may extend this
@@ -21,6 +21,7 @@ export const genericMdxComponents: MDXComponents = {
   Explain,
   Choice,
   Slide,
+  Reveal,
   CodeTabs,
   CodeTab,
   Figure,
