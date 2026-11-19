@@ -21,6 +21,14 @@
   border-bottom-color: var(--ac1b);
 }
 
+/* Embedded SVG figures can use prefers-color-scheme to follow the site theme. */
+:root[data-theme='light'] .lesson-prose figure img {
+  color-scheme: light;
+}
+:root[data-theme='dark'] .lesson-prose figure img {
+  color-scheme: dark;
+}
+
 /* Lesson sections. In slide mode there is no sticky chip nav above the content,
    so sections need less top offset — see Section.tsx. */
 .lesson-section {

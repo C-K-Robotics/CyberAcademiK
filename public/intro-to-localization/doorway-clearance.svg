@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 346" role="img" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title>The same 60 cm robot centered and offset in a 70 cm doorway</title>
+<style>@media (prefers-color-scheme: dark){[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#265287"]{fill:#9abbff}[stroke="#265287"]{stroke:#9abbff}}</style>
+<defs><marker id="teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0a7d8f"/></marker><marker id="red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a93434"/></marker><marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#265287"/></marker></defs>
+<rect x="0" y="0" width="680" height="346" rx="0" fill="#eff5f8" stroke="none"/>
+<rect x="22" y="22" width="306" height="302" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="175" y="53" fill="#0a7d8f" font-size="23" text-anchor="middle" font-weight="650">Centered: fits</text>
+<text x="175" y="90" fill="#15232c" font-size="19" text-anchor="middle" font-weight="400">70 cm opening</text>
+<path d="M105,98v16 M105,106H245 M245,98v16" stroke="#475e6a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M175,117V248" stroke="#475e6a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<rect x="23" y="140" width="82" height="23" rx="0" fill="#475e6a" stroke="none"/>
+<rect x="245" y="140" width="82" height="23" rx="0" fill="#475e6a" stroke="none"/>
+<rect x="115" y="127" width="120" height="86" rx="4" fill="#c9edf0" stroke="#0a7d8f"/>
+<text x="175" y="197" fill="#0a7d8f" font-size="19" text-anchor="middle" font-weight="650">60 cm</text>
+<path d="M175,171V144" stroke="#0a7d8f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#teal)"/>
+<path d="M105,209l-9,24 M245,209l9,24" stroke="#0a7d8f" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="175" y="268" fill="#0a7d8f" font-size="19" text-anchor="middle" font-weight="400">5 cm clear on each side</text>
+<text x="175" y="303" fill="#475e6a" font-size="16" text-anchor="middle" font-weight="400">Top view · travel is upward</text>
+<rect x="352" y="22" width="306" height="302" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="505" y="53" fill="#a93434" font-size="23" text-anchor="middle" font-weight="650">8 cm right: clips</text>
+<text x="505" y="90" fill="#15232c" font-size="19" text-anchor="middle" font-weight="400">70 cm opening</text>
+<path d="M435,98v16 M435,106H575 M575,98v16" stroke="#475e6a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M505,117V248" stroke="#475e6a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5"/>
+<rect x="353" y="140" width="82" height="23" rx="0" fill="#475e6a" stroke="none"/>
+<rect x="575" y="140" width="82" height="23" rx="0" fill="#475e6a" stroke="none"/>
+<rect x="461" y="127" width="120" height="86" rx="4" fill="#fbdcda" stroke="#a93434"/>
+<text x="521" y="197" fill="#a93434" font-size="19" text-anchor="middle" font-weight="650">60 cm</text>
+<path d="M521,171V144" stroke="#a93434" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#red)"/>
+<rect x="575" y="140" width="6" height="23" rx="0" fill="#a93434" stroke="none"/>
+<path d="M578,150L608,182V236H597" stroke="#a93434" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="505" y="268" fill="#a93434" font-size="19" text-anchor="middle" font-weight="400">3 cm overlaps the jamb</text>
+<text x="505" y="303" fill="#475e6a" font-size="16" text-anchor="middle" font-weight="400">Top view · travel is upward</text>
+</svg>
