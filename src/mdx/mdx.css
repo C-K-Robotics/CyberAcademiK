@@ -10,6 +10,42 @@
   max-height: 460px;
 }
 
+/* Build-time highlighting for fenced snippets, both inside and outside tabs.
+   Light-theme tokens are tuned for the code block's tinted --bg-hero surface. */
+.lesson-prose pre .hljs {
+  --syntax-keyword: #51338e;
+  --syntax-string: #166049;
+  --syntax-number: #903158;
+  --syntax-symbol: #15566c;
+  --syntax-comment: #485864;
+}
+:root[data-theme='dark'] .lesson-prose pre .hljs {
+  --syntax-keyword: var(--ac2);
+  --syntax-string: var(--ac4);
+  --syntax-number: var(--ac3);
+  --syntax-symbol: var(--ac1b);
+  --syntax-comment: var(--tx-3);
+}
+.lesson-prose pre .hljs :is(.hljs-keyword, .hljs-selector-tag) {
+  color: var(--syntax-keyword);
+}
+.lesson-prose pre .hljs :is(.hljs-string, .hljs-regexp) {
+  color: var(--syntax-string);
+}
+.lesson-prose pre .hljs :is(.hljs-number, .hljs-literal) {
+  color: var(--syntax-number);
+}
+.lesson-prose pre .hljs :is(.hljs-built_in, .hljs-title, .hljs-type, .hljs-meta, .hljs-attr) {
+  color: var(--syntax-symbol);
+}
+.lesson-prose pre .hljs :is(.hljs-comment, .hljs-quote) {
+  color: var(--syntax-comment);
+}
+/* Embedded expressions are code, not part of the surrounding string color. */
+.lesson-prose pre .hljs .hljs-subst {
+  color: var(--tx-1);
+}
+
 /* Lesson prose links get a subtle underline on hover. */
 .lesson-prose a {
   color: var(--ac1b);

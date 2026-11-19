@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import mdx from '@mdx-js/rollup'
 import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
 import rehypeSlug from 'rehype-slug'
 import { courseContent } from './vite/course-content'
 
@@ -23,7 +24,8 @@ export default defineConfig({
       ...mdx({
         providerImportSource: '@mdx-js/react',
         remarkPlugins: [remarkGfm],
-        rehypePlugins: [rehypeSlug],
+        // Use the fence language; keep equations and diagrams in text fences plain.
+        rehypePlugins: [rehypeSlug, [rehypeHighlight, { plainText: ['text', 'txt'] }]],
       }),
     },
     react({ include: /\.(jsx|js|mdx|md|tsx|ts)$/ }),

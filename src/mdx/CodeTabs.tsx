@@ -43,12 +43,14 @@ export function CodeTabs({ children }: CodeTabsProps) {
   const [copied, setCopied] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
 
-  const copy = () => {
-    const text = bodyRef.current?.innerText ?? ''
+  const copy = async () => {
+    const code = bodyRef.current?.querySelector('pre > code')
+    if (!code || !navigator.clipboard) return
     try {
-      void navigator.clipboard?.writeText(text)
+      // Read source text, independent of token spans or how the browser lays them out.
+      await navigator.clipboard.writeText(code.textContent ?? '')
     } catch {
-      /* clipboard may be unavailable — ignore */
+      return
     }
     setCopied(true)
     window.setTimeout(() => setCopied(false), 1600)
