@@ -2,18 +2,14 @@
 
 ## `glass-door.webp`
 
-- Subject: the Glass House Visitors Center's transparent entrance door, New Canaan, Connecticut.
-- Photograph by **Christopher Peterson**: <https://christopherpeterson.com>.
-- Source page: <https://commons.wikimedia.org/wiki/File:Glass_house_philip_johnson_architecture.jpg>.
-- Original image: <https://upload.wikimedia.org/wikipedia/commons/d/df/Glass_house_philip_johnson_architecture.jpg>.
-- Original Flickr page: <https://www.flickr.com/photos/christopherpeterson/1419848243/>.
-- License: **CC BY 3.0**, <https://creativecommons.org/licenses/by/3.0/>.
-- Changes: EXIF orientation applied, resized proportionally to 733 × 1100, converted to WebP (Pillow, quality 82, method 6), metadata omitted. No crop.
-- The visible lesson caption supplies the photographer's required credit and website link, the source, license, and changes. The probabilities in the lesson are illustrative, not measurements of this door.
+- Subject: an open glass garden door at Himfy utca 7 in Budapest, Hungary.
+- Photograph by **Globetrotter19**: <https://commons.wikimedia.org/wiki/User:Globetrotter19>.
+- Source page: <https://commons.wikimedia.org/wiki/File:Himfy_utca_7,_garden_door,_2019_Szentimrev%C3%A1ros.jpg>.
+- License: **CC BY-SA 3.0**, <https://creativecommons.org/licenses/by-sa/3.0/>. The WebP version is distributed under the same license.
+- Changes: resized the Commons 960 px thumbnail proportionally to 720 × 960 and converted it to WebP. No crop.
+- The lesson caption credits the photographer, links to the source and license, and identifies the changes. The lesson probabilities are illustrative, not measurements of this door.
 
-To recreate, download the original with `curl -fL`, then use Pillow's
-`ImageOps.exif_transpose`, convert to RGB, call `thumbnail((960, 1100))`,
-and save as WebP with `quality=82, method=6`.
+To recreate, download the [960 px thumbnail](https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Himfy_utca_7%2C_garden_door%2C_2019_Szentimrev%C3%A1ros.jpg/960px-Himfy_utca_7%2C_garden_door%2C_2019_Szentimrev%C3%A1ros.jpg), convert to RGB with Pillow, resize with `thumbnail((720, 960), Image.Resampling.LANCZOS)`, and save as WebP with `quality=83, method=6`.
 
 ## `belief-convergence.svg`
 

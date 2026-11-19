@@ -17,8 +17,8 @@ references:
     href: 'https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser17.pdf'
   - label: MIT News — Study finds flying keeps getting safer (2024)
     href: 'https://news.mit.edu/2024/study-flying-keeps-getting-safer-0807'
-  - label: Glass door photograph — Christopher Peterson, CC BY 3.0
-    href: 'https://commons.wikimedia.org/wiki/File:Glass_house_philip_johnson_architecture.jpg'
+  - label: Glass door photograph — Globetrotter19, CC BY-SA 3.0
+    href: 'https://commons.wikimedia.org/wiki/File:Himfy_utca_7,_garden_door,_2019_Szentimrev%C3%A1ros.jpg'
 ---
 
 <Section id="joint-and-conditional" n="01" title="Joint & Conditional Probability" chip="Given what?">
@@ -28,9 +28,9 @@ references:
 “Statistically, the odds of being in a commercial airplane crash are roughly
 **1 in 11,000,000 — super safe!**”
 
-Now add: “You're on a plane, and **both engines just caught fire**.” Would you
-still use the same odds? Of course not. You have learned something important
-about *this particular flight*. The baseline odds no longer describe your situation.
+<Reveal>Now add: “You're on a plane, and **both engines just caught fire**.” Would you
+still use the same odds?</Reveal><Reveal> Of course not. You have learned something important
+about *this particular flight*. The baseline odds no longer describe your situation.</Reveal>
 
 <Figure
   reveal
@@ -111,16 +111,19 @@ Let `t` count steps, starting with the initial state `x₀`. An action **uₜ is
 applied at state xₜ**, taking the system toward `xₜ₊₁`; measurement **zₜ describes
 state xₜ**. So the action leading into `xₜ` is **uₜ₋₁**, not uₜ.
 
+<Reveal>
 ```text
 x₀ ──u₀──→ x₁ ──u₁──→ x₂ ── … ──uₜ₋₁──→ xₜ
-            ↓ z₁        ↓ z₂                 ↓ zₜ
+            ↓ z₁        ↓ z₂            ↓ zₜ
 ```
 
 The previous states run from `x₀` through `xₜ₋₁`, and the actions taken so far
 run from `u₀` through `uₜ₋₁`. Measurements run from `z₁` through `zₜ`.
 A colon such as `z₁:ₜ` means **all measurements from step 1 to t**.
 We start with an initial prior `bel(x₀)`.
+</Reveal>
 
+<Reveal>
 ```text
 bel(xₜ) = P(xₜ ∣ z₁:ₜ, u₀:ₜ₋₁)
 ```
@@ -128,7 +131,9 @@ bel(xₜ) = P(xₜ ∣ z₁:ₜ, u₀:ₜ₋₁)
 This **posterior belief** describes the state *after* using the latest
 measurement. It includes the evidence from all measurements and actions so far;
 the earlier states are uncertain, not extra known values we condition on.
+</Reveal>
 
+<Reveal>
 ```text
 b̄el(xₜ) = P(xₜ ∣ z₁:ₜ₋₁, u₀:ₜ₋₁)
 ```
@@ -137,6 +142,7 @@ This **predicted belief** describes the same state xₜ after action uₜ₋₁,
 **before** measurement zₜ. The bar above `bel` is our “prediction only” flag.
 At step 1, the measurement history `z₁:₀` is empty: predict from `bel(x₀)`
 using u₀, then update with z₁.
+</Reveal>
 
 </Slide>
 <Slide>
@@ -196,8 +202,6 @@ else changes the door between steps. If a spring pulls it shut, we must model th
 </Section>
 
 <Section id="bayesian-inference" n="03" title="Bayesian Inference: Updating Our Belief" chip="Evidence × prior">
-
-<Slide>
 
 A camera reports `Open`. We need the probability the **door is open given the
 reading**, but camera testing tells us the probability of a **reading given the
@@ -266,8 +270,6 @@ and the prior matters. Let's calculate rather than guessing.
 
 </Callout>
 
-</Slide>
-
 </Section>
 
 <Section id="glass-door-measurements" n="04" title="Worked Example 1: The Glass Door" chip="Measurements only">
@@ -287,8 +289,8 @@ These numbers are assumptions for our example, not measurements of the photograp
 
 <Figure
   src="/bayes-filter/glass-door.webp"
-  alt="A transparent glass entrance door at the Glass House Visitors Center, with reflections, lettering, and a vertical handle."
-  caption={<>Glass can be difficult to distinguish from an opening. Photograph by <a href="https://christopherpeterson.com">Christopher Peterson</a>. <a href="https://commons.wikimedia.org/wiki/File:Glass_house_philip_johnson_architecture.jpg">Source</a>, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a> (resized and converted to WebP).</>}
+  alt="Viewed from inside, a black-framed glass door swings open to the left, with the handle in front and a clear opening to the garden straight ahead."
+  caption={<>The open glass door is on the left. You can see greenery both through its glass and through the open doorway. Photo: <a href="https://commons.wikimedia.org/wiki/File:Himfy_utca_7,_garden_door,_2019_Szentimrev%C3%A1ros.jpg">Globetrotter19</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> (resized and converted to WebP).</>}
   width="48%"
 />
 
@@ -296,8 +298,8 @@ Our **measurement model** puts readings in **rows** and true states in **columns
 
 | Camera reading z ↓ / True state x → | open | closed |
 |---|---|---|
-| `Open` | `P(Open ∣ open) = 0.9` | `P(Open ∣ closed) = 0.5` |
-| `Closed` | `P(Closed ∣ open) = 0.1` | `P(Closed ∣ closed) = 0.5` |
+| `Open` | <Reveal>`P(Open ∣ open) = 0.9`</Reveal> | <Reveal>`P(Open ∣ closed) = 0.5`</Reveal> |
+| `Closed` | <Reveal>`P(Closed ∣ open) = 0.1`</Reveal> | <Reveal>`P(Closed ∣ closed) = 0.5`</Reveal> |
 
 Each **column** sums to 1 because it lists all possible readings for one true
 state. A row doesn't have to sum to 1: its entries assume different true states.
