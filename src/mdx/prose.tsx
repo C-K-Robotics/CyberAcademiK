@@ -46,6 +46,9 @@ const inlineCodeStyle: CSSProperties = {
 
 /** Styled overrides for plain markdown elements inside lesson prose. */
 export const proseComponents: MDXComponents = {
+  a: ({ href, ...props }) => (
+    <a {...props} href={href?.startsWith('/courses/') ? assetUrl(href) : href} />
+  ),
   // Markdown images (`![alt](/slug/img.png)`) point at `public/`, so their
   // root-relative src needs the deploy base prefixed. See lib/assetUrl.ts.
   img: ({ src, alt, ...rest }) => {

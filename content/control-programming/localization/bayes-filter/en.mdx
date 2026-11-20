@@ -39,6 +39,8 @@ about *this particular flight*. The baseline odds no longer describe your situat
   caption="Same airplane, different information. The quoted 1-in-11-million figure is only the hook — see the caveat below, not a calculation of flight safety."
 />
 
+<Reveal block>
+
 <Callout type="info" title="A hook, not an aviation risk calculation">
 
 The widely repeated “1 in 11 million” claim above is an illustration, not a
@@ -54,6 +56,8 @@ A robot faces the same reasoning problem on a smaller scale: “Doors in this
 hallway are usually open” is different from “This door is open **given that**
 my camera sees a reflection across the doorway.” **Conditional probability**
 lets us express that difference.
+
+</Reveal>
 
 </Slide>
 <Slide>
@@ -111,7 +115,8 @@ Let `t` count steps, starting with the initial state `x₀`. An action **uₜ is
 applied at state xₜ**, taking the system toward `xₜ₊₁`; measurement **zₜ describes
 state xₜ**. So the action leading into `xₜ` is **uₜ₋₁**, not uₜ.
 
-<Reveal>
+<Reveal block>
+
 ```text
 x₀ ──u₀──→ x₁ ──u₁──→ x₂ ── … ──uₜ₋₁──→ xₜ
             ↓ z₁        ↓ z₂            ↓ zₜ
@@ -123,7 +128,8 @@ A colon such as `z₁:ₜ` means **all measurements from step 1 to t**.
 We start with an initial prior `bel(x₀)`.
 </Reveal>
 
-<Reveal>
+<Reveal block>
+
 ```text
 bel(xₜ) = P(xₜ ∣ z₁:ₜ, u₀:ₜ₋₁)
 ```
@@ -133,7 +139,8 @@ measurement. It includes the evidence from all measurements and actions so far;
 the earlier states are uncertain, not extra known values we condition on.
 </Reveal>
 
-<Reveal>
+<Reveal block>
+
 ```text
 b̄el(xₜ) = P(xₜ ∣ z₁:ₜ₋₁, u₀:ₜ₋₁)
 ```

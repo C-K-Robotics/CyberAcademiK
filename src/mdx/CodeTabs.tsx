@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react'
 import {
   Children,
   isValidElement,
+  useEffect,
   useRef,
   useState,
   type ReactElement,
@@ -42,18 +43,34 @@ export function CodeTabs({ children }: CodeTabsProps) {
   const [active, setActive] = useState(0)
   const [copied, setCopied] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
+  const copyRequest = useRef(0)
+  const copyTimer = useRef<number>()
+
+  useEffect(() => () => {
+    copyRequest.current += 1
+    window.clearTimeout(copyTimer.current)
+  }, [])
+
+  const resetCopy = () => {
+    copyRequest.current += 1
+    window.clearTimeout(copyTimer.current)
+    setCopied(false)
+    return copyRequest.current
+  }
 
   const copy = async () => {
     const code = bodyRef.current?.querySelector('pre > code')
     if (!code || !navigator.clipboard) return
+    const request = resetCopy()
     try {
       // Read source text, independent of token spans or how the browser lays them out.
       await navigator.clipboard.writeText(code.textContent ?? '')
     } catch {
       return
     }
+    if (request !== copyRequest.current) return
     setCopied(true)
-    window.setTimeout(() => setCopied(false), 1600)
+    copyTimer.current = window.setTimeout(() => setCopied(false), 1600)
   }
 
   if (tabs.length === 0) return null
@@ -83,7 +100,11 @@ export function CodeTabs({ children }: CodeTabsProps) {
             <button
               key={tab.props.label + i}
               type="button"
-              onClick={() => setActive(i)}
+              onClick={() => {
+                if (isActive) return
+                resetCopy()
+                setActive(i)
+              }}
               style={{
                 fontFamily: mono,
                 fontSize: 12.5,
