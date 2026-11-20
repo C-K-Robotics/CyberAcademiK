@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited, closed]
   workflow_dispatch:
 
 permissions:
@@ -15,6 +16,7 @@ concurrency:
 jobs:
   build:
     name: Build
+    if: github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,9 +33,6 @@ jobs:
         # `yarn build` is `tsc -b && vite build`, so this is the typecheck gate
         # too (`yarn lint`/`yarn typecheck` are the same `tsc -b` — there is no
         # ESLint and no test runner, so a green build is the verification gate).
-        #
-        # VITE_BASE mirrors the deploy workflow so PRs build under the same
-        # project-Pages sub-path that actually ships, not a bare `/`.
         run: yarn build
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE: ${{ github.event_name == 'pull_request' && format('/previews/pr-{0}/', github.event.pull_request.number) || '/' }}

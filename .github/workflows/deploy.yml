@@ -3,60 +3,205 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
-# Allow one concurrent deployment; never cancel a run mid-deploy.
 concurrency:
-  group: pages
+  # Every deployment rebuilds the current site and open previews, so the
+  # newest queued run can pick up changes from any superseded runs.
+  group: pages-${{ github.ref }}-${{ github.event.workflow_run.head_repository.full_name || github.repository }}-${{ github.event.workflow_run.event == 'workflow_dispatch' && 'skip' || 'publish' }}
   cancel-in-progress: false
 
 jobs:
-  build:
+  plan:
+    if: >-
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.event == 'pull_request' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      previews: ${{ steps.pulls.outputs.previews }}
+    steps:
+      - name: List current pull requests
+        id: pulls
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # Preview JavaScript runs on the production origin. Publish only
+        # heads from branches in this repository, including stacked PRs.
+        run: |
+          previews=$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" |
+            jq -c '[.[][] | select(.head.repo.full_name == env.GITHUB_REPOSITORY) | {number, sha: .head.sha}]')
+          echo "previews=$previews" >> "$GITHUB_OUTPUT"
+
+  production:
+    needs: plan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact: ${{ steps.upload.outputs.artifact-id }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: refs/heads/main
+          persist-credentials: false
 
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: yarn
 
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
+      - run: yarn install --frozen-lockfile
 
-      - name: Build
-        # The Pages custom domain (docs.ckrobotics.org) serves this repo from
-        # its root, so the base is '/'. The bare github.io project URL 301s to
-        # the custom domain, so a /<repo>/ base would 404 every asset. If the
-        # custom domain is ever removed, set this to
-        # /${{ github.event.repository.name }}/ instead.
-        run: yarn build
+      - run: yarn build
         env:
           VITE_BASE: /
 
-      - name: SPA fallback for client-side routing
-        # GitHub Pages serves 404.html for any unmatched path. Mirroring
-        # index.html lets BrowserRouter deep-links (e.g. /courses/<slug>)
-        # resolve to the SPA instead of a hard 404.
-        run: cp dist/index.html dist/404.html
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
+        id: upload
         with:
+          name: production-site
           path: dist
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
+
+  preview:
+    needs: plan
+    if: needs.plan.outputs.previews != '[]'
+    name: "Build preview for PR #${{ matrix.pr.number }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        pr: ${{ fromJSON(needs.plan.outputs.previews) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.pr.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: yarn install --frozen-lockfile
+
+      - run: yarn build
+        env:
+          VITE_BASE: /previews/pr-${{ matrix.pr.number }}/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pr-${{ matrix.pr.number }}-${{ matrix.pr.sha }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 3
+          overwrite: true
 
   deploy:
-    needs: build
+    needs: [plan, production, preview]
+    if: ${{ !cancelled() && needs.production.result == 'success' }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+      published: ${{ steps.assemble.outputs.published }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: ${{ needs.production.outputs.artifact }}
+          path: dist
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        if: needs.plan.outputs.previews != '[]'
+        with:
+          pattern: pr-*
+          path: preview-artifacts
+
+      - name: Assemble the Pages site
+        id: assemble
+        shell: bash
+        env:
+          PREVIEWS: ${{ needs.plan.outputs.previews }}
+        run: |
+          mkdir -p dist/previews
+          published=()
+          while read -r number sha; do
+            preview="preview-artifacts/pr-$number-$sha"
+            if [[ -f "$preview/index.html" ]]; then
+              mv -T -- "$preview" "dist/previews/pr-$number"
+              published+=("$number")
+            fi
+          done < <(jq -r '.[] | [.number, .sha] | @tsv' <<< "$PREVIEWS")
+          node .github/scripts/pages-fallback.mjs dist
+          echo "published=$(jq -cn '$ARGS.positional' --args "${published[@]}")" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          name: github-pages-${{ github.run_attempt }}
+          path: dist
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_attempt }}
+
+  comment:
+    needs: [plan, deploy]
+    if: ${{ !cancelled() && needs.deploy.result == 'success' && needs.plan.outputs.previews != '[]' }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Update preview comments
+        uses: actions/github-script@v8
+        env:
+          PREVIEWS: ${{ needs.plan.outputs.previews }}
+          PUBLISHED: ${{ needs.deploy.outputs.published }}
+          PAGE_URL: ${{ needs.deploy.outputs.page_url }}
+        with:
+          script: |
+            const marker = '<!-- cyberacademik-pages-preview -->'
+            const published = new Set(JSON.parse(process.env.PUBLISHED))
+            const pageUrl = process.env.PAGE_URL.replace(/\/?$/, '/')
+            for (const { number, sha } of JSON.parse(process.env.PREVIEWS)) {
+              const issue = { ...context.repo, issue_number: number }
+              const comments = await github.paginate(github.rest.issues.listComments, issue)
+              const existing = comments.find(comment =>
+                comment.user?.login === 'github-actions[bot]' && comment.body?.startsWith(marker)
+              )
+              const status = published.has(String(number))
+                ? `[Open the Pages preview](${pageUrl}previews/pr-${number}/) for commit \`${sha.slice(0, 7)}\`.`
+                : `The Pages preview build failed for commit \`${sha.slice(0, 7)}\`. [View the workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}).`
+              const body = `${marker}\n### GitHub Pages preview\n\n${status}`
+              if (existing && existing.body !== body) {
+                await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body })
+              } else if (!existing) {
+                await github.rest.issues.createComment({ ...issue, body })
+              }
+            }
