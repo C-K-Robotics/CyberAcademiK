@@ -120,7 +120,7 @@ def gaussian_points(var_y, rho, count=260):
     # Identical seed across panels: only the covariance changes, not the random draws.
     rng = Random(8020)
     for _ in range(count):
-        a, b = rng.gauss(), rng.gauss()
+        a, b = rng.gauss(0, 1), rng.gauss(0, 1)
         yield a, sqrt(var_y) * (rho*a + sqrt(1-rho*rho)*b)
 
 
@@ -211,7 +211,7 @@ def particles():
     dots = []
     for cx, strength in [(433, .52), (574, 1)]:
         for _ in range(22):
-            x, y = rng.gauss(), rng.gauss()
+            x, y = rng.gauss(0, 1), rng.gauss(0, 1)
             x, y = max(-2.0, min(x, 2.0)), max(-2.0, min(y, 2.0))
             radius = round(2.5 + 6*strength*exp(-.35*(x*x+y*y)), 2)
             dots.append((cx+x*21, 151+y*20, radius))

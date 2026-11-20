@@ -45,6 +45,9 @@
   visibility: hidden;
   opacity: 0;
 }
+.course-main[data-slide-mode] [data-slide-reveal-state='shown'] {
+  scroll-margin-block: 72px;
+}
 @media (prefers-reduced-motion: no-preference) {
   .course-main[data-slide-mode] [data-slide-reveal-state='shown'] {
     transition: opacity 160ms ease-out;

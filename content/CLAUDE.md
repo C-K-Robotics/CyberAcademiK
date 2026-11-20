@@ -21,7 +21,7 @@ content/<category>/<sub-category>/<course-slug>/<locale>.mdx
 - `<course-slug>` is one course. Slugs must be **globally unique across the whole tree** — routing and `getCourseModule` key on slug alone, not on path.
 - A category/sub-category dir with no course beneath it is a valid **curriculum skeleton** (sidecar-only) and renders as "Coming soon". Counts are derived everywhere — never assume a number of courses.
 
-Currently only `control-programming/control-theory/pid-control` has a real lesson; everything else is sidecar-only skeleton. Use `pid-control/en.mdx` as the reference for authoring.
+See `control-programming/control-theory/pid-control/en.mdx` for an example of a complete lesson.
 
 ## Metadata: where each field lives
 
