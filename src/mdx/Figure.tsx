@@ -7,14 +7,17 @@ interface FigureProps {
   caption?: ReactNode
   /** CSS width for the image, e.g. `'60%'`, `'400px'`. Defaults to full width. */
   width?: string
+  /** Reveal the image and caption together in slide mode. */
+  reveal?: boolean
 }
 
 /** A captioned image for lesson content. */
-export function Figure({ src, alt = '', caption, width = '100%' }: FigureProps) {
+export function Figure({ src, alt = '', caption, width = '100%', reveal = false }: FigureProps) {
   const full = width === '100%'
 
   return (
     <figure
+      data-slide-reveal={reveal ? '' : undefined}
       style={{
         display: 'flex',
         flexDirection: 'column',

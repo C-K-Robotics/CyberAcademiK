@@ -21,3 +21,9 @@ export function Slide({ children, id }: SlideProps) {
   )
 }
 Slide.displayName = 'Slide'
+
+/** One opt-in reveal step for inline or block content. */
+export function Reveal({ children, block = false }: { children?: ReactNode; block?: boolean }) {
+  const Element = block ? 'div' : 'span'
+  return <Element data-slide-reveal="">{children}</Element>
+}

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 195" role="img" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title>A random variable maps every die outcome to its odd or even indicator</title>
+<style>@media (prefers-color-scheme: dark){[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#265287"]{fill:#9abbff}[stroke="#265287"]{stroke:#9abbff}}</style>
+<defs><marker id="teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0a7d8f"/></marker><marker id="red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a93434"/></marker><marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#265287"/></marker></defs>
+<rect x="0" y="0" width="680" height="195" rx="0" fill="#eff5f8" stroke="none"/>
+<rect x="23" y="16" width="251" height="163" rx="23" fill="#fbfdfe" stroke="#cad9df"/>
+<rect x="406" y="16" width="251" height="163" rx="23" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="47" y="51" fill="#15232c" font-size="26" text-anchor="start" font-weight="650">Ω</text>
+<text x="430" y="51" fill="#15232c" font-size="26" text-anchor="start" font-weight="650">ℝ</text>
+<text x="583" y="115" fill="#475e6a" font-size="31" text-anchor="middle" font-weight="400">…</text>
+<rect x="45" y="62" width="206" height="38" rx="9" fill="#c9edf0" stroke="#0a7d8f"/>
+<text x="80" y="89" fill="#15232c" font-size="23" text-anchor="middle" font-weight="400">1</text>
+<text x="148" y="89" fill="#15232c" font-size="23" text-anchor="middle" font-weight="400">3</text>
+<text x="216" y="89" fill="#15232c" font-size="23" text-anchor="middle" font-weight="400">5</text>
+<path d="M251,81H448" stroke="#0a7d8f" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#teal)"/>
+<text x="340" y="71" fill="#0a7d8f" font-size="19" text-anchor="middle" font-weight="650">X</text>
+<rect x="461" y="62" width="52" height="38" rx="9" fill="#c9edf0" stroke="#0a7d8f"/>
+<text x="487" y="89" fill="#15232c" font-size="23" text-anchor="middle" font-weight="650">1</text>
+<rect x="45" y="116" width="206" height="38" rx="9" fill="#eff5f8" stroke="#265287"/>
+<text x="80" y="143" fill="#15232c" font-size="23" text-anchor="middle" font-weight="400">2</text>
+<text x="148" y="143" fill="#15232c" font-size="23" text-anchor="middle" font-weight="400">4</text>
+<text x="216" y="143" fill="#15232c" font-size="23" text-anchor="middle" font-weight="400">6</text>
+<path d="M251,135H448" stroke="#265287" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#blue)"/>
+<text x="340" y="125" fill="#265287" font-size="19" text-anchor="middle" font-weight="650">X</text>
+<rect x="461" y="116" width="52" height="38" rx="9" fill="#eff5f8" stroke="#265287"/>
+<text x="487" y="143" fill="#15232c" font-size="23" text-anchor="middle" font-weight="650">0</text>
+</svg>

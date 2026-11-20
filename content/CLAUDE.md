@@ -21,7 +21,7 @@ content/<category>/<sub-category>/<course-slug>/<locale>.mdx
 - `<course-slug>` is one course. Slugs must be **globally unique across the whole tree** — routing and `getCourseModule` key on slug alone, not on path.
 - A category/sub-category dir with no course beneath it is a valid **curriculum skeleton** (sidecar-only) and renders as "Coming soon". Counts are derived everywhere — never assume a number of courses.
 
-Currently only `control-programming/control-theory/pid-control` has a real lesson; everything else is sidecar-only skeleton. Use `pid-control/en.mdx` as the reference for authoring.
+See `control-programming/control-theory/pid-control/en.mdx` for an example of a complete lesson.
 
 ## Metadata: where each field lives
 
@@ -73,8 +73,9 @@ A lesson is prose plus components. These components are available in **every** c
 
 - `<Section id n title chip>` — a numbered lesson section. `n` is the displayed number string (e.g. `"01"`), `chip` a small label. Wraps the section's prose and components.
 - `<Slide>` — an optional slide break *inside* a `<Section>`. It renders nothing on its own; in slide mode each `<Slide>` becomes its own step, so a long section can be paged through instead of shown at once. A section with no `<Slide>` children is a single step. Anything left outside a `<Slide>` stays visible on every step of that section — useful for a standing intro, surprising otherwise.
+- `<Reveal>` — marks one inline sentence or bullet for the slide arrows to reveal. For a whole bullet (including its marker), write `- <Reveal>**Measure first:** Scan both jambs.</Reveal>` with nothing else in the item. Use `<Reveal block>` for paragraphs, code fences, or other block content that should appear together. Put reveals inside the active `<Slide>` (or a `<Section>` with no slide breaks). Unmarked content appears immediately, and all content is visible in normal reading mode.
 - `<Callout type title>` — coloured aside; `type` is `info` (default) \| `tip` \| `warn`.
-- `<CodeTabs>` containing one `<CodeTab label="…">` per language, each wrapping a single fenced code block — a tabbed viewer with a copy button.
+- `<CodeTabs>` containing one `<CodeTab label="…">` per language, each wrapping a single fenced code block — a tabbed viewer with a copy button. Use the fence language (e.g. `python`, `java`, `cpp`) for build-time syntax highlighting inside or outside tabs. Use `text` for uncolored equations and diagrams.
 - `<Quiz>` → `<Q>` containing `<Prompt>` (question text), `<Explain>` (feedback), and `<Choice correct>` (answer options) children. All text children are rendered through `InlineMarkdownText`, which parses **bold**, _italic_, and `inline code` patterns before rendering.
 - `<Figure src alt caption width>` — captioned image. Put the file in `public/<slug>/` and give a root-relative `src` (`/<slug>/image.png`); the deploy base is prefixed for you. `width` is any CSS width (`"80%"`, `"400px"`) and defaults to full width. Plain markdown images (`![alt](/<slug>/image.png)`) resolve the same way.
 

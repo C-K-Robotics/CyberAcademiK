@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 290" role="img" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title>A parametric bell curve and two clusters of weighted pose particles</title>
+<style>@media (prefers-color-scheme: dark){[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#265287"]{fill:#9abbff}[stroke="#265287"]{stroke:#9abbff}}</style>
+<defs><marker id="teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0a7d8f"/></marker><marker id="red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a93434"/></marker><marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#265287"/></marker></defs>
+<rect x="0" y="0" width="680" height="290" rx="0" fill="#eff5f8" stroke="none"/>
+<rect x="22" y="20" width="306" height="248" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<rect x="352" y="20" width="306" height="248" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="175" y="54" fill="#15232c" font-size="23" text-anchor="middle" font-weight="650">Parametric Gaussian</text>
+<text x="505" y="54" fill="#15232c" font-size="23" text-anchor="middle" font-weight="650">Weighted particles</text>
+<path d="M42.00,201.11L44.64,200.92L47.28,200.70L49.92,200.44L52.56,200.12L55.20,199.76L57.84,199.33L60.48,198.84L63.12,198.27L65.76,197.61L68.40,196.86L71.04,196.00L73.68,195.03L76.32,193.93L78.96,192.69L81.60,191.31L84.24,189.76L86.88,188.05L89.52,186.17L92.16,184.09L94.80,181.83L97.44,179.36L100.08,176.70L102.72,173.83L105.36,170.75L108.00,167.48L110.64,164.02L113.28,160.36L115.92,156.54L118.56,152.56L121.20,148.43L123.84,144.19L126.48,139.86L129.12,135.47L131.76,131.04L134.40,126.61L137.04,122.21L139.68,117.89L142.32,113.68L144.96,109.63L147.60,105.76L150.24,102.12L152.88,98.75L155.52,95.68L158.16,92.94L160.80,90.58L163.44,88.60L166.08,87.04L168.72,85.91L171.36,85.23L174.00,85.00L176.64,85.23L179.28,85.91L181.92,87.04L184.56,88.60L187.20,90.58L189.84,92.94L192.48,95.68L195.12,98.75L197.76,102.12L200.40,105.76L203.04,109.63L205.68,113.68L208.32,117.89L210.96,122.21L213.60,126.61L216.24,131.04L218.88,135.47L221.52,139.86L224.16,144.19L226.80,148.43L229.44,152.56L232.08,156.54L234.72,160.36L237.36,164.02L240.00,167.48L242.64,170.75L245.28,173.83L247.92,176.70L250.56,179.36L253.20,181.83L255.84,184.09L258.48,186.17L261.12,188.05L263.76,189.76L266.40,191.31L269.04,192.69L271.68,193.93L274.32,195.03L276.96,196.00L279.60,196.86L282.24,197.61L284.88,198.27L287.52,198.84L290.16,199.33L292.80,199.76L295.44,200.12L298.08,200.44L300.72,200.70L303.36,200.92L306.00,201.11L306.00,202.00L42.00,202.00" stroke="none" stroke-width="2" fill="#c9edf0" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M42.00,201.11L44.64,200.92L47.28,200.70L49.92,200.44L52.56,200.12L55.20,199.76L57.84,199.33L60.48,198.84L63.12,198.27L65.76,197.61L68.40,196.86L71.04,196.00L73.68,195.03L76.32,193.93L78.96,192.69L81.60,191.31L84.24,189.76L86.88,188.05L89.52,186.17L92.16,184.09L94.80,181.83L97.44,179.36L100.08,176.70L102.72,173.83L105.36,170.75L108.00,167.48L110.64,164.02L113.28,160.36L115.92,156.54L118.56,152.56L121.20,148.43L123.84,144.19L126.48,139.86L129.12,135.47L131.76,131.04L134.40,126.61L137.04,122.21L139.68,117.89L142.32,113.68L144.96,109.63L147.60,105.76L150.24,102.12L152.88,98.75L155.52,95.68L158.16,92.94L160.80,90.58L163.44,88.60L166.08,87.04L168.72,85.91L171.36,85.23L174.00,85.00L176.64,85.23L179.28,85.91L181.92,87.04L184.56,88.60L187.20,90.58L189.84,92.94L192.48,95.68L195.12,98.75L197.76,102.12L200.40,105.76L203.04,109.63L205.68,113.68L208.32,117.89L210.96,122.21L213.60,126.61L216.24,131.04L218.88,135.47L221.52,139.86L224.16,144.19L226.80,148.43L229.44,152.56L232.08,156.54L234.72,160.36L237.36,164.02L240.00,167.48L242.64,170.75L245.28,173.83L247.92,176.70L250.56,179.36L253.20,181.83L255.84,184.09L258.48,186.17L261.12,188.05L263.76,189.76L266.40,191.31L269.04,192.69L271.68,193.93L274.32,195.03L276.96,196.00L279.60,196.86L282.24,197.61L284.88,198.27L287.52,198.84L290.16,199.33L292.80,199.76L295.44,200.12L298.08,200.44L300.72,200.70L303.36,200.92L306.00,201.11" stroke="#0a7d8f" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M42 202H306 M174 85V202" stroke="#475e6a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4 5"/>
+<text x="175" y="244" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">One center and spread</text>
+<rect x="374" y="85" width="262" height="122" rx="5" fill="#eff5f8" stroke="#cad9df"/>
+<path d="M374 92H636 M374 196H636" stroke="#cad9df" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="406.15" cy="138.90" r="4.05" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="439.92" cy="136.29" r="4.99" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="407.44" cy="116.66" r="3.16" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="444.34" cy="144.03" r="5.2" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="416.15" cy="128.40" r="4.09" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="391.00" cy="149.89" r="3.27" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="410.56" cy="147.16" r="4.57" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="460.98" cy="141.13" r="4.04" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="427.28" cy="167.32" r="4.91" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="426.10" cy="151.16" r="5.5" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="406.27" cy="130.58" r="3.73" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="396.64" cy="168.33" r="3.34" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="457.05" cy="139.86" r="4.27" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="428.62" cy="141.93" r="5.36" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="475.00" cy="170.29" r="3.06" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="429.88" cy="164.53" r="5.14" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="460.84" cy="130.87" r="3.68" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="446.23" cy="163.32" r="4.88" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="433.77" cy="166.94" r="5.0" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="458.59" cy="151.98" r="4.35" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="425.96" cy="169.87" r="4.7" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="437.00" cy="159.88" r="5.38" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="615.73" cy="159.34" r="3.92" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="573.56" cy="125.39" r="5.88" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="582.49" cy="158.97" r="7.86" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="587.38" cy="162.92" r="7.1" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="589.76" cy="156.68" r="7.29" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="578.01" cy="163.52" r="7.66" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="560.79" cy="132.80" r="6.41" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="554.50" cy="154.12" r="6.9" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="538.27" cy="142.49" r="4.54" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="571.14" cy="158.13" r="8.2" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="553.64" cy="153.30" r="6.8" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="575.94" cy="141.48" r="8.03" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="576.53" cy="148.52" r="8.44" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="552.06" cy="145.32" r="6.48" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="556.43" cy="189.44" r="3.79" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="570.28" cy="139.60" r="7.8" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="545.11" cy="151.88" r="5.59" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="582.79" cy="152.79" r="8.13" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="546.75" cy="131.71" r="4.9" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="552.61" cy="155.86" r="6.59" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="557.70" cy="150.32" r="7.36" fill="#0a7d8f" opacity="0.68"/>
+<circle cx="612.29" cy="115.21" r="3.11" fill="#0a7d8f" opacity="0.68"/>
+<text x="505" y="244" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">Larger dot = more weight</text>
+</svg>

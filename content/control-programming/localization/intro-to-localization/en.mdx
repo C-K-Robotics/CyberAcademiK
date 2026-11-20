@@ -1,0 +1,574 @@
+---
+title: Intro to Localization
+desc: Learn how robots estimate where they are and decide what to do when their sensors and wheels aren't perfect.
+kicker: INTRO TO LOCALIZATION · MODULE 1
+lead: >-
+  Your robot thinks it's centered on a doorway. Is that enough to tell it to drive
+  through? In **Introduction to Localization & Probabilistic Robotics**, you'll learn
+  to ask not just *where am I?*, but *how sure am I?* — and see why the answer can
+  change what a robot does next.
+author: FRC 8020
+minutes: 30
+level: beginner
+order: 1
+references:
+  - label: Probabilistic Robotics — Thrun, Burgard & Fox
+    href: 'https://mitpress.mit.edu/9780262201629/probabilistic-robotics/'
+  - label: State Estimation for Robotics — Timothy D. Barfoot
+    href: 'https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser17.pdf'
+  - label: Probabilistic Robotics — Sebastian Thrun's 2002 tutorial
+    href: 'https://doi.org/10.1145/504729.504754'
+  - label: NASA — Apollo lunar module guidance, navigation and control
+    href: 'https://apollojournals.org/alsj/LM08_Guidance-Navigation-Control_ppGN1-48.pdf'
+  - label: NASA — Kalman filtering in the lunar module's abort guidance system
+    href: 'https://ntrs.nasa.gov/citations/19700026383'
+  - label: DARPA — A look back at the Grand Challenges
+    href: 'https://www.darpa.mil/news/2014/grand-challenge-ten-years-later'
+  - label: ROS — October 2009 navigation release notes
+    href: 'https://www.ros.org/news/2009/10/'
+---
+
+<Section id="probabilistic-robotics" n="01" title="What is Probabilistic Robotics?" chip="Uncertainty">
+
+<Callout type="info" title="Further Reading / Inspired By">
+
+- [*Probabilistic Robotics*](https://mitpress.mit.edu/9780262201629/probabilistic-robotics/) by Sebastian Thrun, Wolfram Burgard, and Dieter Fox.
+- [*State Estimation for Robotics*](https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser17.pdf) by Timothy D. Barfoot.
+
+You don't need to read either book to follow this lesson.
+
+</Callout>
+
+Imagine a competition robot trying to line up for a score. Its map shows the
+scoring target, but the map doesn't tell the robot **where it is on that map**.
+Figuring out its position and heading — together called its **pose** — is
+**localization**. Pose is one example of a robot's **state**: the information we
+want to know about it right now.
+
+**Probabilistic robotics** studies algorithms that explicitly account for
+uncertainty in both **state estimation** (what's likely true now?) and **control
+outcomes** (what's likely to happen if I send this command?). Three things make
+that uncertainty unavoidable:
+
+1. **The environment changes.** <Reveal>Someone walks between the robot and a landmark,
+   or a lighting change makes the landmark harder for a camera to see.</Reveal>
+2. **Sensors are noisy and sometimes misleading.** <Reveal>A distance sensor aimed at a
+   stationary wall might flicker between 99 and 101 cm. An encoder can correctly
+   count wheel turns even when the wheel slips and the robot barely moves.</Reveal>
+3. **Motion is hard to predict.** <Reveal>Command “drive forward 1 meter” and you might
+   get 0.98 m on one run and 1.02 m on the next. Battery voltage, floor grip,
+   and tiny steering differences all matter; exactly 1.000 m is unlikely.</Reveal>
+
+Rather than pretending one reading or command tells the whole story, a robot
+can keep track of several possible answers and how plausible each one is.
+
+</Section>
+
+<Section id="estimation-history" n="02" title="A Brief History of Estimation & Localization" chip="History">
+
+<Slide>
+
+### From missing planets to landing on the Moon
+
+- **1801 — Gauss and least squares.** At just 24, Carl Friedrich Gauss took on an
+  astronomical estimation problem: where would the dwarf planet Ceres reappear
+  after being lost in the Sun's glare? About nine months after the last sighting,
+  his prediction was within half a degree. Gauss developed **least squares**, which
+  chooses a prediction by making the sum of squared measurement mismatches as
+  small as possible. In 1809 he showed why this works especially well: with
+  independent Gaussian errors of equal spread, the least-squares fit is the
+  most likely fit.
+- **1913 — Markov chains.** Andrey Markov famously used his earlier chain models
+  to study the order of vowels and consonants in a poem. The key idea: once you
+  know the current state, earlier states don't add anything to the prediction
+  of the next one. For a simple robot motion model, the current pose and speed,
+  plus the next motor command, can be enough to predict the next pose without
+  storing every place the robot has been.
+- **1960 — The Kalman filter.** As computers made repeated updates practical,
+  Rudolf Kalman published landmark work in 1960 and followed it with a paper
+  co-authored with Richard Bucy in 1961. The work formalized **observability**:
+  can you infer a hidden state from the measurements you have? It also gave an
+  optimal way to estimate the state of a linear system with Gaussian noise. NASA
+  used Kalman-filter methods on the **Ranger, Mariner, and Apollo** programs. On
+  **Apollo 11**, the lunar module used noisy landing-radar readings to update
+  its estimate of altitude and velocity above the Moon; the module's separate
+  abort guidance system used Kalman-filter equations for rendezvous-radar data.
+
+<Figure
+  src="/intro-to-localization/apollo-11-eagle.webp"
+  alt="Apollo 11’s Eagle lunar module ascent stage above the Moon, with Earth rising in the distance."
+  caption={<>Eagle after liftoff from the Moon. Photo: <a href="https://commons.wikimedia.org/wiki/File:Apollo_11_lunar_module.jpg">Michael Collins / NASA</a> (public domain).</>}
+  width="58%"
+/>
+
+</Slide>
+<Slide>
+
+### From mathematical models to robots you can build
+
+- **1970 — The Bayes filter.** Andrew Jazwinski's work on filtering helped
+  establish the more general recipe: predict what happens next, then use
+  Bayes' theorem to revise that prediction with new evidence. Repeat every
+  time new data arrives. This setup also covers nonlinear motion and uncertainty
+  that doesn't look like a bell curve.
+- **2002 — Thrun's tutorial.** Sebastian Thrun brought these ideas to a wider
+  computing audience with [*Probabilistic Robotics*](https://doi.org/10.1145/504729.504754),
+  published in *Communications of the ACM*, March 2002, vol. 45, no. 3, pp. 52–57.
+- **2004–2005 — DARPA Grand Challenges.** No vehicle finished the 2004 autonomous
+  race across the desert. In 2005 Stanford's **Stanley** won, using probabilistic
+  localization and perception to estimate where it was and which terrain it
+  could drive over.
+- **2007–2010 — ROS and open-source localization.** The first public code for
+  **ROS** (Robot Operating System) appeared in 2007, and Willow Garage helped
+  grow it into an open-source toolkit. By 2009–2010, the ROS navigation stack
+  included **AMCL** (Adaptive Monte Carlo Localization), putting reusable
+  particle-based localization within reach of robot builders.
+
+<Figure
+  src="/intro-to-localization/stanley-darpa.webp"
+  alt="Stanford’s blue autonomous Volkswagen Touareg with a rack of sensors mounted on its roof."
+  caption={<>Stanley, Stanford’s 2005 Grand Challenge winner. Photo: <a href="https://commons.wikimedia.org/wiki/File:Stanford_Volkswagon_Touareg_Robotic_Control_Vehicle_(86757864).jpg">Global Reactions</a>, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a> (resized).</>}
+  width="70%"
+/>
+
+</Slide>
+
+</Section>
+
+<Section id="probability-foundations" n="03" title="Probability Foundations for Robotics" chip="Probability">
+
+<Slide>
+
+### 1. The proverbial glass
+
+Is the glass half full or half empty? This isn't a philosophy class: an
+engineer wants to know **how much water is actually there, and how sure we
+are**.
+
+<Figure
+  src="/intro-to-localization/glass-half-full.webp"
+  alt="A straight-sided drinking glass with a waterline roughly halfway up."
+  caption={<>It looks about half full. How close to 50% would you bet? Photo: <a href="https://commons.wikimedia.org/wiki/File:Glass-of-water.jpg">Derek Jensen (Tysto)</a> (public domain).</>}
+  width="36%"
+/>
+
+Here's how that answer can get more useful:
+
+1. <Reveal>**“About 50% full.”** A best guess, but no idea how far off it might be.</Reveal>
+2. <Reveal>**“Between 49% and 51% full.”** An interval, but no sense of how much to trust it.</Reveal>
+3. <Reveal>**“Between 49% and 51%, with 90% confidence.”** Now we can weigh the risk of being outside the interval.</Reveal>
+4. <Reveal>**“Between 49% and 51%, with 90% confidence, Gaussian.”** Now we've named the shape of our uncertainty: a bell curve.</Reveal>
+
+<Reveal> Here, “90% confidence” means our model assigns 90% probability to the fill
+level being in that interval. The shape lets us compare other ranges, too. How
+likely is a fill level between 51% and 53% compared with one between 49% and 51%?</Reveal>
+
+</Slide>
+<Slide>
+
+### 2. Why uncertainty changes what a robot does
+
+No sensor measures with perfect accuracy, and no motor or other actuator moves
+with perfect precision. We model uncertain quantities, such as a distance
+reading or how far a drive command will move the robot, as **random variables**:
+numbers that could take different values, with some values more likely than others.
+
+A 60 cm-wide robot faces a 70 cm-wide doorway. The robot *estimates* that it's
+centered and pointed straight through. If that's true, it has just **5 cm of
+clearance on each side**. What if its position estimate is off by 8 cm?
+
+<Figure
+  src="/intro-to-localization/doorway-clearance.svg"
+  alt="Top-down views of a 60 cm robot in a 70 cm doorway: centered with 5 cm on each side, or shifted 8 cm to the right and overlapping the jamb by 3 cm."
+  caption="Both poses can be plausible from the same noisy reading. Only the centered one fits."
+/>
+
+Depending on the quality of its measurements and the cost of being wrong, the
+robot can:
+
+- <Reveal>**Go through** and accept the estimated risk if the margin looks good enough.</Reveal>
+- <Reveal>**Decline to move** if it can't make the crossing safely.</Reveal>
+- <Reveal>**Take the long way** through a wider opening it can locate more reliably.</Reveal>
+- <Reveal>**Measure first:** stop and scan both jambs before deciding. Moving a sensor or changing viewpoint to get better information is called **active perception**.</Reveal>
+
+</Slide>
+<Slide>
+
+### 3. Two ways to represent uncertainty
+
+A robot could be on either side of a hallway with repeating doors. How should
+its software store those possible locations?
+
+| Representation | What the robot stores | When it's useful |
+|---|---|---|
+| **Parametric** | <Reveal>A named distribution and a few numbers that describe it. For a Gaussian, those are a mean (the center) and a covariance (the spread and how directions vary together).</Reveal> | <Reveal>One reasonably compact cluster of likely positions.</Reveal> |
+| **Non-parametric (Monte Carlo)** | <Reveal>A cloud of **particles**, each representing a possible pose with an **importance weight**. A pose whose predicted sensor readings better match the real ones can receive more weight.</Reveal> | <Reveal>Several plausible positions at once, such as two distinct doorways that look alike.</Reveal> |
+
+Think of the bell curve as a compact description of one hill. Particles are
+like weighted pins on a map: they can bunch up on one hill or split across
+several. **Particle filters**, including AMCL, update those pins as the robot
+moves and gathers evidence.
+
+<Figure
+  src="/intro-to-localization/gaussian-vs-particles.svg"
+  alt="A single smooth bell curve beside two clusters of particles, with larger dots representing more weight."
+  caption="A single Gaussian summarizes one cluster; a particle cloud can keep two distinct guesses alive."
+/>
+
+</Slide>
+<Slide>
+
+### 4. Events, probability, and random variables
+
+Roll a fair six-sided die. The whole box below shows every outcome. The
+bubbles group the outcomes we want to ask about. Rolling a 3 also counts as
+rolling an odd number, so the smaller bubble fits entirely inside the larger one.
+
+<Figure
+  src="/intro-to-localization/die-sample-space.svg"
+  alt="Sample space Ω contains outcomes 1 through 6. The bubble for A₂ contains 1, 3, and 5. Inside it, the smaller A₁ bubble contains only 3. Outcomes 2, 4, and 6 are outside both events."
+  caption="A₁ is ‘roll a 3’; A₂ is ‘roll an odd number.’ Every outcome in A₁ is also in A₂."
+/>
+
+Now give each event a number that says **how likely it is**. On a fair die,
+three of the six outcomes are odd, so A₂ points to 1/2 on the probability line.
+
+<Figure
+  src="/intro-to-localization/event-probability.svg"
+  alt="Four arrows map events to a probability number line. The empty event maps to 0, A₁ to 1/6, A₂ to 1/2, and the full sample space Ω to 1."
+  caption="Probability maps a whole event to a value from 0 to 1. The impossible event has P(∅) = 0; the certain event has P(Ω) = 1."
+/>
+
+</Slide>
+<Slide>
+
+#### Give every outcome a number
+
+A **random variable** answers a different question: what number should we
+record for the outcome that actually happened? For example, use `X = 1` for
+an odd roll and `X = 0` for an even one. The roll of 3 maps to 1, even though
+the probability of rolling a 3 is 1/6.
+
+<Figure
+  src="/intro-to-localization/random-variable-mapping.svg"
+  alt="Two sets labeled Ω and ℝ. The die outcomes 1, 3, and 5 point to the real number 1, while 2, 4, and 6 point to 0."
+  caption="X assigns a value to each outcome in Ω. The output set ℝ is the real numbers, but this particular X only uses 0 and 1."
+/>
+
+</Slide>
+<Slide>
+
+#### From the diagrams to the notation
+
+For a six-sided die, the **sample space** Ω is the set of all possible
+outcomes: 1 through 6. An **event** is a set of outcomes you care about:
+“roll a 3” is one event; “roll an odd number” includes 1, 3, and 5. A
+probability assigns each event a number in `[0, 1]`.
+
+- `P(Ω) = 1`: some outcome in the sample space must happen.
+- `P(∅) = 0`: the empty event can't happen.
+- If events A and B are **disjoint** (they can't both happen), then
+  `P(A or B) = P(A) + P(B)`. So on a fair die, the chance of a 1 or a 3 is 2/6.
+  “Roll a 3” and “roll an odd number” aren't disjoint: adding them would count 3 twice.
+
+Three common ways to calculate probability are **counting** equally likely
+outcomes (combinatorics), **measuring** a fraction of a uniform area or volume
+(geometry), and **adding up area** under a probability density function
+(calculus). The right method depends on how the outcomes are distributed.
+
+A **random variable** assigns a number to each outcome. For example, X might
+be the number of wheel ticks counted in a tenth of a second, or the actual
+distance the robot travels in that time.
+
+- **Discrete:** A tick count takes separate values: 0, 1, 2, and so on. For each
+  value x that can occur with positive probability, `0 < P(X = x) ≤ 1`.
+  Adding all the individual probabilities gives 1.
+- **Continuous:** Model a distance measured with a ruler as able to take any real
+  value between marks, even if the ruler only shows millimeters. Instead of
+  asking for the chance of landing on one exact value (zero in a continuous
+  model), ask for a range. **Cumulative probability** `P(X < x)` is the area
+  under the **probability density function** (PDF) `f(x)` to the left of x.
+  The curve's height is a density, not the probability of an exact reading.
+
+<Figure
+  src="/intro-to-localization/metric-ruler.webp"
+  alt="Close-up of a ruler with numbered centimeter marks and smaller millimeter ticks in between."
+  caption={<>The marks are discrete; a real length can fall anywhere between them. Photo: <a href="https://commons.wikimedia.org/wiki/File:Ruler_4scales_details.jpg">Tangopaso</a> (public domain).</>}
+/>
+
+</Slide>
+<Slide>
+
+### 5. Mean, variance, and standard deviation
+
+Suppose a robot commanded to drive 1 m is equally likely to travel 0.98 m or
+1.02 m. Its **expected value** `E[X]`, or mean μ, is 1.00 m. That's the center
+of the guesses, not a promise that any run lands there.
+
+**Variance** `V[X]` is the average *squared* distance from the mean. Squaring
+stops misses on opposite sides from canceling out. In our example both misses
+are 0.02 m from the center, so the variance is 0.0004 m². **Standard deviation**
+`σ[X] = √(V[X])` brings the spread back into the original units: 0.02 m, or 2 cm.
+
+<Callout type="info" title="The same idea in symbols">
+
+| Quantity | Discrete: add over possible x values | Continuous: add up area over all x |
+|---|---|---|
+| Mean | `μ = E[X] = ∑ x · P(X = x)` | `μ = E[X] = ∫ x · f(x) dx` |
+| Variance | `V[X] = ∑ (x − μ)² · P(X = x)` | `V[X] = ∫ (x − μ)² · f(x) dx` |
+| Standard deviation | `σ[X] = √(V[X])` | `σ[X] = √(V[X])` |
+
+No calculus needed here: read ∫ as “add up very thin slices.” In each column,
+the mean averages positions; the variance averages squared misses from the mean.
+
+</Callout>
+
+</Slide>
+<Slide>
+
+### 6. Gaussians in one and two dimensions
+
+Two sensors estimate that the left jamb is 35 cm from the robot's center. One
+is usually within a centimeter or two; the other often misses by several
+centimeters. Same estimate, different trust. When we model an uncertain
+measurement as a **1D Gaussian**, the model is a **(μ, σ) pair**: μ says where
+it's centered, and σ says how spread out it is. A larger σ puts more probability
+farther from the center, so we're less confident that the true value is close to μ.
+
+`f(x) = [1 / (σ√(2π))] · exp(−(x − μ)² / (2σ²))`
+
+The `exp` part makes the curve fall away on both sides of μ. Increasing σ makes
+the bell wider and lower, but the total area stays 1.
+
+<Figure
+  src="/intro-to-localization/gaussian-pdf.svg"
+  alt="Bell curve with a dashed center line at 35 cm, shading from 32 to 38 cm, and red example distance readings on the horizontal axis."
+  caption="The shaded interval is one standard deviation on each side of the mean (σ = 3 cm), containing about 68% of the modeled probability. The red dots are example measurements."
+/>
+
+</Slide>
+<Slide>
+
+#### From a bell curve to a cloud of points
+
+On a map we care about two coordinates, **(x, y)**. Each has its own variance,
+and the errors can move together. For instance, if a robot is driving northeast
+and underestimates how far it drove, its actual position may be both farther
+east and farther north than predicted. **Correlation** ρ describes that tendency:
+a positive ρ means above-average x and above-average y tend to occur together.
+
+<Callout type="info" title="Reading a 2 × 2 covariance matrix">
+
+For the robot's position `(x, y)`, put the two standard deviations `σₓ` and
+`σᵧ` and the correlation `ρ` together in one **covariance matrix**:
+
+```text
+    ⎡ σₓ²       ρ σₓ σᵧ ⎤
+Σ = ⎣ ρ σₓ σᵧ   σᵧ²     ⎦
+```
+
+- **On the diagonal:** `σₓ²` (top left) and `σᵧ²` (bottom right) are the variances. Each tells you how spread out the uncertainty is along that map axis on its own.
+- **Off the diagonal:** both entries are `ρ σₓ σᵧ`, the covariance between x and y. They capture how the coordinates vary together. If `ρ = 0`, both entries are zero and the coordinates are uncorrelated.
+
+</Callout>
+
+</Slide>
+<Slide>
+
+#### See the matrix in the scatter plots
+
+<Figure
+  src="/intro-to-localization/gaussian-uncorrelated.svg"
+  alt="Two uncorrelated scatter plots on identical axes. With variance 1 on both axes the cloud is round; with y variance 2 it stretches vertically."
+  caption="With zero correlation (ρ = 0), doubling the y variance stretches the cloud vertically without tilting it."
+/>
+
+<Figure
+  src="/intro-to-localization/gaussian-correlated.svg"
+  alt="Two scatter plots with x variance 1 and y variance 2. At correlation 0.5 the cloud tilts up to the right; at 0.7 it is narrower along the diagonal."
+  caption="Both plots have the same x and y variances. Larger positive correlation makes the points cluster more tightly around a rising diagonal."
+/>
+
+</Slide>
+<Slide>
+
+### 7. Uncertainty ellipses on a robot map
+
+A cloud of dots can clutter a map. For a 2D Gaussian, an **uncertainty ellipse**
+shows a region that contains a chosen share of the possible positions under
+that model. Its **center** is the mean position. The **long axis** points where
+we know the least; the **short axis** points where our estimate is tighter.
+The **covariance matrix** stores both axis variances and how x and y vary
+together. Its **eigenvectors** give those ellipse directions, and the square
+roots of its **eigenvalues** give the standard deviations along them.
+
+<Figure
+  src="/intro-to-localization/uncertainty-ellipse.svg"
+  alt="Tilted scatter cloud with two nested probability ellipses and perpendicular arrows along the long and short axes. Solid 3-sigma contour encloses 98.9%; dashed 3.41-sigma contour encloses 99.7%."
+  caption="The arrows show the directions of greatest and least spread. The dashed ellipse extends beyond 3σ to enclose 99.7% of the modeled 2D positions."
+/>
+
+<Callout type="tip" title="Three sigma: check the dimension">
+
+In **1D**, within 3 standard deviations of a Gaussian mean covers about
+**99.7%** of the probability. For a **2D** Gaussian ellipse with semiaxes
+`3√λ`, coverage is about **98.9%**. To enclose about 99.7% in 2D, use semiaxes
+of about `3.41√λ` instead. Either way, an ellipse is not a guarantee that the
+robot is inside it.
+
+</Callout>
+
+<details>
+<summary>Optional Linear Algebra Deep Dive</summary>
+
+If A is the position covariance matrix, an eigenvector **v** is a nonzero
+arrow that A stretches or shrinks without turning it. The equation is
+`λv = Av`, where **λ** is the scale factor, called the eigenvalue. Use the two
+perpendicular eigenvector directions as the ellipse axes. Along each axis,
+`√λ` is one standard deviation, so the semiaxis length is `k√λ` for a common
+scale factor k chosen for the desired coverage.
+
+</details>
+
+</Slide>
+<Slide>
+
+#### What localization and clearance look like on a real robot
+
+A bridge-inspection robot used AMCL to localize on a LiDAR map. In panel **a**,
+look for the orange pose arrow inside a wide purple **position uncertainty**
+ellipse. The yellow wedge is **heading uncertainty**, which is separate. By
+panel **e**, the spread has shrunk as the robot gathers more evidence.
+
+<Figure
+  src="/intro-to-localization/bridge-robot-amcl.webp"
+  alt="Five RViz views of bridge-inspection robot localization, from a large purple position covariance ellipse and dispersed pose particles to a tight pose estimate."
+  caption={<>AMCL during a bridge-inspection run. Figure 14 from <a href="https://doi.org/10.1016/j.autcon.2018.07.003">Peel, Luo, Cohn, and Fuentes (2018)</a>, <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> (cropped to the figure and its legend).</>}
+/>
+
+</Slide>
+<Slide>
+
+#### Why a planner leaves room around walls
+
+A **costmap** is a grid that tells a robot which places are hard or unsafe to
+cross. In this ROS screenshot, the dark blue cells extend beyond the red
+obstacle cells. This is **inflation**: the robot’s center stays back so its
+body has room. A planner can leave an extra margin for localization error,
+but inflation itself doesn't measure uncertainty, and a fixed margin doesn't
+make every estimate safe.
+
+<Figure
+  src="/intro-to-localization/ros-costmap-inflation.webp"
+  alt="ROS costmap display with red obstacle cells bordered by thick blue inflation bands and an outlined robot footprint in the free space."
+  caption={<>In RViz, red cells mark obstacles, blue cells mark inflation, and the thin red polygon shows the robot’s footprint. Source: <a href="https://wiki.ros.org/costmap_2d">ROS Wiki contributors, costmap_2d</a>, <a href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>.</>}
+  width="75%"
+/>
+
+</Slide>
+<Slide>
+
+### 8. Stretch: How uncertainty changes when we do math
+
+Wheel ticks aren't a map position. A robot converts ticks to distance, then
+uses distance and heading to update `(x, y)`. If the heading is a little off,
+a long drive can push the estimated position far to one side. It's not enough
+to convert the *best guess*; the robot needs to convert the *spread*, too.
+
+<Callout type="info" title="Sneak Peek: How Robots Update Uncertainty">
+
+For a **linear** conversion `y = Ax`, the covariance transforms as
+`Σᵧ = A Σₓ Aᵀ`. Here x and y stand for the input and output quantities,
+Σ is a covariance, and `Aᵀ` is A with its rows and columns swapped. Think of A
+as a rule that stretches, turns, or combines directions in the uncertainty cloud.
+For example, doubling a distance doubles its standard deviation and quadruples
+its variance.
+
+<details>
+<summary>Step-by-Step Math Derivation</summary>
+
+Here `x` and `y` are whole column vectors, and `A` is a fixed matrix.
+`E[…]` means an average over possible outcomes, and `μₓ` and `μᵧ` are the mean vectors.
+
+1. **Start with the covariance of `y`.** Subtract the mean, then multiply that column by its transpose to get the products of all pairs of deviations.
+
+   ```text
+   Σᵧ = E[(y − μᵧ)(y − μᵧ)ᵀ]
+   ```
+
+2. **Use linearity of expectation.** Applying the same fixed `A` to every input means we can apply it after averaging instead. Then substitute `y = Ax` and `μᵧ = Aμₓ`.
+
+   ```text
+   μᵧ = E[Ax] = A E[x] = Aμₓ
+   Σᵧ = E[(Ax − Aμₓ)(Ax − Aμₓ)ᵀ]
+   ```
+
+3. **Factor out `A` from each difference.** Both terms in each difference were multiplied by the same matrix.
+
+   ```text
+   Σᵧ = E[(A(x − μₓ))(A(x − μₓ))ᵀ]
+   ```
+
+4. **Transpose the product in reverse order.** The rule `(MN)ᵀ = NᵀMᵀ` moves the transposed `A` to the far right.
+
+   ```text
+   Σᵧ = E[A(x − μₓ)(x − μₓ)ᵀ Aᵀ]
+   ```
+
+5. **Take the constant matrices outside the expectation.** `A` and `Aᵀ` stay the same for every outcome.
+
+   ```text
+   Σᵧ = A E[(x − μₓ)(x − μₓ)ᵀ] Aᵀ
+   ```
+
+6. **Recognize the covariance of `x`.** The average between the two fixed matrices is exactly `Σₓ`.
+
+   ```text
+   Σᵧ = A Σₓ Aᵀ
+   ```
+
+</details>
+
+Real motion can be **nonlinear**: a change in heading sends a robot along an
+arc, not a straight line. Near the current best guess, we can approximate
+`y = f(x)` with a linear rule. Its **Jacobian** J tells us how a small change
+in each input changes the outputs. That gives `Σᵧ ≈ J Σₓ Jᵀ`. This describes
+how existing uncertainty changes; new noise from the motion itself also needs
+its own allowance.
+
+The next step is **Bayes and Kalman filters**: predict where the robot moved
+and how uncertain that prediction is, then use new measurements to revise both.
+
+</Callout>
+
+</Slide>
+
+</Section>
+
+<Section id="check-your-understanding" n="04" title="Check Your Understanding" chip="Knowledge check">
+
+<Quiz>
+  <Q>
+    <Prompt>A robot thinks it will clear a doorway by 5 cm on each side, but its position could be off by more than that. Which action is an example of **active perception**?</Prompt>
+    <Explain>Scanning the jambs gives the robot new information it can use to reduce uncertainty before deciding whether to cross.</Explain>
+    <Choice>Drive straight through and accept the risk.</Choice>
+    <Choice correct>Stop and scan both door jambs before choosing a path.</Choice>
+    <Choice>Take a known wider route without collecting any new data.</Choice>
+  </Q>
+  <Q>
+    <Prompt>Two sensors give the same 35 cm estimate. Both use bell curves: one has a standard deviation of 1 cm, the other 6 cm. Which model puts more probability close to 35 cm?</Prompt>
+    <Explain>The mean tells you the center. The smaller standard deviation means a narrower bell curve and more probability close to that center.</Explain>
+    <Choice correct>The sensor with 1 cm of standard deviation.</Choice>
+    <Choice>The sensor with 6 cm of standard deviation.</Choice>
+    <Choice>Neither: equal means always give equal confidence.</Choice>
+  </Q>
+  <Q>
+    <Prompt>A robot's uncertainty ellipse is much longer along the aisle than across it. What does that tell you?</Prompt>
+    <Explain>The longer direction shows a larger spread of possible positions. The walls can help the robot estimate its distance from either side without telling it exactly how far along the aisle it is.</Explain>
+    <Choice>The robot is definitely moving along the aisle.</Choice>
+    <Choice>The robot is less sure of its position across the aisle.</Choice>
+    <Choice correct>The robot is less sure of its position along the aisle.</Choice>
+  </Q>
+</Quiz>
+
+</Section>

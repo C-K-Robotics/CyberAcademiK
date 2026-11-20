@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 548" role="img" aria-labelledby="title desc" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title id="title">Element-wise sensor update selects one likelihood row</title><desc id="desc">The Open row [0.9, 0.5] is highlighted in a two-by-two measurement grid. A prior column [0.5, 0.5] has the same state order. Matching open entries produce 0.45, and matching closed entries produce 0.25. The unused Closed row is [0.1, 0.5]. This is not a matrix product.</desc>
+<style>@media (prefers-color-scheme: dark){[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#6b46c1"]{fill:#a78bfa}[stroke="#6b46c1"]{stroke:#a78bfa}[fill="#e8dff8"]{fill:#30234a}[stroke="#e8dff8"]{stroke:#30234a}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#b07c08"]{fill:#fbbf24}[stroke="#b07c08"]{stroke:#fbbf24}}</style>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475e6a"/></marker>
+</defs>
+<rect x="0" y="0" width="840" height="548" rx="0" fill="#eff5f8" stroke="none"/>
+<text x="28" y="36" fill="#15232c" font-size="25" text-anchor="start" font-weight="650">Pick one sensor row. Match the states. Multiply.</text>
+<text x="265" y="80" fill="#15232c" font-size="21" text-anchor="middle" font-weight="650">Measurement model</text>
+<text x="250" y="113" fill="#0a7d8f" font-size="18" text-anchor="middle" font-weight="400">true: open</text>
+<text x="400" y="113" fill="#6b46c1" font-size="18" text-anchor="middle" font-weight="400">true: closed</text>
+<text x="26" y="157" fill="#0a7d8f" font-size="20" text-anchor="start" font-weight="650">z = Open →</text>
+<text x="26" y="211" fill="#475e6a" font-size="20" text-anchor="start" font-weight="400">z = Closed</text>
+<rect x="175" y="126" width="300" height="54" rx="4" fill="#c9edf0" stroke="#0a7d8f"/>
+<rect x="175" y="180" width="300" height="54" rx="4" fill="#fbfdfe" stroke="#cad9df"/>
+<path d="M325 126 V234" fill="none" stroke="#cad9df" stroke-width="2" stroke-linejoin="round"/>
+<text x="250" y="161" fill="#0a7d8f" font-size="25" text-anchor="middle" font-weight="650">0.9</text>
+<text x="400" y="161" fill="#0a7d8f" font-size="25" text-anchor="middle" font-weight="650">0.5</text>
+<text x="250" y="215" fill="#475e6a" font-size="25" text-anchor="middle" font-weight="400">0.1</text>
+<text x="400" y="215" fill="#475e6a" font-size="25" text-anchor="middle" font-weight="400">0.5</text>
+<text x="675" y="80" fill="#15232c" font-size="21" text-anchor="middle" font-weight="650">Prior column</text>
+<path d="M641 121 H630 V231 H641 M709 121 H720 V231 H709" fill="none" stroke="#15232c" stroke-width="2" stroke-linejoin="round"/>
+<text x="674" y="157" fill="#0a7d8f" font-size="24" text-anchor="middle" font-weight="650">0.5</text>
+<text x="674" y="211" fill="#6b46c1" font-size="24" text-anchor="middle" font-weight="650">0.5</text>
+<text x="733" y="157" fill="#0a7d8f" font-size="17" text-anchor="start" font-weight="400">open</text>
+<text x="733" y="211" fill="#6b46c1" font-size="17" text-anchor="start" font-weight="400">closed</text>
+<text x="420" y="273" fill="#15232c" font-size="23" text-anchor="middle" font-weight="650">measurement_model[0] * belief</text>
+<text x="420" y="306" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">Pair the same state — no adding across states here.</text>
+<rect x="55" y="333" width="350" height="122" rx="12" fill="#c9edf0" stroke="#0a7d8f"/>
+<rect x="435" y="333" width="350" height="122" rx="12" fill="#e8dff8" stroke="#6b46c1"/>
+<text x="230" y="368" fill="#0a7d8f" font-size="21" text-anchor="middle" font-weight="650">Open score</text>
+<text x="230" y="413" fill="#0a7d8f" font-size="27" text-anchor="middle" font-weight="650">0.9 × 0.5 = 0.45</text>
+<text x="610" y="368" fill="#6b46c1" font-size="21" text-anchor="middle" font-weight="650">Closed score</text>
+<text x="610" y="413" fill="#6b46c1" font-size="27" text-anchor="middle" font-weight="650">0.5 × 0.5 = 0.25</text>
+<text x="420" y="491" fill="#475e6a" font-size="20" text-anchor="middle" font-weight="400">Reading Closed instead? Select row 1: [0.1, 0.5].</text>
+<text x="420" y="523" fill="#475e6a" font-size="19" text-anchor="middle" font-weight="400">NumPy * is element-wise here; @ would be matrix multiplication.</text>
+</svg>

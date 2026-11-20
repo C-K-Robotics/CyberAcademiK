@@ -1,0 +1,667 @@
+---
+title: 貝氏濾波器
+desc: 用有雜訊的量測、不確定的動作結果，以及「預測 → 更新」循環，幫助機器人判斷玻璃門是否開著。
+kicker: 機器人定位入門 · 模組 2
+lead: >-
+  相機說玻璃門開著，機器人該相信它嗎？你將打造一個 **貝氏濾波器**，保留對門狀態的不確定性，
+  預測推門後可能發生什麼，再用新證據更新判斷。
+author: FRC 8020
+minutes: 40
+level: beginner
+order: 2
+references:
+  - label: 機率機器人學（Probabilistic Robotics）— Thrun、Burgard 與 Fox（貝氏濾波）
+    href: 'https://mitpress.mit.edu/9780262201629/probabilistic-robotics/'
+  - label: 機器人狀態估計（State Estimation for Robotics）— Timothy D. Barfoot
+    href: 'https://asrl.utias.utoronto.ca/~tdb/bib/barfoot_ser17.pdf'
+  - label: MIT News — 研究指出搭機越來越安全（2024）
+    href: 'https://news.mit.edu/2024/study-flying-keeps-getting-safer-0807'
+  - label: 玻璃門照片 — Globetrotter19，CC BY-SA 3.0
+    href: 'https://commons.wikimedia.org/wiki/File:Himfy_utca_7,_garden_door,_2019_Szentimrev%C3%A1ros.jpg'
+---
+
+<Section id="joint-and-conditional" n="01" title="聯合機率與條件機率" chip="已知什麼？">
+
+<Slide>
+
+「有人說，搭商用客機遇上墜機的機率大約是 **一千一百萬分之一——超安全！**」
+
+<Reveal>再加一個條件：「你就在飛機上，而且 **兩具引擎剛剛都起火了**。」你還會用同一個機率嗎？</Reveal><Reveal> 當然不會。你剛得知一條跟 *這一班飛機* 有關的重要訊息。原本的整體機率已經不能描述你現在的情況。</Reveal>
+
+<Figure
+  reveal
+  src="/bayes-filter/airplane-conditional.svg"
+  alt="兩格插圖畫的是同一架客機：左邊平穩巡航，右邊兩具引擎都起火冒煙。得知新資訊後，適用的機率也不同。圖中的基準數字只是頭條上的說法，不是現行風險估計。"
+  caption="同一架飛機，已知的資訊不同。「一千一百萬分之一」只是頭條上的數字，不是飛安風險的計算結果。"
+/>
+
+<Reveal block>
+
+<Callout type="info" title="這是頭條，不是飛安風險計算">
+
+常見的「一千一百萬分之一」說法不是定義明確的現行墜機統計。要估計風險，得說清楚是在算哪種事件、哪段時間，以及哪一群人。
+作為比較，[MIT 的 2024 年報導](https://news.mit.edu/2024/study-flying-keeps-getting-safer-0807)估計，
+**2018 至 2022 年全球每約 1,370 萬人次搭乘商用航班，就有 1 人死亡**。那是 **死亡風險**，不是墜機風險。
+我們不替引擎起火的情況編一個數字。重點是：新證據會改變哪個機率適用。
+
+</Callout>
+
+機器人也會遇到類似的問題。「這條走廊的門通常開著」和「**已知相機在門口看到反光，這扇門開著的機率是多少？**」是不同的問題。
+**條件機率** 讓我們把這個差別寫清楚。
+
+</Reveal>
+
+</Slide>
+<Slide>
+
+### 兩件事同時發生，還是已知一件事再問另一件事？
+
+用 **X** 表示看不見的狀態（例如門是否開著），用 **Z** 表示感測器的讀值。小寫 **x** 和 **z** 表示這些變數的某個值，
+例如 `x = open`（門真的開著）和 `z = 相機回報 Open`。以下大寫開頭的 `Open`、`Closed` 是 **相機的標籤**，不保證門真的開著或關著。
+
+| 概念 | 公式 | 用白話說 |
+|---|---|---|
+| **聯合機率** | `P(x, z) = P(X = x, Z = z)` | 狀態是 x，**而且**讀值是 z，兩件事同時發生的機率。 |
+| **條件機率** | `P(x ∣ z) = P(x, z) / P(z)` | 只看讀值為 z 的情況，其中有多少比例的狀態是 x？必須有 `P(z) > 0`。 |
+| **獨立** | `P(x, z) = P(x)P(z)`，且 `P(x ∣ z) = P(x)` | 得知 z 不會改變對 x 的判斷。 |
+
+直線 **∣** 讀作 **「已知」**。想像把整個樣本空間縮小到符合觀測結果的那些情況；除以 `P(z)`，就能讓這個縮小後的範圍總機率重新等於 1。
+
+<Figure
+  src="/bayes-filter/shrinking-universe.svg"
+  alt="左邊的完整樣本空間中，事件 X 與 Z 有重疊。右邊放大 Z，只留下 Z 當作新的樣本空間，交集在 Z 中所占的比例沒有改變。聯合機率以整個樣本空間為分母，條件機率只以 Z 為分母。"
+  caption="分子還是交集，換的是分母。圖中的面積只是示意，不是玻璃門範例的機率。"
+/>
+
+例如，`P(門開著, 相機回報 Open)` 問的是兩件事同時發生的機率。`P(門開著 ∣ 相機回報 Open)` 則問：看到這個讀值後，門真的開著的機率是多少？
+
+丟一枚跟門毫無關係的硬幣，不該改變我們對門的估計，因為兩件事彼此獨立。有用的相機讀值則 **不會與門的狀態獨立**，不然相機就幫不上忙了！
+
+</Slide>
+
+</Section>
+
+<Section id="belief-and-markov" n="02" title="信念、預測與馬可夫假設" chip="保留不確定性">
+
+<Slide>
+
+### 機器人保留的是機率分布，不是非黑即白的答案
+
+在[模組 1](/courses/intro-to-localization)中，機器人的姿態不一定能確定。估計器不假裝知道確切狀態，而是保留一份 **信念**（belief）：
+對各種可能狀態的機率分布。這裡只估計 **門開著** 或 **門關著**，方便看清每一步計算。做定位時，可能狀態就會換成機器人的各種位置與朝向。
+
+信念 `[0.6, 0.4]` 表示「門有 60% 的機率開著，40% 的機率關著」，**不是**「門開了六成」。我們的模型只有開和關兩種狀態。
+
+用 `t` 表示步數，從初始狀態 `x₀` 開始。動作 **uₜ 在狀態 xₜ 時執行**，使系統走向 `xₜ₊₁`；量測 **zₜ 描述的是狀態 xₜ**。
+所以，讓系統來到 `xₜ` 的動作是 **uₜ₋₁**，不是 uₜ。
+
+<Reveal block>
+
+```text
+x₀ ──u₀──→ x₁ ──u₁──→ x₂ ── … ──uₜ₋₁──→ xₜ
+            ↓ z₁        ↓ z₂            ↓ zₜ
+```
+
+先前的狀態從 `x₀` 到 `xₜ₋₁`，已執行的動作從 `u₀` 到 `uₜ₋₁`，量測則從 `z₁` 到 `zₜ`。
+冒號記號 `z₁:ₜ` 表示 **從第 1 步到第 t 步的所有量測**。我們從初始先驗 `bel(x₀)` 開始。
+</Reveal>
+
+<Reveal block>
+
+```text
+bel(xₜ) = P(xₜ ∣ z₁:ₜ, u₀:ₜ₋₁)
+```
+
+**後驗信念** 是納入最新量測 *之後* 的狀態分布，包含目前為止的動作與量測資訊。先前的狀態仍不確定，不是我們額外知道的條件。
+</Reveal>
+
+<Reveal block>
+
+```text
+b̄el(xₜ) = P(xₜ ∣ z₁:ₜ₋₁, u₀:ₜ₋₁)
+```
+
+**預測信念** 描述的也是 xₜ，但時間點在動作 uₜ₋₁ 執行之後、量測 zₜ **之前**。`bel` 上方的橫線提醒我們「這還只是預測」。
+第 1 步的量測歷史 `z₁:₀` 是空的：先從 `bel(x₀)` 用 u₀ 預測，再用 z₁ 更新。
+</Reveal>
+
+</Slide>
+<Slide>
+
+### 為什麼不用重播機器人的整段歷史？
+
+假設機器人已經知道現在的位置和速度。要預測下一刻的位置，應該不必重播上週所有的輪子指令。
+**馬可夫假設** 認為：只要狀態描述得夠完整，當前狀態就包含了預測下一步所需的歷史資訊。
+因此，預測只需要前一狀態和最新的動作；感測模型則只需要目前的狀態。
+
+但機器人 **不知道上一刻究竟是哪個狀態**。它保留先前的 **信念** 作為摘要，綜合每個可能狀態出發的預測。這樣就能把先前的資訊帶到下一步，不用保存每筆原始讀值。
+
+<Figure
+  src="/bayes-filter/markov-timeline.svg"
+  alt="狀態由 x t−2 接到 x t−1、x t 和 x t+1。動作從同索引的狀態出發、指向下一狀態，量測畫在同索引的狀態下方。較早的歷史以淡色呈現；估計 x t 時，重點是前一狀態 x t−1、讓系統到達此處的動作 u t−1，以及讀值 z t。"
+  caption="uₜ₋₁ 讓系統來到 xₜ，uₜ 則讓它走向 xₜ₊₁。前一狀態包含相關的歷史資訊，但真實狀態未知，濾波器仍須保留對它的信念。"
+/>
+
+箭頭表示 **模型中的依賴關係**，不是說我們確定知道前一個狀態。一旦指定前一狀態，更早的狀態就不會提供這個運動模型所需的額外資訊；但前一狀態未知時，預測仍要綜合各種可能性。
+
+<Callout type="info" title="深入看看：模型不是信念">
+
+運動模型是 `P(xₜ ∣ xₜ₋₁, uₜ₋₁)`：指定前一狀態和執行的動作後，新狀態有多可能？量測模型則是 `P(zₜ ∣ xₜ)`。
+對離散狀態，真正的濾波步驟是：
+
+```text
+預測：b̄el(xₜ) = Σ over xₜ₋₁ [P(xₜ ∣ xₜ₋₁, uₜ₋₁) bel(xₜ₋₁)]
+更新： bel(xₜ) = η P(zₜ ∣ xₜ) b̄el(xₜ)
+```
+
+**預測**：對每種可能的前一狀態，把「從那裡來到這裡的機率」乘上「原本就在那裡的機率」，再把不同路徑加總。
+**更新**：把預測乘上「這個狀態有多容易產生最新讀值」，再正規化。
+
+不要把 `b̄el(xₜ)` 等同於 `P(xₜ ∣ xₜ₋₁, uₜ₋₁)`，也不要把 `bel(xₜ)` 等同於 `P(xₜ ∣ xₜ₋₁, zₜ, uₜ₋₁)`。
+右邊的式子都假設前一狀態已指定，信念卻必須考慮 **所有** 可能的前一狀態。只有確知前一狀態時，才能把那個狀態的信念設為 1，其餘設為 0。
+
+</Callout>
+
+這是我們對 **模型** 做的假設，不是放諸四海皆準的定律。移動中的機器人可能得把速度也納入狀態，只有位置還不夠。
+玻璃門的模型假設兩步之間沒有其他東西會改變門的狀態；如果有彈簧會把門拉回去，就得把這個作用也加進模型。
+
+</Slide>
+
+</Section>
+
+<Section id="bayesian-inference" n="03" title="貝氏推論：用觀測更新信念" chip="證據 × 先驗">
+
+相機回報 `Open`。我們想知道的是 **已知讀值，門真的開著的機率**；但測試相機時，測到的是 **已知門的真實狀態，相機產生某個讀值的機率**。
+方向剛好相反！貝氏定理把這兩個問題連在一起：
+
+```text
+P(x ∣ z) = P(z ∣ x) P(x) / P(z) = η P(z ∣ x) P(x)
+```
+
+用白話說：**新信念 = 讀值與狀態的吻合程度 × 原本的信念，再調整比例**。
+在完整的濾波器中，量測當下的「原本信念」就是預測信念 `b̄el`。
+
+<figure style={{margin: '22px 0'}}>
+<svg viewBox="0 0 760 300" role="img" aria-labelledby="bayes-rule-title bayes-rule-desc" style={{width: '100%', height: 'auto', display: 'block', background: 'var(--bg-inset)', border: '1px solid var(--line)', borderRadius: 12, fontFamily: 'IBM Plex Sans, sans-serif'}}>
+<title id="bayes-rule-title">貝氏定理的四個部分</title>
+<desc id="bayes-rule-desc">後驗 P(x 給定 z) 等於正規化因子 η 乘上量測概似 P(z 給定 x)，再乘上先驗 P(x)。線條連接各項及其標籤。</desc>
+<g fill="none" strokeWidth="2">
+<path d="M120 98 V130" stroke="var(--ac1b)" />
+<path d="M285 98 V130" stroke="var(--tx-2)" />
+<path d="M455 198 V170" stroke="var(--ac2)" />
+<path d="M650 198 V170" stroke="var(--ac3)" />
+</g>
+<g textAnchor="middle" fontSize="20" fontWeight="600">
+<text x="120" y="55" fill="var(--ac1b)">後驗</text>
+<text x="285" y="55" fill="var(--tx-2)">正規化因子</text>
+<text x="455" y="233" fill="var(--ac2)">量測模型</text>
+<text x="650" y="233" fill="var(--ac3)">先驗</text>
+</g>
+<g textAnchor="middle" fontSize="16" fill="var(--tx-3)">
+<text x="120" y="82">更新後的信念</text>
+<text x="285" y="82">讓總和等於 1</text>
+<text x="455" y="260">讀值 z 與狀態 x 有多吻合？</text>
+<text x="650" y="260">量測前的信念</text>
+</g>
+<g textAnchor="middle" fontSize="32" fontWeight="600">
+<text x="120" y="160" fill="var(--ac1b)">P(x ∣ z)</text>
+<text x="220" y="160" fill="var(--tx-2)">=</text>
+<text x="285" y="160" fill="var(--tx-2)">η</text>
+<text x="350" y="160" fill="var(--tx-2)">×</text>
+<text x="455" y="160" fill="var(--ac2)">P(z ∣ x)</text>
+<text x="560" y="160" fill="var(--tx-2)">×</text>
+<text x="650" y="160" fill="var(--ac3)">P(x)</text>
+</g>
+</svg>
+<figcaption style={{textAlign: 'center', color: 'var(--tx-4)', fontSize: 12, marginTop: 9}}>先替每個可能的狀態打分數，再按比例調整分數。</figcaption>
+</figure>
+
+| 項目 | 對機器人來說代表什麼 |
+|---|---|
+| **後驗**（posterior）`P(x ∣ z)` | 納入量測 **之後**，對狀態的新判斷。 |
+| **量測模型／概似**（likelihood）`P(z ∣ x)` | **如果**真實狀態是 x，相機有多可能產生讀值 z？這還不是狀態 x 的機率！ |
+| **先驗**（prior）`P(x)` | 看到這筆量測 **之前** 的信念。 |
+| **正規化因子** `η = 1 / P(z)` | 把所有機率的總和調回 **1** 的比例常數。η 讀作「eta」。 |
+
+不必另外求 `P(z)`。先算出每個狀態尚未正規化的分數，再將它們加總，最後 **每個分數都除以總和**。
+這就等於乘上 η，分數之間的相對比例不會改變。接下來的[玻璃門範例](#sec-glass-door-measurements)會用長條圖展示 η 如何把兩個分數的總和拉到 100%。
+
+<Callout type="tip" title="讀值一樣，問題不一樣">
+
+`P(相機回報 Open ∣ 門開著) = 0.9` **不代表** `P(門開著 ∣ 相機回報 Open) = 0.9`。
+門關著時，相機也可能常常誤報 `Open`，而先驗同樣重要。與其猜，不如算一次。
+
+</Callout>
+
+</Section>
+
+<Section id="glass-door-measurements" n="04" title="範例一：只量測玻璃門" chip="只用量測">
+
+<Slide>
+
+### 1. 從相機可能犯的錯建立模型
+
+機器人來到一扇玻璃門前。它看得到門後的走廊，但這不代表玻璃不在路上。反光和不明顯的門邊都可能騙過相機。
+在這個 **教學模型** 中，假設測試結果如下：
+
+- 門真的 **關著**：相機有一半的機會誤判成 `Open`。
+- 門真的 **開著**：相機有 **90% 的機會** 正確回報 `Open`。
+
+這些數字是範例的假設，並不是對照片中那扇門的實際量測結果。
+
+<Figure
+  src="/bayes-filter/glass-door.webp"
+  alt="從室內看，一扇黑色門框的玻璃門向左敞開，前方可見把手，正前方是通往花園的開口。"
+  caption={<>打開的玻璃門在左邊。透過玻璃和正前方的門口，都能看到植物。照片：<a href="https://commons.wikimedia.org/wiki/File:Himfy_utca_7,_garden_door,_2019_Szentimrev%C3%A1ros.jpg">Globetrotter19</a>，<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a>（調整尺寸並轉為 WebP）。</>}
+  width="48%"
+/>
+
+在 **量測模型** 的表格中，橫列是相機讀值，直欄是真實狀態：
+
+| 相機讀值 z ↓ / 真實狀態 x → | 開著 `open` | 關著 `closed` |
+|---|---|---|
+| `Open` | <Reveal>`P(Open ∣ open) = 0.9`</Reveal> | <Reveal>`P(Open ∣ closed) = 0.5`</Reveal> |
+| `Closed` | <Reveal>`P(Closed ∣ open) = 0.1`</Reveal> | <Reveal>`P(Closed ∣ closed) = 0.5`</Reveal> |
+
+每一 **直欄** 的總和都是 1：在同一種真實狀態下，它列出了所有可能的讀值。橫列不一定加起來等於 1，因為左右兩格假設的是不同的真實狀態。
+
+目前機器人 **只量測，不碰門**。我們假設門的狀態不變，且 **給定真實狀態後**，各次讀值彼此獨立。
+如果相機卡住，只送出同一張畫面，重複收到它並不算新證據。
+
+</Slide>
+<Slide>
+
+### 2. 從 50/50 開始，處理第一筆 `Open`
+
+我們沒有理由偏向其中一個狀態，所以把 **初始先驗** 設成：
+
+```text
+P(x = open) = 0.5       P(x = closed) = 0.5
+```
+
+50/50 是這個兩狀態範例的建模選擇，不是「不知道」永遠都要用的數字。現在相機回報 `Open`，用 `Open` 那一列來替兩種真實狀態打分數：
+
+```text
+bel(open)   = η × 0.9 × 0.5 = 0.45η
+bel(closed) = η × 0.5 × 0.5 = 0.25η
+```
+
+`0.9` 和 `0.5` 表示讀值與各狀態的吻合程度；每個式子裡另一個 `0.5` 則是對應的先驗。分數是 `0.45` 和 `0.25`，總和為 `0.70`。接著正規化：
+
+```text
+η = 1 / (0.45 + 0.25) ≈ 1.429
+bel(open)   = 0.45 / 0.70 ≈ 0.643
+bel(closed) = 0.25 / 0.70 ≈ 0.357
+```
+
+<Figure
+  src="/bayes-filter/normalization.svg"
+  alt="正規化前，堆疊長條的開門分數為 0.45、關門分數為 0.25，合計 0.70，低於 1.0 虛線。兩段都乘上約 1.429 後，開門為 0.643、關門為 0.357，合計 1.0。兩者比例仍是 9 比 5。"
+  caption="η 改變總和，不改變分數的比例。兩段長條都乘上同一個倍數，顯示時才四捨五入。"
+/>
+
+新信念是 **64.3% 開著、35.7% 關著**。`Open` 的確支持「門是開的」，但證據沒那麼強：門關著時，相機也有一半的機會給出相同讀值！
+
+<Callout type="warn" title="停一下，你會怎麼做？">
+
+**有 64.3% 的把握，你就敢讓機器人開過玻璃門嗎？** 這比 `if camera == "Open": drive()` 的規則聰明在哪裡？
+
+濾波器讓規劃器知道：門還有 **35.7% 的機率關著**，直接開過去可能撞上。濾波器負責估計，不會代替規劃器選擇安全動作。
+規劃器可以先停下、換個感測器確認，或改走別的路。機率不是安全保證；判斷錯誤的代價也要算進去。
+
+</Callout>
+
+</Slide>
+<Slide>
+
+### 3. 用 Python 或 Java 反覆更新
+
+<Figure
+  src="/bayes-filter/elementwise-update.svg"
+  alt="二乘二量測表標出 Open 那一列 [0.9, 0.5]，先驗欄向量 [0.5, 0.5] 的順序是開著、關著。對應元素相乘，得到開門分數 0.9 × 0.5 = 0.45、關門分數 0.5 × 0.5 = 0.25。若讀值為 Closed 則取 [0.1, 0.5]。"
+  caption="只選一列，然後依狀態配對概似與先驗。逐元素相乘得到的是分數，還沒正規化。"
+/>
+
+每次算出的後驗會變成下一次的先驗。這種 **遞迴更新** 用兩個數字，就能把先前的證據帶到下一步。下面兩種版本任選其一：
+Python 若還沒安裝 NumPy，可執行 `python -m pip install numpy`；Java 請把程式存成 `DoorMeasurements.java`，再執行 `java DoorMeasurements.java`（JDK 11 或更新版本）。Java 版只用一般陣列，不需要 WPILib 或機器人硬體。
+
+<CodeTabs>
+<CodeTab label="door_measurements.py">
+
+```python
+import numpy as np
+
+# 狀態順序固定為 [開著, 關著]。
+belief = np.array([0.5, 0.5])
+
+# 橫列：相機讀值 [Open, Closed]。直欄：真實狀態 [開著, 關著]。
+measurement_model = np.array([
+    [0.9, 0.5],  # 各種真實狀態下，相機回報 Open 的機率
+    [0.1, 0.5],  # 各種真實狀態下，相機回報 Closed 的機率
+])
+
+# Open, Open, Open, Open, Open, Closed, Open, Open
+measurements = [0, 0, 0, 0, 0, 1, 0, 0]
+labels = ["Open", "Closed"]
+
+print("step  reading  bel(open)  bel(closed)")
+for step, z in enumerate(measurements, start=1):
+    # 取出對應這次讀值的概似列。
+    # * 是逐元素相乘，不是矩陣相乘：
+    # [開門概似 × 開門先驗, 關門概似 × 關門先驗]。
+    scores = measurement_model[z] * belief
+    total = scores.sum()
+    if total <= 0:
+        raise ValueError("在這個模型下，不可能出現這筆讀值。")
+    belief = scores / total  # 正規化，等同乘上 η。
+    print(f"{step:>4}  {labels[z]:>7}  {belief[0]:.3f}      {belief[1]:.3f}")
+```
+
+</CodeTab>
+<CodeTab label="DoorMeasurements.java">
+
+```java
+import java.util.Locale;
+
+public class DoorMeasurements {
+    public static void main(String[] args) {
+        // 狀態順序固定為 [開著, 關著]。
+        double[] belief = {0.5, 0.5};
+
+        // 橫列：相機讀值 [Open, Closed]。直欄：真實狀態 [開著, 關著]。
+        double[][] measurementModel = {
+            {0.9, 0.5},  // 各種真實狀態下，相機回報 Open 的機率
+            {0.1, 0.5}   // 各種真實狀態下，相機回報 Closed 的機率
+        };
+
+        // Open, Open, Open, Open, Open, Closed, Open, Open
+        int[] measurements = {0, 0, 0, 0, 0, 1, 0, 0};
+        String[] labels = {"Open", "Closed"};
+
+        System.out.println("step  reading  bel(open)  bel(closed)");
+        for (int i = 0; i < measurements.length; i++) {
+            int z = measurements[i];
+            double[] likelihood = measurementModel[z];  // 取出對應的那一列。
+
+            // 把對應元素相乘，兩個分數都使用更新前的信念。
+            double openScore = likelihood[0] * belief[0];
+            double closedScore = likelihood[1] * belief[1];
+            double total = openScore + closedScore;
+            if (total <= 0.0) {
+                throw new IllegalStateException("在這個模型下，不可能出現這筆讀值。");
+            }
+
+            // 正規化：這次的後驗就是下次的先驗。
+            belief[0] = openScore / total;
+            belief[1] = closedScore / total;
+            System.out.printf(Locale.ROOT, "%4d  %7s  %.3f      %.3f%n",
+                    i + 1, labels[z], belief[0], belief[1]);
+        }
+    }
+}
+```
+
+</CodeTab>
+</CodeTabs>
+
+當 `z = 0`，兩個版本都選 `[0.9, 0.5]`；當 `z = 1`，就選 `[0.1, 0.5]`。NumPy 的 `*` 自動配對，Java 則把兩次相乘分開寫出來。
+這是 **逐元素相乘**：開著配開著，關著配關著。這一步不需要矩陣乘法。正規化後，`belief` 就存著新的機率分布。
+計算時保留完整精度，只在輸出時四捨五入。
+
+</Slide>
+<Slide>
+
+### 4. 看信念怎麼上升、下滑，再回升
+
+| 步驟 | 讀值 | bel(open) | bel(closed) |
+|---|---|---|---|
+| 0 | 初始先驗 | 0.500 | 0.500 |
+| 1 | `Open` | 0.643 | 0.357 |
+| 2 | `Open` | 0.764 | 0.236 |
+| 3 | `Open` | 0.854 | 0.146 |
+| 4 | `Open` | 0.913 | 0.087 |
+| 5 | `Open` | 0.950 | 0.050 |
+| 6 | `Closed` | 0.791 | 0.209 |
+| 7 | `Open` | 0.872 | 0.128 |
+| 8 | `Open` | 0.924 | 0.076 |
+
+<Figure
+  src="/bayes-filter/belief-convergence.svg"
+  alt="門開著的信念從 0.500 起，依序升到 0.643、0.764、0.854、0.913、0.950。第六次讀到 Closed 時掉到 0.791，接著回升到 0.872 和 0.924。"
+  caption="前五次的 Open 讀值逐步提高信念。第六次的 Closed 拉低開門機率，但沒有抹去先前的證據。"
+/>
+
+即使門真的開著，第 6 步也 **可能讀到 `Closed`**：機率是 0.1。不過門關著時，讀到 `Closed` 的機率是門開著時的五倍（`0.5 / 0.1`），
+所以開門的信念降到 **0.791**。接著兩次 `Open` 又把信念拉了回來。我們不知道第 6 筆讀值是否真的出錯；濾波器只是把它和先前的證據一起考量。
+
+如果持續收到 `Open`，在這個「門的狀態不變」的模型中，開門信念會越來越高。但這 **不能證明** 門真的開著，信念也不一定每步都上升。
+校正不良的相機或彼此相關的畫面，都可能讓濾波器太有把握。算得再精確，也救不了不合適的模型。
+
+</Slide>
+
+</Section>
+
+<Section id="full-bayes-filter" n="05" title="範例二：把動作加進來" chip="預測 → 更新">
+
+<Slide>
+
+### 1. 如果機器人可以推門呢？
+
+現在機器人有了致動器。再次查看之前，它可以 **推門**，也可以 **不動作**。送出指令不代表一定成功，也許推得不夠用力。
+我們需要一個 **動作模型**（也叫運動模型或狀態轉移模型），描述各種下一狀態的機率。
+
+| 動作 | 前一狀態 | 下一步：開著 | 下一步：關著 |
+|---|---|---|---|
+| `push`（推門） | 開著 | 1.0 | 0.0 |
+| `push`（推門） | 關著 | 0.6 | 0.4 |
+| `none`（不動作） | 開著 | 1.0 | 0.0 |
+| `none`（不動作） | 關著 | 0.0 | 1.0 |
+
+在這個簡化模型中，已經開著的門不會被推關；原本關著的門有 **60% 的機會** 被推開。執行 `none` 時，門的狀態不變。
+每一橫列都指定了一種動作與前一狀態，因此右邊兩種結果的機率加起來是 1。
+
+### 2. 先推門做預測，再量測
+
+**重新從 50/50 的先驗** `bel(x₀)` 開始，不沿用範例一的結果。第一次推門是 **u₀**，用來預測新的門狀態 **x₁**；接著相機會給出 **z₁**。
+推完後門可能開著，有兩條路：它原本就開著，或它原本關著但成功被推開。把兩條路的機率加起來：
+
+```text
+b̄el(open)   = 1.0 × 0.5 + 0.6 × 0.5 = 0.8
+b̄el(closed) = 0.0 × 0.5 + 0.4 × 0.5 = 0.2
+```
+
+每條路的機率，都等於起點的信念乘上從該處出發的轉移機率。把終點相同的路加起來，就得到 **80% 開著、20% 關著** 的預測信念。這時還沒用到新的相機讀值。
+
+</Slide>
+<Slide>
+
+### 3. 矩陣只是把所有路徑排成一張表
+
+狀態順序保持 **[open, closed]**。把 **前一狀態放在直欄**，**下一狀態放在橫列**，預測就能寫成「矩陣乘上欄向量」：
+
+```text
+           前一狀態： open  closed
+                       ↓     ↓
+          M_push = [ 1.0   0.6 ]  ← 下一狀態：open
+                   [ 0.0   0.4 ]  ← 下一狀態：closed
+
+          M_none = [ 1.0   0.0 ]
+                   [ 0.0   1.0 ]
+
+[ b̄el(open)   ]       [ bel(open)   ]
+[ b̄el(closed) ] = M × [ bel(closed) ]
+
+[ 0.8 ]   [ 1.0  0.6 ]   [ 0.5 ]
+[ 0.2 ] = [ 0.0  0.4 ] × [ 0.5 ]
+```
+
+**橫列 × 直欄** 的意思是把對應的數字相乘，再把乘積加起來。上面一列是 `1.0 × 0.5 + 0.6 × 0.5`，下面一列是 `0.0 × 0.5 + 0.4 × 0.5`。就是剛才算過的兩式，沒有新花招。
+
+這些矩陣的每個 **直欄** 都加起來等於 1，因為無論從哪個狀態出發，門最後一定會落在某個狀態。
+`none` 的矩陣稱為 **單位矩陣**，乘上它不會改變信念。
+
+<Callout type="tip" title="注意：兩種不同的乘法">
+
+在 NumPy 裡，預測是 `predicted = motion_model @ belief`，用 **矩陣與向量相乘**，把不同路徑的機率加起來。
+量測更新是 `scores = measurement_model[z] * predicted`，用 **逐元素相乘** 分別替各狀態打分數，再正規化。
+
+</Callout>
+
+</Slide>
+<Slide>
+
+### 4. 用相機讀值更新
+
+現在相機回報 `Open`。用跟剛才 **相同的感測模型**，但這次從 `[0.8, 0.2]` 的預測信念出發：
+
+```text
+bel(open)   = η × 0.9 × 0.8 = 0.72η
+bel(closed) = η × 0.5 × 0.2 = 0.10η
+
+η = 1 / (0.72 + 0.10) ≈ 1.2195
+bel(open)   = 0.72 / 0.82 ≈ 0.878
+bel(closed) = 0.10 / 0.82 ≈ 0.122
+```
+
+還是一樣：概似乘上預測，再除以分數總和。現在我們估計門有 **87.8% 的機率開著**。
+
+| 同樣從 50/50 開始 | 讀到 `Open` 前 | 讀到 `Open` 後 |
+|---|---|---|
+| 只量測（`none`） | 開門 0.500 | **開門 0.643** |
+| 推門後再量測 | 開門 0.800 | **開門 0.878** |
+
+<Figure
+  src="/bayes-filter/action-comparison.svg"
+  alt="分組長條比較三個階段的開門機率。只量測：先驗 0.500、不動作時的預測 0.500、讀到 Open 後為 0.643。推門後量測：先驗 0.500，推門 u 零後的預測 0.800，同樣讀到 Open（z 一）後為 0.878。"
+  caption="兩種情況的初始信念和感測模型相同。不動作時，預測維持 0.500；推一下，還沒看相機讀值，預測就先變成 0.800。"
+/>
+
+相機並沒有變準。是動作改變了門的可能狀態，也就改變了我們在看到讀值 **之前** 的信念。在別的模型中，動作也可能增加不確定性；推門不是什麼情況都能增加把握。
+
+</Slide>
+<Slide>
+
+### 5. 完整的貝氏濾波：反覆做兩步
+
+<figure style={{margin: '22px 0'}}>
+<svg viewBox="0 0 760 420" role="img" aria-labelledby="bayes-loop-title bayes-loop-desc" style={{width: '100%', height: 'auto', display: 'block', background: 'var(--bg-inset)', border: '1px solid var(--line)', borderRadius: 12, fontFamily: 'IBM Plex Sans, sans-serif'}}>
+<title id="bayes-loop-title">貝氏濾波器的「預測 → 更新」循環</title>
+<desc id="bayes-loop-desc">預測步驟用運動模型結合先前信念與動作。更新步驟用感測模型和量測修正預測信念。正規化後的後驗會成為下一步的先驗。</desc>
+<defs>
+<marker id="bayes-loop-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="var(--tx-3)" /></marker>
+</defs>
+<g fill="var(--bg-hero)" strokeWidth="2">
+<rect x="40" y="118" width="290" height="172" rx="14" stroke="var(--ac1b)" />
+<rect x="430" y="118" width="290" height="172" rx="14" stroke="var(--ac2)" />
+</g>
+<g fill="none" stroke="var(--tx-3)" strokeWidth="2.5" markerEnd="url(#bayes-loop-arrow)">
+<path d="M185 72 V115" />
+<path d="M575 72 V115" />
+<path d="M332 202 H427" />
+<path d="M575 294 V363 H185 V294" />
+</g>
+<g textAnchor="middle" fill="var(--tx-2)" fontSize="18">
+<text x="185" y="46">動作 uₜ₋₁</text>
+<text x="575" y="46">量測 zₜ</text>
+<text x="185" y="198">運動模型</text>
+<text x="575" y="198">感測模型</text>
+<text x="185" y="237">→ 預測信念 b̄el(xₜ)</text>
+<text x="575" y="237">乘上概似，再正規化</text>
+<text x="185" y="267">加總從舊信念出發的路徑</text>
+<text x="575" y="267">→ 後驗信念 bel(xₜ)</text>
+<text x="380" y="338">這一步的後驗成為下一步的先驗</text>
+<text x="380" y="398">從初始信念開始，每次動作與量測都重複這兩步。</text>
+</g>
+<g textAnchor="middle" fontSize="27" fontWeight="600">
+<text x="185" y="161" fill="var(--ac1b)">1 · 預測</text>
+<text x="575" y="161" fill="var(--ac2)">2 · 更新</text>
+</g>
+</svg>
+<figcaption style={{textAlign: 'center', color: 'var(--tx-4)', fontSize: 12, marginTop: 9}}>先預測動作可能造成的改變，再用感測器實際回報的結果來更新。</figcaption>
+</figure>
+
+1. **預測**：根據最新動作、運動模型與前一份信念，把機率分配到各種可能的下一狀態。
+2. **更新**：根據最新的量測和感測模型，提高能解釋讀值的狀態的相對權重，再正規化。
+3. **重複**：這一步的後驗成為下一步的起始信念。
+
+用在定位時，把門的狀態換成可能的 **機器人姿態**，把推門換成 **行駛指令**，把相機標籤換成 **地標觀測或距離讀值**。
+用地圖與模型預測各個姿態會產生什麼讀值。「預測 → 更新」的做法不變，只是換了狀態空間與模型。
+
+<Callout type="info" title="深入看看：狀態變多時怎麼辦？">
+
+在指定的模型下，兩狀態的例子是精確的離散貝氏濾波器。離散狀態越多，加總的項目就越多；如果姿態是連續的，就改成對前一狀態的所有可能值做積分。
+卡爾曼濾波器與粒子濾波器，讓同一套做法能用不同的模型與信念表示方式來實作。理解這個循環，不必先會較進階的數學記號。
+
+</Callout>
+
+</Slide>
+
+</Section>
+
+<Section id="practical-concerns" n="06" title="實作時要注意什麼？" chip="實作注意事項">
+
+<Slide>
+
+### 如果只做濾波的一半呢？
+
+1. **只有量測：機率為零的先驗可能把正確答案排除在外。** 依 `[開著, 關著]` 順序從 `[1, 0]` 開始。
+   若沒有運動模型把機率分到其他狀態，讀到 `Closed` 時，分數還是 `[0.1 × 1, 0.5 × 0] = [0.1, 0]`。
+   正規化後又回到 `[1, 0]`：讀到再多次這種讀值，關門的信念仍是零。只有真正能排除的狀態才設為零。
+   如果兩次讀值之間有人可能把門關上，就算機器人沒動作，模型也要考慮這種可能。
+2. **只有動作：預測不是確認。** 從 `[0.5, 0.5]` 開始，推一下門，模型預測開門機率為 80%。再推一下，預測升到 92%，
+   因為剩下 20% 的關門情況中有六成會被推開。但沒有相機，機器人無法確認哪次真的成功。
+   做定位時，若只靠輪子編碼器推算移動，每一步的小誤差都可能累積，最後估計的位置就會偏離真實位置。
+   少了一筆量測時，可以沿用預測，但不要把預測當成已確認的結果。
+
+</Slide>
+<Slide>
+
+### 感測器讀值不可靠時
+
+3. **收到讀值，不代表得到有用的資訊。** 如果不管門開或關，相機都有一半的機會回報 `Open`，這個讀值會把兩個分數都乘上 0.5。
+   正規化會消掉這個共同因子，所以預測信念維持原樣，**不會**重設為 50/50。
+4. **重複的讀值不一定是新證據。** 同一張相機畫面的五份副本，不算五次獨立的觀察。同一道反光也可能連續騙過好幾張畫面。
+   別把重複資料當成新量測；需要獨立證據時，可以試試換個角度或用第二種感測器。
+5. **讀到模型認為不可能的結果，要特別處理。** 如果所有分數都是零，就不能除以總和。
+   例如，若模型假設感測器完全不會出錯，而它給的讀值又與先驗矛盾，就可能遇到這種情況。
+   不要除以零，先檢查資料或模型是否有問題。這台機器人可以先保留預測，標記更新失敗，並停下來取得更可靠的證據。
+
+<Callout type="tip" title="先測試，再相信濾波器">
+
+試試看：一開始就太有把握、漏掉一筆讀值，或相機畫面卡住。確認每次成功更新後，機率總和仍是 1，機器人也不會把「信念沒變」誤認成「又得到了一次確認」。
+
+</Callout>
+
+</Slide>
+
+</Section>
+
+<Section id="check-your-understanding" n="07" title="觀念檢查" chip="觀念檢查">
+
+<Quiz>
+  <Q>
+    <Prompt>相機壞了，不論門是真的開著還是關著，都各有 0.5 的機率輸出 `Open` 和 `Closed`。收到一筆讀值後，預測信念會怎麼變？</Prompt>
+    <Explain>兩個狀態的機率都乘上同一個 0.5。正規化會抵銷這個共同因子，信念不變。這個感測器沒有提供任何關於門狀態的資訊。</Explain>
+    <Choice>信念重設為 50/50。</Choice>
+    <Choice correct>預測信念不變。</Choice>
+    <Choice>相機回報的狀態變成百分之百確定。</Choice>
+  </Q>
+  <Q>
+    <Prompt>為什麼把概似乘上先驗後，需要正規化因子 η？</Prompt>
+    <Explain>乘積是相對分數，總和通常不等於 1。各分數除以總和，可以在不改變比例的情況下重新調整。如果分數全是零，代表模型認為讀值不可能，應處理模型與觀測不符的情況，而不是除以零。</Explain>
+    <Choice>它一定會提高開著的機率。</Choice>
+    <Choice>它會把有雜訊的讀值從歷史移除。</Choice>
+    <Choice correct>它讓更新後的狀態機率加起來等於 1。</Choice>
+  </Q>
+  <Q>
+    <Prompt>從 50/50 開始，在讀相機之前，推一次門就讓開著的預測信念變成 80%。為什麼？</Prompt>
+    <Explain>門可能原本就開著（0.5），也可能原本關著但成功推開（0.5 × 0.6 = 0.3）。把兩條路加起來就是 0.8。動作模型是在預測結果，不是保證指令成功。</Explain>
+    <Choice correct>把所有最後開著的路徑加起來，每條路都按起始狀態的機率加權。</Choice>
+    <Choice>只要推門，門就一定會開。</Choice>
+    <Choice>濾波器偷看了下一筆相機讀值。</Choice>
+  </Q>
+</Quiz>
+
+**記住**：不要太早把不確定性變成「是」或「不是」的猜測。保留信念，反覆 **預測 → 更新**，再讓規劃器判斷哪些風險可以接受。
+
+</Section>

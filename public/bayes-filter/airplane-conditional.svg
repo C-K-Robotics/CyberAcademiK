@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 480" role="img" aria-labelledby="title desc" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title id="title">Conditional probability: new evidence changes the odds</title><desc id="desc">Two panels show the same jet cruising, then with fire and smoke from both engines. The quoted one-in-eleven-million baseline is only a hook; the conditional risk is not quantified.</desc>
+<style>@media (prefers-color-scheme: dark){[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#6b46c1"]{fill:#a78bfa}[stroke="#6b46c1"]{stroke:#a78bfa}[fill="#e8dff8"]{fill:#30234a}[stroke="#e8dff8"]{stroke:#30234a}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#b07c08"]{fill:#fbbf24}[stroke="#b07c08"]{stroke:#fbbf24}}</style>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#475e6a"/></marker>
+</defs>
+<rect x="0" y="0" width="840" height="480" rx="0" fill="#eff5f8" stroke="none"/>
+<text x="28" y="36" fill="#15232c" font-size="25" text-anchor="start" font-weight="650">Same airplane. New evidence.</text>
+<rect x="20" y="58" width="390" height="340" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<rect x="430" y="58" width="390" height="340" rx="12" fill="#fbfdfe" stroke="#cad9df"/>
+<text x="42" y="91" fill="#0a7d8f" font-size="22" text-anchor="start" font-weight="650">1 · Peaceful cruise</text>
+<text x="452" y="91" fill="#a93434" font-size="22" text-anchor="start" font-weight="650">2 · Both engines on fire</text>
+<circle cx="80" cy="145" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="100" cy="140" r="22" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="122" cy="145" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="335" cy="125" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="355" cy="120" r="22" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="377" cy="125" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="490" cy="145" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="510" cy="140" r="22" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="532" cy="145" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="745" cy="125" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="765" cy="120" r="22" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<circle cx="787" cy="125" r="16" fill="#eff5f8" stroke="#eff5f8" stroke-width="2"/>
+<g transform="translate(225 220)">
+<path d="M-120 -11 L-30 -11 L-65 -95 L-42 -95 L35 -12 L98 -10 Q145 0 98 10 L35 12 L-42 95 L-65 95 L-30 11 L-120 11 L-146 48 L-162 48 L-147 0 L-162 -48 L-146 -48 Z" fill="#c9edf0" stroke="#0a7d8f" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M96 -7 L112 0 L96 7" fill="none" stroke="#0a7d8f" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="-95" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-79" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-63" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-47" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-31" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-15" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="1" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="17" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="33" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="49" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="65" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<rect x="-34" y="-61" width="52" height="18" rx="8" fill="#fbfdfe" stroke="#0a7d8f"/>
+<rect x="-34" y="43" width="52" height="18" rx="8" fill="#fbfdfe" stroke="#0a7d8f"/>
+</g>
+<g transform="translate(635 220)">
+<path d="M-120 -11 L-30 -11 L-65 -95 L-42 -95 L35 -12 L98 -10 Q145 0 98 10 L35 12 L-42 95 L-65 95 L-30 11 L-120 11 L-146 48 L-162 48 L-147 0 L-162 -48 L-146 -48 Z" fill="#c9edf0" stroke="#0a7d8f" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M96 -7 L112 0 L96 7" fill="none" stroke="#0a7d8f" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="-95" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-79" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-63" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-47" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-31" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="-15" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="1" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="17" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="33" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="49" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<circle cx="65" cy="0" r="2.5" fill="#0a7d8f" stroke="#0a7d8f" stroke-width="2"/>
+<rect x="-34" y="-61" width="52" height="18" rx="8" fill="#fbfdfe" stroke="#0a7d8f"/>
+<path d="M-36 -60 L-60 -71 L-55 -57 L-87 -52 L-58 -44 L-66 -33 L-36 -44 Z" fill="#b07c08" stroke="#a93434" stroke-width="2" stroke-linejoin="round"/>
+<path d="M-85 -52 Q-108 -76 -125 -52 T-167 -52" fill="none" stroke="#475e6a" stroke-width="6" stroke-linejoin="round"/>
+<path d="M-96 -42 Q-120 -26 -145 -45" fill="none" stroke="#475e6a" stroke-width="4" stroke-linejoin="round"/>
+<rect x="-34" y="43" width="52" height="18" rx="8" fill="#fbfdfe" stroke="#0a7d8f"/>
+<path d="M-36 44 L-60 33 L-55 47 L-87 52 L-58 60 L-66 71 L-36 60 Z" fill="#b07c08" stroke="#a93434" stroke-width="2" stroke-linejoin="round"/>
+<path d="M-85 52 Q-108 28 -125 52 T-167 52" fill="none" stroke="#475e6a" stroke-width="6" stroke-linejoin="round"/>
+<path d="M-96 62 Q-120 78 -145 59" fill="none" stroke="#475e6a" stroke-width="4" stroke-linejoin="round"/>
+</g>
+<text x="215" y="345" fill="#15232c" font-size="19" text-anchor="middle" font-weight="400">“Odds of a crash: ~1 in 11,000,000”</text>
+<text x="625" y="337" fill="#15232c" font-size="19" text-anchor="middle" font-weight="400">Odds of a crash given both fires?</text>
+<text x="625" y="367" fill="#a93434" font-size="19" text-anchor="middle" font-weight="650">Much higher — different evidence!</text>
+<text x="420" y="430" fill="#475e6a" font-size="18" text-anchor="middle" font-weight="400">Quoted baseline is illustrative, not a current risk estimate.</text>
+<text x="420" y="457" fill="#475e6a" font-size="17" text-anchor="middle" font-weight="400">No numerical risk is assigned to the fire scenario. See the source caveat below.</text>
+</svg>

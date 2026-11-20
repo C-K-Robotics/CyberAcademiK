@@ -61,6 +61,8 @@ export interface Strings {
   slideExit: string
   slidePrev: string
   slideNext: string
+  slideHideItem: string
+  slideRevealItem: string
   footerContentBy: string
   footerSiteBy: string
   footerCopyright: string
@@ -108,6 +110,8 @@ const en: Strings = {
   slideExit: 'Exit slide mode',
   slidePrev: 'Previous slide',
   slideNext: 'Next slide',
+  slideHideItem: 'Hide last item',
+  slideRevealItem: 'Reveal next item',
   footerContentBy: 'Course content by FRC#8020 Mentors & Members',
   footerSiteBy: 'CyberAcademiK · tutorial site by Nathan Lee',
   footerCopyright: '© 2026 CyberAcademiK · FRC Learning Library',
@@ -155,6 +159,8 @@ const zhHant: Strings = {
   slideExit: '退出投影片模式',
   slidePrev: '上一張',
   slideNext: '下一張',
+  slideHideItem: '隱藏上一項',
+  slideRevealItem: '顯示下一項',
   footerContentBy: '課程內容由 FRC#8020 Mentor 與隊員提供',
   footerSiteBy: 'CyberAcademiK · 教學網站由 Nathan Lee 製作',
   footerCopyright: '© 2026 CyberAcademiK · FRC 學習資料庫',
