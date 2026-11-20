@@ -43,7 +43,7 @@ Data flow:
    - `import.meta.glob('/src/courses/*/index.tsx', { eager: true })` — optional course-specific code, matched to a course by folder name = slug.
 3. **`catalog.ts`, `registry.ts`, `selectors.ts`** are thin re-export shims over `discovery.ts` (kept for stable import paths). Prefer adding new exports to `discovery.ts`.
 
-**All counts are derived** (`TOTAL_COURSES`, `courseCountForSubteam`, etc.) — never hardcode course/subteam numbers. Empty groups render "Coming soon". Only `control-programming/foundations/intro-to-robotics` and `control-programming/control-theory/pid-control` have real lessons; the other category/sub-category dirs are sidecar-only curriculum skeleton.
+**All counts are derived** (`TOTAL_COURSES`, `courseCountForSubteam`, etc.) — never hardcode course/subteam numbers. A course directory contains at least one locale MDX file. Empty groups render "Coming soon".
 
 ### Adding content
 
@@ -65,7 +65,7 @@ Data flow:
   - `CodeTabs`/`CodeTab` — tabbed code viewer with copy button.
   - `Figure` — captioned image with a configurable `width`; resolves the deploy base via `assetUrl`.
   - Prose element overrides (headings, tables, code, blockquotes etc.) — from `prose.tsx`.
-- **Slide mode:** the Monitor toggle in `CourseTopbar` flips `slideMode` state in `CourseLayout`, which hides ChipNav/LessonHeader/FooterNav, marks `.course-main` with `data-slide-mode`, and renders the floating `SlideDeck`. SlideDeck discovers its steps from the rendered DOM — each `<Slide>` inside a `<Section>`, or the whole section when it has none — retrying via rAF until the lazily code-split lesson mounts, and re-scanning on mutation so switching locale mid-deck keeps working. It shows one step at a time with inline `display`, and the effect cleanup restores everything. The position is saved per course slug under `cyberacademik:slide-mode` and clamped to the current step count on load. Keyboard: ←→ ↑↓ PageUp/PageDown, Esc to exit; all ignored while a field has focus.
+- **Slide mode:** the Monitor toggle in `CourseTopbar` flips `slideMode` state in `CourseLayout`, which hides ChipNav/LessonHeader/FooterNav, marks `.course-main` with `data-slide-mode`, and renders the floating `SlideDeck`. SlideDeck discovers its steps from the rendered DOM — each `<Slide>` inside a `<Section>`, or the whole section when it has none — retrying via rAF until the lazily code-split lesson mounts, and re-scanning on mutation so switching locale mid-deck keeps working. It shows one step at a time with inline `display`, and the effect cleanup restores everything. The deck saves its slide index under `cyberacademik:slide-mode:<course-slug>` and clamps it to the current step count on load. Keyboard: ←→ ↑↓ PageUp/PageDown, Esc to exit; all ignored while a field has focus.
 - Inline markdown in frontmatter: `LessonHeader.tsx` uses `src/mdx/ProseContent.tsx`'s `InlineMarkdownText` component to parse bold/italic/inline-code in the `lead` frontmatter.
 
 ## i18n

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useI18n } from '../../i18n/I18nProvider'
 
 /** One navigable step: either a `<Slide>` block or a whole `<Section>`. */
@@ -36,8 +36,11 @@ const MAX_SCAN_FRAMES = 100
 
 function readSavedIdx(slug: string): number {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Record<string, unknown>
-    const idx = Number(saved?.[slug])
+    const current = localStorage.getItem(`${STORAGE_KEY}:${slug}`)
+    const saved = current === null
+      ? (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Record<string, unknown>)?.[slug]
+      : current
+    const idx = Number(saved)
     return Number.isInteger(idx) && idx >= 0 ? idx : 0
   } catch {
     return 0
@@ -46,8 +49,7 @@ function readSavedIdx(slug: string): number {
 
 function writeSavedIdx(slug: string, idx: number) {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}') as Record<string, unknown>
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...saved, [slug]: idx }))
+    localStorage.setItem(`${STORAGE_KEY}:${slug}`, String(idx))
   } catch {
     /* private mode or quota — the saved position is a convenience, not state we need */
   }
@@ -95,6 +97,10 @@ function collectSlides(): SlideItem[] {
   return out
 }
 
+function slideScrollBehavior(): ScrollBehavior {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'
+}
+
 /** Show only `slides[idx]` (and the section it belongs to); hide every other step. */
 function showOnly(slides: SlideItem[], idx: number) {
   for (const s of slides) {
@@ -106,8 +112,7 @@ function showOnly(slides: SlideItem[], idx: number) {
   if (!target) return
   target.section.style.display = ''
   target.el.style.display = ''
-  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  target.section.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'start' })
+  target.section.scrollIntoView({ behavior: slideScrollBehavior(), block: 'start' })
 }
 
 /** Undo `showOnly` so the lesson reads as a normal scrolling page again. */
@@ -165,6 +170,7 @@ export function SlideDeck({ slug, onExit }: SlideDeckProps) {
   const { t } = useI18n()
   const [slides, setSlides] = useState<SlideItem[]>([])
   const [position, setPosition] = useState<SlidePosition>(() => ({ index: readSavedIdx(slug), revealed: 0 }))
+  const previousReveal = useRef<{ slide?: SlideItem; count: number }>({ count: 0 })
 
   const count = slides.length
   const ready = count > 0
@@ -242,9 +248,14 @@ export function SlideDeck({ slug, onExit }: SlideDeckProps) {
   }, [slides, activeIdx, active])
 
   useLayoutEffect(() => {
+    const previous = previousReveal.current
+    previousReveal.current = { slide: active, count: revealed }
     active?.reveals.forEach((el, i) => {
       el.dataset.slideRevealState = i < revealed ? 'shown' : 'hidden'
     })
+    if (active && previous.slide === active && revealed > previous.count) {
+      active.reveals[revealed - 1].scrollIntoView({ behavior: slideScrollBehavior(), block: 'nearest' })
+    }
   }, [active, revealed])
 
   useEffect(() => {
