@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 218" role="img" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title>Two lines fit the same data with different sums of squared residuals</title>
+<style>@media (prefers-color-scheme: dark){[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#265287"]{fill:#9abbff}[stroke="#265287"]{stroke:#9abbff}}</style>
+<defs><marker id="teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0a7d8f"/></marker><marker id="red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a93434"/></marker><marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#265287"/></marker></defs>
+<rect x="0" y="0" width="540" height="218" rx="0" fill="#eff5f8" stroke="none"/>
+<rect x="16" y="12" width="247" height="193" rx="10" fill="#fbfdfe" stroke="#cad9df"/>
+<path d="M43,117H247" stroke="#cad9df" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M43,83H247" stroke="#cad9df" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M43,49H247" stroke="#cad9df" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M43,23.5V151H247" stroke="#475e6a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M43,123.8L236.8,26.89999999999999" stroke="#265287" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M77,117V106.8" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M111,117V89.8" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M145,83V72.80000000000001" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M179,83V55.80000000000001" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M213,49V38.80000000000001" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<circle cx="77.00" cy="117.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="111.00" cy="117.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="145.00" cy="83.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="179.00" cy="83.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="213.00" cy="49.00" r="4.5" fill="#15232c" opacity="1"/>
+<text x="140" y="188" fill="#265287" font-size="24" text-anchor="middle" font-weight="650">Σe² = 6.2</text>
+<rect x="277" y="12" width="247" height="193" rx="10" fill="#fbfdfe" stroke="#cad9df"/>
+<path d="M304,117H508" stroke="#cad9df" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M304,83H508" stroke="#cad9df" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M304,49H508" stroke="#cad9df" stroke-width="1" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M304,23.5V151H508" stroke="#475e6a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M304,140.8L497.8,43.900000000000006" stroke="#0a7d8f" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M338,117V123.8" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M372,117V106.8" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M406,83V89.8" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M440,83V72.80000000000001" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<path d="M474,49V55.80000000000001" stroke="#a93434" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3"/>
+<circle cx="338.00" cy="117.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="372.00" cy="117.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="406.00" cy="83.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="440.00" cy="83.00" r="4.5" fill="#15232c" opacity="1"/>
+<circle cx="474.00" cy="49.00" r="4.5" fill="#15232c" opacity="1"/>
+<text x="401" y="188" fill="#0a7d8f" font-size="24" text-anchor="middle" font-weight="650">Σe² = 1.2</text>
+</svg>

@@ -68,61 +68,117 @@ can keep track of several possible answers and how plausible each one is.
 
 <Slide>
 
-### From missing planets to landing on the Moon
+### Gauss uses measurements to find Ceres
 
-- **1801 — Gauss and least squares.** At just 24, Carl Friedrich Gauss took on an
-  astronomical estimation problem: where would the dwarf planet Ceres reappear
-  after being lost in the Sun's glare? About nine months after the last sighting,
-  his prediction was within half a degree. Gauss developed **least squares**, which
-  chooses a prediction by making the sum of squared measurement mismatches as
-  small as possible. In 1809 he showed why this works especially well: with
-  independent Gaussian errors of equal spread, the least-squares fit is the
-  most likely fit.
+- **1801 — Gauss and least squares.** At 24, Gauss predicted where Ceres would
+  reappear after nine months lost in the Sun's glare. He was within half a degree.
+  **Least squares** fits the data by minimizing the sum of squared errors.
+  In 1809 Gauss showed that this gives the most likely fit when the errors
+  are independent Gaussians with equal spread.
+
+<Figure
+  src="/intro-to-localization/least-squares-fit.svg"
+  alt="The same five points are plotted twice. Vertical dashed lines show the residuals. The line on the left has a squared residual sum of 6.2, compared with 1.2 for the best-fit line on the right."
+  caption="The dashed gaps are residuals: measured minus predicted. Squaring and adding them gives 6.2 on the left and 1.2 for the least-squares line on the right."
+  width="min(100%, 540px)"
+/>
+
+</Slide>
+<Slide>
+
+### Markov predicts the next state
+
 - **1913 — Markov chains.** Andrey Markov famously used his earlier chain models
   to study the order of vowels and consonants in a poem. The key idea: once you
   know the current state, earlier states don't add anything to the prediction
   of the next one. For a simple robot motion model, the current pose and speed,
   plus the next motor command, can be enough to predict the next pose without
   storing every place the robot has been.
-- **1960 — The Kalman filter.** As computers made repeated updates practical,
-  Rudolf Kalman published landmark work in 1960 and followed it with a paper
-  co-authored with Richard Bucy in 1961. The work formalized **observability**:
-  can you infer a hidden state from the measurements you have? It also gave an
-  optimal way to estimate the state of a linear system with Gaussian noise. NASA
-  used Kalman-filter methods on the **Ranger, Mariner, and Apollo** programs. On
-  **Apollo 11**, the lunar module used noisy landing-radar readings to update
-  its estimate of altitude and velocity above the Moon; the module's separate
-  abort guidance system used Kalman-filter equations for rendezvous-radar data.
 
 <Figure
-  src="/intro-to-localization/apollo-11-eagle.webp"
-  alt="Apollo 11’s Eagle lunar module ascent stage above the Moon, with Earth rising in the distance."
-  caption={<>Eagle after liftoff from the Moon. Photo: <a href="https://commons.wikimedia.org/wiki/File:Apollo_11_lunar_module.jpg">Michael Collins / NASA</a> (public domain).</>}
-  width="58%"
+  src="/intro-to-localization/markov-chain.svg"
+  alt="Two states, V for vowel and C for consonant, each have a loop back to themselves and an arrow to the other state. From V the probabilities are 20% to V and 80% to C; from C they are 60% to V and 40% to C."
+  caption="In this toy chain, V means vowel and C means consonant. If the current letter is a vowel, the next is 80% likely to be a consonant, regardless of earlier letters."
+  width="min(100%, 540px)"
 />
 
 </Slide>
 <Slide>
 
-### From mathematical models to robots you can build
+### Kalman estimates a hidden state
+
+- **1960 — The Kalman filter.** Kalman's work, followed by a 1961 paper with
+  Richard Bucy, asked whether measurements can reveal a hidden state
+  (**observability**). The filter repeatedly predicts and corrects the state
+  estimate. It is optimal for linear systems with Gaussian noise.
+
+<Figure
+  src="/intro-to-localization/rudolf-kalman.webp"
+  alt="Portrait of Rudolf E. Kalman in a dark suit against a blue patterned background."
+  caption={<>Rudolf E. Kalman, 2007. Unknown photographer, <a href="https://doi.org/10.3932/ethz-a-000672660">ETH-Bibliothek Zürich, Bildarchiv (HK_04-01925)</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> (resized).</>}
+  width="min(100%, 215px)"
+/>
+
+<Figure
+  src="/intro-to-localization/kalman-update.svg"
+  alt="On a number line, arrows from a prediction at 10 meters and a sensor reading at 12 meters converge on the updated estimate at 11 meters."
+  caption="Prediction: 10 m. Sensor reading: 12 m. With equal uncertainty and independent errors, the updated estimate is halfway between them: 11 m."
+  width="min(100%, 440px)"
+/>
+
+</Slide>
+<Slide>
+
+### Apollo 11 puts estimation to work
+
+NASA used Kalman-filter methods on the **Ranger, Mariner, and Apollo** programs.
+On **Apollo 11**, the lunar module used noisy landing-radar readings to update
+its estimate of altitude and velocity above the Moon. Its separate abort
+guidance system used Kalman-filter equations for rendezvous-radar data.
+
+<Figure
+  src="/intro-to-localization/apollo-11-eagle.webp"
+  alt="Apollo 11’s Eagle lunar module ascent stage above the Moon, with Earth rising in the distance."
+  caption={<>Eagle after liftoff from the Moon. Photo: <a href="https://commons.wikimedia.org/wiki/File:Apollo_11_lunar_module.jpg">Michael Collins / NASA</a> (public domain).</>}
+  width="min(58%, 400px)"
+/>
+
+</Slide>
+<Slide>
+
+### The Bayes filter generalizes the update
 
 - **1970 — The Bayes filter.** Andrew Jazwinski's work on filtering helped
   establish the more general recipe: predict what happens next, then use
   Bayes' theorem to revise that prediction with new evidence. Repeat every
   time new data arrives. This setup also covers nonlinear motion and uncertainty
   that doesn't look like a bell curve.
+
+</Slide>
+<Slide>
+
+### Thrun brings probabilistic robotics to a wider audience
+
 - **2002 — Thrun's tutorial.** Sebastian Thrun brought these ideas to a wider
   computing audience with [*Probabilistic Robotics*](https://doi.org/10.1145/504729.504754),
   published in *Communications of the ACM*, March 2002, vol. 45, no. 3, pp. 52–57.
+
+<Figure
+  src="/intro-to-localization/probabilistic-robotics-cover.webp"
+  alt="Blue cover of the book Probabilistic Robotics, by Sebastian Thrun, Wolfram Burgard, and Dieter Fox."
+  caption={<>Cover of the later <a href="https://mitpress.mit.edu/9780262201629/probabilistic-robotics/">2005 textbook</a> by Thrun, Burgard, and Fox, published by MIT Press. The 2002 tutorial is a separate publication.</>}
+  width="min(100%, 205px)"
+/>
+
+</Slide>
+<Slide>
+
+### Probabilistic robotics in the desert
+
 - **2004–2005 — DARPA Grand Challenges.** No vehicle finished the 2004 autonomous
   race across the desert. In 2005 Stanford's **Stanley** won, using probabilistic
   localization and perception to estimate where it was and which terrain it
   could drive over.
-- **2007–2010 — ROS and open-source localization.** The first public code for
-  **ROS** (Robot Operating System) appeared in 2007, and Willow Garage helped
-  grow it into an open-source toolkit. By 2009–2010, the ROS navigation stack
-  included **AMCL** (Adaptive Monte Carlo Localization), putting reusable
-  particle-based localization within reach of robot builders.
 
 <Figure
   src="/intro-to-localization/stanley-darpa.webp"
@@ -130,6 +186,34 @@ can keep track of several possible answers and how plausible each one is.
   caption={<>Stanley, Stanford’s 2005 Grand Challenge winner. Photo: <a href="https://commons.wikimedia.org/wiki/File:Stanford_Volkswagon_Touareg_Robotic_Control_Vehicle_(86757864).jpg">Global Reactions</a>, <a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a> (resized).</>}
   width="70%"
 />
+
+</Slide>
+<Slide>
+
+### Localization becomes an open-source tool
+
+- **2007–2010 — ROS and open-source localization.** The first public code for
+  **ROS** (Robot Operating System) appeared in 2007, and Willow Garage helped
+  grow it into an open-source toolkit. By 2009–2010, the ROS navigation stack
+  included **AMCL** (Adaptive Monte Carlo Localization), putting reusable
+  particle-based localization within reach of robot builders. The **Open Source Robotics Foundation** (OSRF), founded in 2012, later took over stewardship of ROS.
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 140px))', justifyContent: 'center', gap: '16px' }}>
+  <Figure
+    src="/intro-to-localization/ros-icon.webp"
+    alt="The ROS logo, a square grid of nine dark blue dots."
+    caption={<a href="https://github.com/ros-infrastructure/artwork/blob/master/orgunits/ros.png">ROS logo</a>}
+    width="min(100%, 112px)"
+  />
+  <Figure
+    src="/intro-to-localization/osrf-icon.webp"
+    alt="The historical Open Source Robotics Foundation logo, two dark blue angular shapes around a white circle."
+    caption={<a href="https://github.com/ros-infrastructure/artwork/blob/master/orgunits/osrf.png">OSRF logo</a>}
+    width="min(100%, 112px)"
+  />
+</div>
+
+ROS and the Nine Dots logo are trademarks of OSRF. The marks here identify the project and its foundation.
 
 </Slide>
 

@@ -56,28 +56,95 @@ references:
 
 <Slide>
 
-### 從找回失蹤的天體到登陸月球
+### 高斯靠量測找回穀神星
 
-- **1801 年 — 高斯與最小平方法。** 年僅 24 歲的高斯（Carl Friedrich Gauss）接下了一道天文估計題：被太陽強光遮蔽的矮行星穀神星，會在哪裡重新出現？距離上一次觀測約九個月時，他的預測與實際位置相差不到半度。高斯發展的 **最小平方法**，是找出能讓量測誤差平方和最小的預測。1809 年，他說明了它何時特別有用：如果各次誤差彼此獨立、同樣分散，而且都服從高斯分布，最小平方法得到的就是最能解釋所觀測資料的結果。
-- **1913 年 — 馬可夫鏈。** 馬可夫（Andrey Markov）用自己先前發展的鏈式模型，研究一首詩中母音和子音的排列。核心想法是：知道目前狀態後，更早的狀態不會再提供預測下一步所需的資訊。對簡單的機器人運動模型來說，目前的姿態、速度和下一個馬達指令，可能就足夠預測下一個姿態，不必記住機器人曾經去過的每個地方。
-- **1960 年 — 卡爾曼濾波器。** 電腦讓反覆更新估計變得可行。卡爾曼（Rudolf Kalman）於 1960 年發表重要成果，並於隔年與 Richard Bucy 共同發表後續論文。這些研究將 **可觀測性** 形式化：能不能用手上的量測推知看不見的系統狀態？它們也提出了在線性系統與高斯雜訊條件下，對狀態進行最佳估計的方法。NASA 將卡爾曼濾波方法用在 **遊騎兵號（Ranger）、水手號（Mariner）和阿波羅（Apollo）** 計畫中。**阿波羅 11 號** 的登月小艇透過有雜訊的著陸雷達讀值更新相對於月球表面的高度與速度估計；另一套獨立的中止任務導引系統，則使用卡爾曼濾波方程式處理會合雷達資料。
+- **1801 年 — 高斯與最小平方法。** 穀神星在太陽強光下消失了約九個月。24 歲的高斯預測它會在哪裡重新出現，誤差不到半度。**最小平方法** 透過讓殘差平方和最小來配適資料。高斯在 1809 年指出：如果各次誤差彼此獨立，且都服從同樣分散的高斯分布，這就是最可能的配適結果。
 
 <Figure
-  src="/intro-to-localization/apollo-11-eagle.webp"
-  alt="阿波羅 11 號的鷹號登月小艇上升段飛在月球上空，遠處可見地球。"
-  caption={<>鷹號從月球表面起飛後的身影。照片：<a href="https://commons.wikimedia.org/wiki/File:Apollo_11_lunar_module.jpg">Michael Collins / NASA</a>（公有領域）。</>}
-  width="58%"
+  src="/intro-to-localization/least-squares-fit.svg"
+  alt="同樣五個資料點畫在左右兩張圖上。垂直虛線標出殘差。左圖直線的殘差平方和是 6.2；右圖最貼合資料的直線是 1.2。"
+  caption="虛線標出殘差，也就是量測值減掉預測值。把殘差平方後相加，左圖得到 6.2，右圖的最小平方直線只得到 1.2。"
+  width="min(100%, 540px)"
 />
 
 </Slide>
 <Slide>
 
-### 從數學模型走向大家都能打造的機器人
+### 馬可夫預測下一個狀態
+
+- **1913 年 — 馬可夫鏈。** 馬可夫（Andrey Markov）用自己先前發展的鏈式模型，研究一首詩中母音和子音的排列。核心想法是：知道目前狀態後，更早的狀態不會再提供預測下一步所需的資訊。對簡單的機器人運動模型來說，目前的姿態、速度和下一個馬達指令，可能就足夠預測下一個姿態，不必記住機器人曾經去過的每個地方。
+
+<Figure
+  src="/intro-to-localization/markov-chain.svg"
+  alt="母音 V 與子音 C 各有一支回到自己的箭頭，以及一支指向另一個狀態的箭頭。從 V 出發有 20% 到 V、80% 到 C；從 C 出發有 60% 到 V、40% 到 C。"
+  caption="在這個簡化的例子裡，V 代表母音，C 代表子音。如果現在的字母是母音，下一個有 80% 的機率是子音，不必知道更早的字母。"
+  width="min(100%, 540px)"
+/>
+
+</Slide>
+<Slide>
+
+### 卡爾曼估計看不見的狀態
+
+- **1960 年 — 卡爾曼濾波器。** 卡爾曼的研究和他與 Richard Bucy 在 1961 年發表的論文，探討了 **可觀測性**：能不能從量測推知看不見的狀態？濾波器反覆預測並修正狀態估計，對有高斯雜訊的線性系統能做出最佳估計。
+
+<Figure
+  src="/intro-to-localization/rudolf-kalman.webp"
+  alt="卡爾曼身穿深色西裝，身後是帶有圖案的藍色背景。"
+  caption={<>卡爾曼（Rudolf E. Kalman），攝於 2007 年。攝影者不詳，<a href="https://doi.org/10.3932/ethz-a-000672660">蘇黎世聯邦理工學院圖書館影像檔案（HK_04-01925）</a>，<a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>（已調整尺寸）。</>}
+  width="min(100%, 215px)"
+/>
+
+<Figure
+  src="/intro-to-localization/kalman-update.svg"
+  alt="數線上，預測位置 10 公尺與感測讀值 12 公尺，各有箭頭指向更新後的估計位置 11 公尺。"
+  caption="模型預測 10 公尺，感測讀值是 12 公尺。如果兩者的不確定程度相同，且誤差彼此獨立，更新後的估計就在中間：11 公尺。"
+  width="min(100%, 440px)"
+/>
+
+</Slide>
+<Slide>
+
+### 阿波羅 11 號如何運用狀態估計？
+
+NASA 將卡爾曼濾波方法用在 **遊騎兵號（Ranger）、水手號（Mariner）和阿波羅（Apollo）** 計畫中。
+**阿波羅 11 號** 的登月小艇用帶有雜訊的著陸雷達讀值，更新相對於月球表面的高度與速度估計。
+另一套獨立的中止任務導引系統，則使用卡爾曼濾波方程式處理會合雷達資料。
+
+<Figure
+  src="/intro-to-localization/apollo-11-eagle.webp"
+  alt="阿波羅 11 號的鷹號登月小艇上升段飛在月球上空，遠處可見地球。"
+  caption={<>鷹號從月球表面起飛後的身影。照片：<a href="https://commons.wikimedia.org/wiki/File:Apollo_11_lunar_module.jpg">Michael Collins / NASA</a>（公有領域）。</>}
+  width="min(58%, 400px)"
+/>
+
+</Slide>
+<Slide>
+
+### 貝氏濾波器讓更新方法更通用
 
 - **1970 年 — 貝氏濾波器。** Andrew Jazwinski 的濾波研究幫助建立了一套更通用的做法：先預測接下來會發生什麼，再收到新證據後，用貝氏定理修正預測。每次收到新資料就重複一次。這套方法也能處理非線性運動，以及不呈鐘形的不確定性分布。
+
+</Slide>
+<Slide>
+
+### Thrun 向更多讀者介紹機率機器人學
+
 - **2002 年 — Thrun 的導讀文章。** Sebastian Thrun 發表 [*Probabilistic Robotics*](https://doi.org/10.1145/504729.504754)，把這些想法介紹給更多資訊領域的讀者。文章刊於 *Communications of the ACM*，2002 年 3 月，第 45 卷第 3 期，第 52–57 頁。
+
+<Figure
+  src="/intro-to-localization/probabilistic-robotics-cover.webp"
+  alt="《機率機器人學》的藍色封面。作者為 Sebastian Thrun、Wolfram Burgard 與 Dieter Fox。"
+  caption={<>Thrun、Burgard 與 Fox 合著、由 MIT Press 出版的<a href="https://mitpress.mit.edu/9780262201629/probabilistic-robotics/"> 2005 年教科書</a>封面，並非 2002 年的同名導讀文章。</>}
+  width="min(100%, 205px)"
+/>
+
+</Slide>
+<Slide>
+
+### 機率機器人學走進沙漠
+
 - **2004–2005 年 — DARPA 無人車大挑戰。** 2004 年，沒有一輛無人車跑完沙漠賽道。2005 年，史丹佛大學團隊的 **Stanley** 獲勝；它用機率式定位估計自己在哪裡，並透過感知判斷哪些地形可以通過。
-- **2007–2010 年 — ROS 與開放原始碼定位。** **ROS**（Robot Operating System，機器人作業系統）的程式碼於 2007 年首次公開，Willow Garage 協助它發展成開放原始碼工具組。到了 2009–2010 年，ROS 導航套件已納入 **AMCL**（自適應蒙地卡羅定位），讓機器人開發者可以直接使用以粒子為基礎的定位方法。
 
 <Figure
   src="/intro-to-localization/stanley-darpa.webp"
@@ -85,6 +152,30 @@ references:
   caption={<>史丹佛大學的 Stanley，2005 年 DARPA 無人車大挑戰冠軍。照片：<a href="https://commons.wikimedia.org/wiki/File:Stanford_Volkswagon_Touareg_Robotic_Control_Vehicle_(86757864).jpg">Global Reactions</a>，<a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>（已調整尺寸）。</>}
   width="70%"
 />
+
+</Slide>
+<Slide>
+
+### 定位技術成為開放原始碼工具
+
+- **2007–2010 年 — ROS 與開放原始碼定位。** **ROS**（Robot Operating System，機器人作業系統）的程式碼於 2007 年首次公開，Willow Garage 協助它發展成開放原始碼工具組。到了 2009–2010 年，ROS 導航套件已納入 **AMCL**（自適應蒙地卡羅定位），讓機器人開發者可以直接使用以粒子為基礎的定位方法。2012 年成立的 **開放原始碼機器人基金會**（OSRF）後來接手維護 ROS。
+
+<div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 140px))', justifyContent: 'center', gap: '16px' }}>
+  <Figure
+    src="/intro-to-localization/ros-icon.webp"
+    alt="ROS 標誌，由九個深藍色圓點排成正方形。"
+    caption={<a href="https://github.com/ros-infrastructure/artwork/blob/master/orgunits/ros.png">ROS 標誌</a>}
+    width="min(100%, 112px)"
+  />
+  <Figure
+    src="/intro-to-localization/osrf-icon.webp"
+    alt="開放原始碼機器人基金會的早期標誌，兩個深藍色的幾何圖形環繞著白色圓形。"
+    caption={<a href="https://github.com/ros-infrastructure/artwork/blob/master/orgunits/osrf.png">OSRF 標誌</a>}
+    width="min(100%, 112px)"
+  />
+</div>
+
+ROS 與九點標誌均為 OSRF 的商標。這裡的標誌只用來辨識專案與基金會。
 
 </Slide>
 
