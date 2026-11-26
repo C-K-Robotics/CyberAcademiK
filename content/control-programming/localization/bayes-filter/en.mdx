@@ -37,9 +37,11 @@ about *this particular flight*. The baseline odds no longer describe your situat
   src="/bayes-filter/airplane-conditional.svg"
   alt="Two panels show the same jet cruising peacefully, then with flames and smoke from both engines. New evidence changes the applicable odds; the quoted baseline is illustrative, not a current risk estimate."
   caption="Same airplane, different information. The quoted 1-in-11-million figure is only the hook — see the caveat below, not a calculation of flight safety."
+  width="min(100%, 640px)"
 />
 
-<Reveal block>
+</Slide>
+<Slide id="hook-context">
 
 <Callout type="info" title="A hook, not an aviation risk calculation">
 
@@ -57,8 +59,6 @@ hallway are usually open” is different from “This door is open **given that*
 my camera sees a reflection across the doorway.” **Conditional probability**
 lets us express that difference.
 
-</Reveal>
-
 </Slide>
 <Slide>
 
@@ -75,6 +75,11 @@ are **camera labels**, not guarantees about reality.
 | **Conditional probability** | `P(x ∣ z) = P(x, z) / P(z)` | Among cases where we observed z, what fraction have state x? Requires `P(z) > 0`. |
 | **Independence** | `P(x, z) = P(x)P(z)` and `P(x ∣ z) = P(x)` | Learning z tells us nothing about x. |
 
+</Slide>
+<Slide id="conditioning-visual">
+
+### Shrink the sample space
+
 The vertical bar **∣** means **“given.”** Imagine shrinking your whole sample
 space to just the cases matching the observation; dividing by `P(z)` rescales
 that smaller world to a total probability of 1.
@@ -83,7 +88,13 @@ that smaller world to a total probability of 1.
   src="/bayes-filter/shrinking-universe.svg"
   alt="Left: events X and Z overlap inside the full sample space. Right: Z is enlarged and becomes the entire universe; the overlap with X occupies the same fraction of Z. Joint probability uses the whole sample space as its denominator, while conditional probability uses only Z."
   caption="Keep the overlap; change the denominator. These areas are schematic, not the probabilities from the door example."
+  width="min(100%, 600px)"
 />
+
+</Slide>
+<Slide id="independence-example">
+
+### When does a reading tell you something?
 
 For instance, `P(door open, camera says Open)` counts both events together.
 `P(door open ∣ camera says Open)` asks how much to trust that reading.
@@ -111,6 +122,11 @@ the possibilities would instead be robot positions and headings.
 A belief `[0.6, 0.4]` means “60% probability open, 40% closed,” **not** “the door
 is 60% of the way open.” Our model only has two possible states.
 
+</Slide>
+<Slide id="state-timeline">
+
+### Line up states, actions, and measurements
+
 Let `t` count steps, starting with the initial state `x₀`. An action **uₜ is
 applied at state xₜ**, taking the system toward `xₜ₊₁`; measurement **zₜ describes
 state xₜ**. So the action leading into `xₜ` is **uₜ₋₁**, not uₜ.
@@ -127,6 +143,11 @@ run from `u₀` through `uₜ₋₁`. Measurements run from `z₁` through `zₜ
 A colon such as `z₁:ₜ` means **all measurements from step 1 to t**.
 We start with an initial prior `bel(x₀)`.
 </Reveal>
+
+</Slide>
+<Slide id="belief-equations">
+
+### Before and after the latest reading
 
 <Reveal block>
 
@@ -168,7 +189,17 @@ previous **belief** as a compact summary and combines predictions from every
 possible previous state. That is why a recursive filter can carry yesterday's
 information forward without storing every raw reading.
 
+This is an assumption about our **model**, not a magic law. A moving robot may
+need speed as well as position in its state. Our door model assumes nothing
+else changes the door between steps. If a spring pulls it shut, we must model that too.
+
+</Slide>
+<Slide id="markov-visual">
+
+### What each step depends on
+
 <Figure
+  width="min(100%, 600px)"
   src="/bayes-filter/markov-timeline.svg"
   alt="A chain of states x t−2, x t−1, x t, x t+1 has controls leading from each departure state into the next state and sensor readings below each same-index state. Older history is faded. Previous state x t−1, incoming action u t−1, and latest reading z t are highlighted for estimating x t."
   caption="Our indexing: uₜ₋₁ leads into xₜ, and uₜ leads toward xₜ₊₁. The previous state summarizes relevant history; the filter carries a belief over that unknown state."
@@ -177,6 +208,9 @@ information forward without storing every raw reading.
 The arrows show **model dependencies**, not certainty. Once a previous state
 is specified, earlier states add nothing to this motion model. Since we don't
 know that previous state, prediction still averages over its possible values.
+
+</Slide>
+<Slide id="markov-models">
 
 <Callout type="info" title="Under the Hood: models are not beliefs">
 
@@ -200,15 +234,13 @@ If that previous state were known exactly, its belief would be 1 there and 0 els
 
 </Callout>
 
-This is an assumption about our **model**, not a magic law. A moving robot may
-need speed as well as position in its state. Our door model assumes nothing
-else changes the door between steps. If a spring pulls it shut, we must model that too.
-
 </Slide>
 
 </Section>
 
 <Section id="bayesian-inference" n="03" title="Bayesian Inference: Updating Our Belief" chip="Evidence × prior">
+
+<Slide id="bayes-rule">
 
 A camera reports `Open`. We need the probability the **door is open given the
 reading**, but camera testing tells us the probability of a **reading given the
@@ -221,7 +253,7 @@ P(x ∣ z) = P(z ∣ x) P(x) / P(z) = η P(z ∣ x) P(x)
 In words: **new belief = how well the reading fits × old belief, rescaled**.
 For the full filter, the “old belief” at measurement time is the prediction `b̄el`.
 
-<figure style={{margin: '22px 0'}}>
+<figure style={{margin: '22px auto', maxWidth: 700}}>
 <svg viewBox="0 0 760 300" role="img" aria-labelledby="bayes-rule-title bayes-rule-desc" style={{width: '100%', height: 'auto', display: 'block', background: 'var(--bg-inset)', border: '1px solid var(--line)', borderRadius: 12, fontFamily: 'IBM Plex Sans, sans-serif'}}>
 <title id="bayes-rule-title">Four pieces of Bayes' rule</title>
 <desc id="bayes-rule-desc">Posterior P(x given z) equals normalization eta times measurement likelihood P(z given x) times prior P(x). Colored arrows connect each term to its meaning.</desc>
@@ -256,6 +288,11 @@ For the full filter, the “old belief” at measurement time is the prediction 
 <figcaption style={{textAlign: 'center', color: 'var(--tx-4)', fontSize: 12, marginTop: 9}}>Read the rule as a recipe: score each possible state, then rescale the scores.</figcaption>
 </figure>
 
+</Slide>
+<Slide id="bayes-terms">
+
+### What each term does
+
 | Piece | What it means for our robot |
 |---|---|
 | **Posterior** `P(x ∣ z)` | Our new knowledge about the state **after** incorporating the measurement. |
@@ -269,6 +306,9 @@ multiplication by η. It preserves their relative sizes. In the
 [glass-door example below](#sec-glass-door-measurements), a before-and-after
 bar diagram shows exactly how η stretches two scores to total 100%.
 
+</Slide>
+<Slide id="reverse-condition">
+
 <Callout type="tip" title="Same reading, different meaning">
 
 `P(camera says Open ∣ door open) = 0.9` does **not** mean
@@ -276,6 +316,8 @@ bar diagram shows exactly how η stretches two scores to total 100%.
 and the prior matters. Let's calculate rather than guessing.
 
 </Callout>
+
+</Slide>
 
 </Section>
 
@@ -287,19 +329,26 @@ and the prior matters. Let's calculate rather than guessing.
 
 Your robot approaches a glass door. It can see the hallway beyond it — but
 that doesn't prove the glass isn't in the way. Reflections and a hard-to-see
-edge can fool its camera. For this **teaching model**, suppose camera testing gives:
-
-- If the door is **closed**, the camera confuses it with open **half the time**.
-- If the door is **open**, the camera correctly reports `Open` **90% of the time**.
-
-These numbers are assumptions for our example, not measurements of the photographed door.
+edge can fool its camera.
 
 <Figure
   src="/bayes-filter/glass-door.webp"
   alt="Viewed from inside, a black-framed glass door swings open to the left, with the handle in front and a clear opening to the garden straight ahead."
   caption={<>The open glass door is on the left. You can see greenery both through its glass and through the open doorway. Photo: <a href="https://commons.wikimedia.org/wiki/File:Himfy_utca_7,_garden_door,_2019_Szentimrev%C3%A1ros.jpg">Globetrotter19</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> (resized and converted to WebP).</>}
-  width="48%"
+  width="min(65%, 230px)"
 />
+
+</Slide>
+<Slide id="measurement-table">
+
+### The camera's measurement model
+
+For this **teaching model**, suppose camera testing gives:
+
+- If the door is **closed**, the camera confuses it with open **half the time**.
+- If the door is **open**, the camera correctly reports `Open` **90% of the time**.
+
+These numbers are assumptions for our example, not measurements of the photographed door.
 
 Our **measurement model** puts readings in **rows** and true states in **columns**:
 
@@ -336,7 +385,13 @@ bel(closed) = η × 0.5 × 0.5 = 0.25η
 
 The `0.9` and `0.5` say how well that reading fits each state; the other `0.5`
 in each line is our prior. The scores are `0.45` and `0.25`, totaling `0.70`.
-Normalize them:
+
+</Slide>
+<Slide id="normalize-scores">
+
+### Normalize the two scores
+
+Divide each score by the total, `0.70`:
 
 ```text
 η = 1 / (0.45 + 0.25) ≈ 1.429
@@ -344,7 +399,13 @@ bel(open)   = 0.45 / 0.70 ≈ 0.643
 bel(closed) = 0.25 / 0.70 ≈ 0.357
 ```
 
+</Slide>
+<Slide id="normalization-visual">
+
+### See what η changes
+
 <Figure
+  width="min(100%, 630px)"
   src="/bayes-filter/normalization.svg"
   alt="Before normalization, a stacked bar has open score 0.45 and closed score 0.25, totaling 0.70 below a dashed 1.0 line. After multiplying both by eta approximately 1.429, open is 0.643 and closed is 0.357, totaling 1.0. The open-to-closed ratio stays 9 to 5."
   caption="η changes the total, not the balance of evidence. Both stacked segments stretch by the same factor; values are rounded only for display."
@@ -353,6 +414,9 @@ bel(closed) = 0.25 / 0.70 ≈ 0.357
 The new belief is **64.3% open, 35.7% closed**. An `Open` reading favors an
 open door, but it isn't overwhelming evidence: closed glass doors produce that
 same reading half the time!
+
+</Slide>
+<Slide id="pause-and-decide">
 
 <Callout type="warn" title="Pause & Decide">
 
@@ -372,17 +436,37 @@ isn't a safety guarantee — the cost of being wrong matters.
 ### 3. Repeat the update in Python or Java
 
 <Figure
+  width="min(100%, 585px)"
   src="/bayes-filter/elementwise-update.svg"
   alt="A two-by-two measurement model highlights the Open row [0.9, 0.5]. The prior column [0.5, 0.5] is labeled open then closed. Matching entries give open score 0.9 times 0.5 equals 0.45 and closed score 0.5 times 0.5 equals 0.25. A Closed reading would select row [0.1, 0.5] instead."
   caption="Select one row, then pair likelihood and prior for each state. This element-wise operation produces scores, not yet a normalized belief."
 />
 
 Each posterior becomes the next prior. This **recursive update** carries the
-earlier evidence forward in just two numbers. Pick either version below. For
+earlier evidence forward in just two numbers.
+
+</Slide>
+<Slide id="reading-the-code">
+
+### What the two programs have in common
+
+For `z = 0`, both versions pick `[0.9, 0.5]`. For `z = 1`, they pick `[0.1, 0.5]`.
+NumPy's `*` pairs the entries for us; Java writes the two scalar products out.
+This is **element-wise multiplication**: open is paired with open, closed with
+closed. A matrix product isn't needed for this measurement update. After
+normalizing, `belief` stores the updated distribution. Keep full precision
+internally; round only when printing.
+
+Pick either version on the next slide. For
 Python, install NumPy with `python -m pip install numpy` if needed. For Java,
 save the code as `DoorMeasurements.java` and run `java DoorMeasurements.java`
 (JDK 11 or newer). The Java version uses ordinary arrays, so it works without
 WPILib or robot hardware.
+
+</Slide>
+<Slide id="measurement-code">
+
+### Try the recursive update
 
 <CodeTabs>
 <CodeTab label="door_measurements.py">
@@ -463,13 +547,6 @@ public class DoorMeasurements {
 </CodeTab>
 </CodeTabs>
 
-For `z = 0`, both versions pick `[0.9, 0.5]`. For `z = 1`, they pick `[0.1, 0.5]`.
-NumPy's `*` pairs the entries for us; Java writes the two scalar products out.
-This is **element-wise multiplication**: open is paired with open, closed with
-closed. A matrix product isn't needed for this measurement update. After
-normalizing, `belief` stores the updated distribution. Keep full precision
-internally; round only when printing.
-
 </Slide>
 <Slide>
 
@@ -487,7 +564,13 @@ internally; round only when printing.
 | 7 | `Open` | 0.872 | 0.128 |
 | 8 | `Open` | 0.924 | 0.076 |
 
+</Slide>
+<Slide id="convergence-chart">
+
+### Why the belief dips at step 6
+
 <Figure
+  width="min(100%, 620px)"
   src="/bayes-filter/belief-convergence.svg"
   alt="Belief in open rises from 0.500 initially through 0.643, 0.764, 0.854, 0.913, and 0.950, dips to 0.791 at the sixth reading Closed, then recovers to 0.872 and 0.924."
   caption="Five Open readings build confidence. The sixth reading, Closed, lowers it — without erasing everything learned earlier."
@@ -498,6 +581,11 @@ likelihood there is 0.1. It favors closed over open by a factor of five
 (`0.5 / 0.1`), so belief in open drops to **0.791**. The next two `Open` readings
 bring it back up. We don't know whether reading 6 was wrong; the filter simply
 weighs it alongside the earlier evidence.
+
+</Slide>
+<Slide id="convergence-limits">
+
+### Confidence is not certainty
 
 With repeated `Open` evidence, this fixed-door model tends toward high confidence
 in open. It does **not** prove the door is open, and confidence need not increase
@@ -529,6 +617,9 @@ model, giving probabilities for the next state.
 In this simplified world, a push never closes an open door, and opens a closed
 door **60% of the time**. With `none`, nothing changes. Each row here describes
 one action and previous state, so its two outcome probabilities sum to 1.
+
+</Slide>
+<Slide id="push-prediction">
 
 ### 2. Predict after pushing, before measuring
 
@@ -574,6 +665,11 @@ Keep state order **[open, closed]**. Put **previous states in columns** and
 `1.0 × 0.5 + 0.6 × 0.5`. The bottom row gives
 `0.0 × 0.5 + 0.4 × 0.5`. That's the arithmetic we already did — no new trick.
 
+</Slide>
+<Slide id="prediction-vs-update-multiply">
+
+### Reading the motion matrices
+
 Each **column** of these matrices sums to 1, because the door has to end up
 somewhere for each starting state. The `none` matrix is the **identity matrix**:
 it leaves our belief unchanged.
@@ -612,7 +708,13 @@ door is **87.8% likely to be open**.
 | Measurement alone (`none`) | 0.500 open | **0.643 open** |
 | Push, then measurement | 0.800 open | **0.878 open** |
 
+</Slide>
+<Slide id="action-comparison">
+
+### Same camera reading, different starting beliefs
+
 <Figure
+  width="min(100%, 580px)"
   src="/bayes-filter/action-comparison.svg"
   alt="Grouped bars compare probability open across three stages. Measure only: 0.500 prior, 0.500 prediction with no action, 0.643 after an Open reading. Push and measure: 0.500 prior, 0.800 after push u zero, 0.878 after the same Open reading z one."
   caption="Same initial belief and sensor model. With no action the prediction stays 0.500; a push changes it to 0.800 before either track uses the Open reading."
@@ -627,7 +729,7 @@ uncertainty larger in other models; pushing is not a universal confidence boost.
 
 ### 5. The full Bayes filter: repeat two steps
 
-<figure style={{margin: '22px 0'}}>
+<figure style={{margin: '22px auto', maxWidth: 550}}>
 <svg viewBox="0 0 760 420" role="img" aria-labelledby="bayes-loop-title bayes-loop-desc" style={{width: '100%', height: 'auto', display: 'block', background: 'var(--bg-inset)', border: '1px solid var(--line)', borderRadius: 12, fontFamily: 'IBM Plex Sans, sans-serif'}}>
 <title id="bayes-loop-title">The predict–update Bayes filter loop</title>
 <desc id="bayes-loop-desc">Previous belief and action enter Predict with a motion model. The predicted belief flows to Update with a measurement and sensor model. The normalized posterior returns as the next prior.</desc>
@@ -669,6 +771,11 @@ uncertainty larger in other models; pushing is not a universal confidence boost.
 2. **Update:** use the latest measurement and sensor model to favor states that
    explain the reading, then normalize.
 3. **Repeat:** today's posterior becomes tomorrow's starting belief.
+
+</Slide>
+<Slide id="localization-connection">
+
+### From doors to robot poses
 
 For localization, replace door states with possible **robot poses**, a push with
 a **drive command**, and the camera label with a **landmark or range reading**.
@@ -725,6 +832,12 @@ belief representations. You don't need that heavier notation to understand the l
    can also fool several consecutive frames in the same way. Don't count
    duplicate data as new measurements; try a different viewpoint or a
    second sensor if you need independent evidence.
+
+</Slide>
+<Slide id="impossible-measurements">
+
+### When a reading contradicts the model
+
 5. **A reading your model says is impossible needs special handling.** If
    all the scores are zero, there's no total to divide by. For example, a
    model that gives a sensor no chance of error may fail when that sensor
@@ -746,6 +859,10 @@ mistake an unchanged belief for fresh confirmation.
 
 <Section id="check-your-understanding" n="07" title="Check Your Understanding" chip="Knowledge check">
 
+<Slide id="quiz-uninformative-reading">
+
+### 1. An uninformative camera
+
 <Quiz>
   <Q>
     <Prompt>A broken camera outputs `Open` or `Closed` with probability 0.5 each, regardless of the true door state. What does one reading do to the predicted belief?</Prompt>
@@ -754,6 +871,14 @@ mistake an unchanged belief for fresh confirmation.
     <Choice correct>Leaves the predicted belief unchanged.</Choice>
     <Choice>Makes the reported state certain.</Choice>
   </Q>
+</Quiz>
+
+</Slide>
+<Slide id="quiz-normalization">
+
+### 2. Why normalize?
+
+<Quiz>
   <Q>
     <Prompt>Why do we need the normalization factor η after multiplying likelihoods by the prior?</Prompt>
     <Explain>The products are relative scores, not usually probabilities that sum to 1. Dividing by their sum rescales them without changing their ratio. If every score is zero, the model considers that reading impossible and we must handle the model mismatch rather than divide by zero.</Explain>
@@ -761,6 +886,14 @@ mistake an unchanged belief for fresh confirmation.
     <Choice>It removes noisy readings from the history.</Choice>
     <Choice correct>It makes the updated state probabilities sum to 1.</Choice>
   </Q>
+</Quiz>
+
+</Slide>
+<Slide id="quiz-prediction">
+
+### 3. Where does the prediction come from?
+
+<Quiz>
   <Q>
     <Prompt>Starting from 50/50, a push makes the predicted belief 80% open before the camera is read. Why?</Prompt>
     <Explain>The door might already be open (0.5), or it might be closed and successfully pushed open (0.5 × 0.6 = 0.3). Adding those paths gives 0.8. The action model predicts outcomes; sending a command doesn't guarantee success.</Explain>
@@ -773,5 +906,7 @@ mistake an unchanged belief for fresh confirmation.
 **Take it with you:** don't replace uncertainty with a yes/no guess too early.
 Carry a belief, **predict → update**, and let the planner decide what level of
 risk is acceptable.
+
+</Slide>
 
 </Section>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 115" role="img" font-family="IBM Plex Sans, DejaVu Sans, sans-serif">
+<title>A Kalman update blends a 10 m prediction with a 12 m measurement</title>
+<style>@media (prefers-color-scheme: dark){[fill="#15232c"]{fill:#e6edf3}[stroke="#15232c"]{stroke:#e6edf3}[fill="#475e6a"]{fill:#9baebd}[stroke="#475e6a"]{stroke:#9baebd}[fill="#cad9df"]{fill:#324854}[stroke="#cad9df"]{stroke:#324854}[fill="#eff5f8"]{fill:#111c26}[stroke="#eff5f8"]{stroke:#111c26}[fill="#fbfdfe"]{fill:#0c1118}[stroke="#fbfdfe"]{stroke:#0c1118}[fill="#0a7d8f"]{fill:#34d6e8}[stroke="#0a7d8f"]{stroke:#34d6e8}[fill="#c9edf0"]{fill:#163f49}[stroke="#c9edf0"]{stroke:#163f49}[fill="#a93434"]{fill:#ff9992}[stroke="#a93434"]{stroke:#ff9992}[fill="#fbdcda"]{fill:#532f34}[stroke="#fbdcda"]{stroke:#532f34}[fill="#265287"]{fill:#9abbff}[stroke="#265287"]{stroke:#9abbff}}</style>
+<defs><marker id="teal" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#0a7d8f"/></marker><marker id="red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#a93434"/></marker><marker id="blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#265287"/></marker></defs>
+<rect x="0" y="0" width="500" height="115" rx="0" fill="#eff5f8" stroke="none"/>
+<path d="M55 61H445" stroke="#475e6a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M95 36H229" stroke="#0a7d8f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#teal)"/>
+<path d="M405 36H271" stroke="#0a7d8f" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#teal)"/>
+<circle cx="95.00" cy="61.00" r="7" fill="#265287" opacity="1"/>
+<path d="M250 51l10 10-10 10-10-10Z" stroke="#0a7d8f" stroke-width="2" fill="#c9edf0" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M399 55l12 12m0-12-12 12" stroke="#a93434" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="95" y="99" fill="#265287" font-size="25" text-anchor="middle" font-weight="650">10 m</text>
+<text x="250" y="99" fill="#0a7d8f" font-size="25" text-anchor="middle" font-weight="650">11 m</text>
+<text x="405" y="99" fill="#a93434" font-size="25" text-anchor="middle" font-weight="650">12 m</text>
+</svg>

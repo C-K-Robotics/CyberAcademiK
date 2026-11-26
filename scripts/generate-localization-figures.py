@@ -290,7 +290,61 @@ def random_variable_mapping():
     save('random-variable-mapping', 680, 195, 'A random variable maps every die outcome to its odd or even indicator', elements)
 
 
+def least_squares():
+    points = [(1, 2), (2, 2), (3, 4), (4, 4), (5, 6)]
+    elements = []
+    for left, intercept, color in [(16, 1.6, BLUE), (277, .6, TEAL)]:
+        x = lambda value: left + 27 + 34*value
+        y = lambda value: 151 - 17*value
+        penalty = sum((value - (time + intercept))**2 for time, value in points)
+        elements.extend([
+            rect(left, 12, 247, 193, PANEL, GRID, 10),
+            *[path(f'M{x(0)},{y(tick)}H{x(6)}', stroke=GRID, width=1) for tick in (2, 4, 6)],
+            path(f'M{x(0)},{y(7.5)}V{y(0)}H{x(6)}', stroke=MUTED, width=1.5),
+            path(f'M{x(0)},{y(intercept)}L{x(5.7)},{y(5.7 + intercept)}', stroke=color, width=3),
+            *[path(f'M{x(t)},{y(v)}V{y(t + intercept)}', stroke=RED, width=2.5, dash='3 3')
+              for t, v in points],
+            *[circle(x(t), y(v), 4.5, INK) for t, v in points],
+            text(left+124, 188, f'Σe² = {penalty:.1f}', anchor='middle', bold=True, size=24, color=color),
+        ])
+    save('least-squares-fit', 540, 218, 'Two lines fit the same data with different sums of squared residuals', elements)
+
+
+def markov_chain():
+    elements = [
+        circle(110, 111, 35, TEAL_FILL), circle(430, 111, 35, PANEL),
+        path('M85 86C33 6 187 6 137 82', stroke=TEAL, width=2.5, arrow='teal'),
+        path('M405 86C353 6 507 6 457 82', stroke=BLUE, width=2.5, arrow='blue'),
+        path('M142 97H395', stroke=TEAL, width=2.5, arrow='teal'),
+        path('M398 126H146', stroke=BLUE, width=2.5, arrow='blue'),
+        text(110, 122, 'V', size=32, color=TEAL, bold=True, anchor='middle'),
+        text(430, 122, 'C', size=32, color=BLUE, bold=True, anchor='middle'),
+        text(110, 64, '20%', bold=True, anchor='middle', size=23),
+        text(430, 64, '40%', bold=True, anchor='middle', size=23),
+        text(270, 86, '80%', bold=True, anchor='middle', size=23),
+        text(270, 153, '60%', bold=True, anchor='middle', size=23),
+    ]
+    save('markov-chain', 540, 174, 'A two-state Markov chain of vowels and consonants', elements)
+
+
+def kalman_update():
+    elements = [
+        path('M55 61H445', stroke=MUTED, width=2),
+        path('M95 36H229', stroke=TEAL, width=2, arrow='teal'),
+        path('M405 36H271', stroke=TEAL, width=2, arrow='teal'),
+        circle(95, 61, 7, BLUE),
+        path('M250 51l10 10-10 10-10-10Z', stroke=TEAL, width=2, fill=TEAL_FILL),
+        path('M399 55l12 12m0-12-12 12', stroke=RED, width=3),
+    ]
+    for x, distance, color in [(95, 10, BLUE), (250, 11, TEAL), (405, 12, RED)]:
+        elements.append(text(x, 99, f'{distance} m', size=25, bold=True, anchor='middle', color=color))
+    save('kalman-update', 500, 115, 'A Kalman update blends a 10 m prediction with a 12 m measurement', elements)
+
+
 if __name__ == '__main__':
+    least_squares()
+    markov_chain()
+    kalman_update()
     doorway()
     particles()
     die_sample_space()
