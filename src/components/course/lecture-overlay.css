@@ -14,6 +14,12 @@
   pointer-events: none;
 }
 
+/* Gives Excalidraw's 100%-sized root a definite box inside the fixed overlay. */
+.lecture-canvas-root {
+  position: absolute;
+  inset: 0;
+}
+
 /* Keep rendered ink visible in pass-through mode while hiding all Excalidraw chrome. */
 .lecture-overlay[data-active='false'] .layer-ui__wrapper {
   visibility: hidden;

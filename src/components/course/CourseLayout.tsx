@@ -115,29 +115,26 @@ export function CourseLayout({ module }: { module: CourseModule }) {
     if (lectureMounted) setClearTick((n) => n + 1)
   }, [lectureMounted])
 
+  // Updater functions must stay pure, so cross-state side effects are driven from the current
+  // value in the handler rather than from inside a setState callback.
   const toggleNav = () => {
     if (window.matchMedia('(max-width:820px)').matches) {
-      setNavOpen((open) => {
-        const next = !open
-        if (next) setLectureActive(false)
-        return next
-      })
+      if (!navOpen) setLectureActive(false)
+      setNavOpen(!navOpen)
     } else {
       setNavCollapsed((c) => !c)
     }
-  }
-
-  const toggleSlide = () => {
-    setSlideMode((current) => {
-      if (current) resetLecture()
-      return !current
-    })
   }
 
   const exitSlide = useCallback(() => {
     resetLecture()
     setSlideMode(false)
   }, [resetLecture])
+
+  const toggleSlide = () => {
+    if (slideMode) exitSlide()
+    else setSlideMode(true)
+  }
 
   // Clear viewport-fixed annotations when switching locale mid-deck.
   useEffect(() => {
@@ -146,9 +143,11 @@ export function CourseLayout({ module }: { module: CourseModule }) {
     if (lectureMounted) setClearTick((n) => n + 1)
   }, [locale, lectureMounted])
 
-  // Clear pass-through annotations if the document scrolls underneath the fixed canvas.
+  // Clear annotations if the document scrolls underneath the fixed canvas. This must also run while
+  // drawing: wheel/keys are blocked then, but the dock's reveal buttons still call scrollIntoView
+  // on tall slides, which would leave the ink misaligned with the content it was drawn on.
   useEffect(() => {
-    if (!slideMode || !lectureMounted || lectureActive || !hasInk) return
+    if (!slideMode || !lectureMounted || !hasInk) return
     const onScroll = () => {
       if (Math.abs(window.scrollY - anchorScrollYRef.current) > 8) {
         setClearTick((n) => n + 1)
@@ -156,13 +155,13 @@ export function CourseLayout({ module }: { module: CourseModule }) {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [slideMode, lectureMounted, lectureActive, hasInk])
+  }, [slideMode, lectureMounted, hasInk])
 
   // Alt+A toggles Annotate <-> Pass-through without colliding with Excalidraw single-key tools.
   useEffect(() => {
     if (!slideMode) return
     const onKey = (e: KeyboardEvent) => {
-      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
+      if (e.repeat || !e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return
       if (e.code !== 'KeyA' || isEditableTarget(e.target)) return
       e.preventDefault()
       toggleDraw()

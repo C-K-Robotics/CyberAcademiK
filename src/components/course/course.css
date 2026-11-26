@@ -237,4 +237,9 @@
   .slide-deck[data-lecture-active='true'] {
     bottom: 72px;
   }
+  /* The raised dock (72px + ~44px tall) would sit under the loading/error pill (z-index 51),
+     so lift the pill clear of it. */
+  body:has(.slide-deck[data-lecture-active='true']) .lecture-status-pill {
+    bottom: 124px;
+  }
 }
