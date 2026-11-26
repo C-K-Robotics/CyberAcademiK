@@ -63,6 +63,13 @@ export interface Strings {
   slideNext: string
   slideHideItem: string
   slideRevealItem: string
+  lectureDraw: string
+  lecturePassThrough: string
+  lectureLaser: string
+  lectureClear: string
+  lectureLoading: string
+  lectureLoadError: string
+  lectureRetry: string
   footerContentBy: string
   footerSiteBy: string
   footerCopyright: string
@@ -112,6 +119,13 @@ const en: Strings = {
   slideNext: 'Next slide',
   slideHideItem: 'Hide last item',
   slideRevealItem: 'Reveal next item',
+  lectureDraw: 'Annotate (Alt+A)',
+  lecturePassThrough: 'Interact with slide (Alt+A)',
+  lectureLaser: 'Laser pointer',
+  lectureClear: 'Clear annotations',
+  lectureLoading: 'Loading drawing tools…',
+  lectureLoadError: 'Could not load drawing tools',
+  lectureRetry: 'Retry',
   footerContentBy: 'Course content by FRC#8020 Mentors & Members',
   footerSiteBy: 'CyberAcademiK · tutorial site by Nathan Lee',
   footerCopyright: '© 2026 CyberAcademiK · FRC Learning Library',
@@ -161,6 +175,13 @@ const zhHant: Strings = {
   slideNext: '下一張',
   slideHideItem: '隱藏上一項',
   slideRevealItem: '顯示下一項',
+  lectureDraw: '標記畫筆 (Alt+A)',
+  lecturePassThrough: '互動模式 (Alt+A)',
+  lectureLaser: '雷射筆',
+  lectureClear: '清除標記',
+  lectureLoading: '正在載入繪圖工具…',
+  lectureLoadError: '無法載入繪圖工具',
+  lectureRetry: '重試',
   footerContentBy: '課程內容由 FRC#8020 Mentor 與隊員提供',
   footerSiteBy: 'CyberAcademiK · 教學網站由 Nathan Lee 製作',
   footerCopyright: '© 2026 CyberAcademiK · FRC 學習資料庫',

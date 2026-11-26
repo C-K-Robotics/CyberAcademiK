@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { useI18n } from '../../i18n/I18nProvider'
 
 /** One navigable step: either a `<Slide>` block or a whole `<Section>`. */
@@ -28,6 +28,14 @@ interface SlideDeckProps {
   /** Course slug — the saved position is per course. */
   slug: string
   onExit: () => void
+  /** Suspend global navigation/exit shortcuts (e.g. while drawing overlay owns the keyboard). */
+  suspendKeys?: boolean
+  /** Fires when the active slide index changes (distinct from intra-slide reveal steps). */
+  onSlideChange?: (slideIndex: number) => void
+  /** True while the lecture overlay is actively capturing input (shifts mobile dock above its bar). */
+  lectureActive?: boolean
+  /** Optional presenter controls rendered inside the dock bar. */
+  extraControls?: ReactNode
 }
 
 const STORAGE_KEY = 'cyberacademik:slide-mode'
@@ -166,11 +174,19 @@ function isTyping(target: EventTarget | null): boolean {
  * inline `display` and undone by the effect cleanup, so leaving slide mode (or
  * unmounting for any other reason) always restores the page.
  */
-export function SlideDeck({ slug, onExit }: SlideDeckProps) {
+export function SlideDeck({
+  slug,
+  onExit,
+  suspendKeys = false,
+  onSlideChange,
+  lectureActive = false,
+  extraControls,
+}: SlideDeckProps) {
   const { t } = useI18n()
   const [slides, setSlides] = useState<SlideItem[]>([])
   const [position, setPosition] = useState<SlidePosition>(() => ({ index: readSavedIdx(slug), revealed: 0 }))
   const previousReveal = useRef<{ slide?: SlideItem; count: number }>({ count: 0 })
+  const lastSlideIdx = useRef<number | null>(null)
 
   const count = slides.length
   const ready = count > 0
@@ -233,8 +249,13 @@ export function SlideDeck({ slug, onExit }: SlideDeckProps) {
   }, [slides])
 
   useEffect(() => {
-    if (ready) writeSavedIdx(slug, activeIdx)
-  }, [slug, activeIdx, ready])
+    if (!ready) return
+    writeSavedIdx(slug, activeIdx)
+    if (lastSlideIdx.current !== null && lastSlideIdx.current !== activeIdx) {
+      onSlideChange?.(activeIdx)
+    }
+    lastSlideIdx.current = activeIdx
+  }, [slug, activeIdx, ready, onSlideChange])
 
   // Apply slide and reveal visibility before paint. Separate the reveal update
   // so advancing one sentence never repeats the slide's scroll-to-top behavior.
@@ -260,7 +281,7 @@ export function SlideDeck({ slug, onExit }: SlideDeckProps) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return
+      if (suspendKeys || isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return
 
       if (ready && (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === 'PageDown')) {
         e.preventDefault()
@@ -275,7 +296,7 @@ export function SlideDeck({ slug, onExit }: SlideDeckProps) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [ready, step, onExit])
+  }, [ready, step, onExit, suspendKeys])
 
   const canHide = revealed > 0
   const canReveal = revealed < (active?.reveals.length ?? 0)
@@ -316,10 +337,21 @@ export function SlideDeck({ slug, onExit }: SlideDeckProps) {
   )
 
   return (
-    <nav className="slide-deck" style={{ opacity: ready ? 1 : 0.25 }} aria-label={t.slideMode}>
+    <nav
+      className="slide-deck"
+      data-lecture-active={lectureActive || undefined}
+      style={{ opacity: ready ? 1 : 0.25 }}
+      aria-label={t.slideMode}
+    >
       {stepButton(-1, hasPrev, canHide ? t.slideHideItem : t.slidePrev, '←')}
       <span style={{ padding: '0 4px' }}>{ready ? label : '…'}</span>
       {stepButton(1, hasNext, canReveal ? t.slideRevealItem : t.slideNext, '→')}
+      {extraControls && (
+        <>
+          <div style={{ width: 1, height: 16, background: 'var(--line)', margin: '0 4px' }} />
+          {extraControls}
+        </>
+      )}
       <div style={{ width: 1, height: 16, background: 'var(--line)', margin: '0 4px' }} />
       <button
         type="button"

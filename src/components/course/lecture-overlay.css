@@ -1,0 +1,51 @@
+/* Slide-mode Excalidraw lecture overlay.
+   Mounted in a body portal at z-index 40: above topbar (20) and sidebar (30),
+   below the floating SlideDeck presenter dock (50). */
+
+.lecture-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: auto;
+  outline: none;
+}
+
+.lecture-overlay[data-active='false'] {
+  pointer-events: none;
+}
+
+/* Gives Excalidraw's 100%-sized root a definite box inside the fixed overlay. */
+.lecture-canvas-root {
+  position: absolute;
+  inset: 0;
+}
+
+/* Keep rendered ink visible in pass-through mode while hiding all Excalidraw chrome. */
+.lecture-overlay[data-active='false'] .layer-ui__wrapper {
+  visibility: hidden;
+}
+
+/* Never paint an opaque backdrop over the underlying slide. */
+.lecture-overlay .excalidraw,
+.lecture-overlay .excalidraw .excalidraw-container {
+  background: transparent;
+}
+
+/* Hide camera zoom controls and hand-pan tool: the overlay is viewport-locked to the slide. */
+.lecture-overlay .zoom-actions,
+.lecture-overlay [data-testid='toolbar-hand'] {
+  display: none;
+}
+
+/* Undo CyberAcademiK's global range-slider track/thumb overrides inside Excalidraw's panel. */
+.lecture-overlay .excalidraw input[type='range']::-webkit-slider-runnable-track,
+.lecture-overlay .excalidraw input[type='range']::-moz-range-track {
+  background: transparent;
+}
+.lecture-overlay .excalidraw input[type='range']::-webkit-slider-thumb {
+  margin-top: 0;
+  box-shadow: none;
+}
+.lecture-overlay .excalidraw input[type='range']::-moz-range-thumb {
+  box-shadow: none;
+}

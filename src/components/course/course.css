@@ -170,3 +170,76 @@
   background: rgba(var(--ac1-rgb), 0.08);
 }
 
+.slide-deck-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--tx-2);
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+}
+.slide-deck-btn:hover:not(:disabled) {
+  color: var(--tx-strong);
+  border-color: rgba(var(--ac1-rgb), 0.4);
+}
+.slide-deck-btn:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+.slide-deck-btn[aria-pressed='true'] {
+  color: var(--ac1);
+  border-color: rgba(var(--ac1-rgb), 0.5);
+  background: rgba(var(--ac1-rgb), 0.12);
+}
+
+.lecture-status-pill {
+  position: fixed;
+  bottom: 68px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 51;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.16);
+  font-family: 'IBM Plex Mono', system-ui, monospace;
+  font-size: 12px;
+  color: var(--tx-2);
+  white-space: nowrap;
+}
+.lecture-status-pill button {
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--bg-input);
+  color: var(--tx-1);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.lecture-status-pill button:hover {
+  border-color: rgba(var(--ac1-rgb), 0.5);
+  color: var(--ac1);
+}
+
+@media (max-width: 820px) {
+  /* Keep the slide dock clear of Excalidraw's mobile bottom toolbar while drawing. */
+  .slide-deck[data-lecture-active='true'] {
+    bottom: 72px;
+  }
+  /* The raised dock (72px + ~44px tall) would sit under the loading/error pill (z-index 51),
+     so lift the pill clear of it. */
+  body:has(.slide-deck[data-lecture-active='true']) .lecture-status-pill {
+    bottom: 124px;
+  }
+}
